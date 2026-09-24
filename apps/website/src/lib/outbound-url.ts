@@ -10,7 +10,12 @@ function isPrivateIpv4(ip: string): boolean {
 
 function isPrivateIpv6(ip: string): boolean {
   const normalized = ip.toLowerCase();
-  return normalized === "::1" || normalized === "::" || normalized.startsWith("fc") || normalized.startsWith("fd") || normalized.startsWith("fe80:");
+  if (normalized === "::1" || normalized === "::" || normalized.startsWith("fc") || normalized.startsWith("fd") || normalized.startsWith("fe80:")) return true;
+  if (normalized.startsWith("::ffff:")) {
+    const mapped = normalized.slice("::ffff:".length);
+    if (net.isIP(mapped) === 4) return isPrivateIpv4(mapped);
+  }
+  return false;
 }
 
 function isBlockedIp(ip: string): boolean {
