@@ -11,7 +11,7 @@ import {
   withErrorHandling,
 } from "@/lib/api-helpers";
 import { parseAutomationInstruction } from "@/server/connectors/automations/parser";
-import { encryptSecret, decryptSecret } from "@/lib/secret-box";
+import { encryptSecret, decryptSecret, isEncryptedSecret } from "@/lib/secret-box";
 import { safeOutboundFetch, assertSafeOutboundUrl } from "@/lib/outbound-url";
 
 const DEFAULT_SIMULATED_DEVICES = {
@@ -23,15 +23,23 @@ const DEFAULT_SIMULATED_DEVICES = {
 
 const ConnectSchema = z.object({
   action: z.string().optional().default("connect"),
-  // For action: "connect"
   url: z.string().optional(),
   token: z.string().optional(),
   simulated: z.boolean().optional(),
-  // For action: "add_automation"
   instruction: z.string().optional(),
-  // For action: "delete_automation"
   automationId: z.string().optional(),
 });
+
+async function readMetadata(account: typeof connectorAccounts.$inferSelect, userId: string, workspaceId: string) {
+  const metadata = JSON.parse(account.metadataJson || "{}") as Record<string, any>;
+  if (typeof metadata.token === "string" && metadata.token && !isEncryptedSecret(metadata.token)) {
+    metadata.token = encryptSecret(metadata.token);
+    await db.update(connectorAccounts)
+      .set({ metadataJson: JSON.stringify(metadata), updatedAt: new Date().toISOString() })
+      .where(and(eq(connectorAccounts.id, account.id), eq(connectorAccounts.userId, userId), eq(connectorAccounts.workspaceId, workspaceId)));
+  }
+  return metadata;
+}
 
 /**
  * POST /api/connectors/homeassistant
@@ -75,7 +83,7 @@ export async function POST(req: Request) {
 
       if (!account) return apiError("connector_not_connected", 404);
 
-      const metadata = JSON.parse(account.metadataJson || "{}");
+      const metadata = await readMetadata(account, user.id, workspaceId);
       const automations = metadata.automations || [];
       automations.push(parsedAuto);
       metadata.automations = automations;
