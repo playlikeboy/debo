@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import dotenv from "dotenv";
 import { z } from "zod";
+import { createHarnessEvent, createTraceId, type HarnessTrace, addEvent, finishTrace } from "@debo/harness";
 
 // Load environment variables from parent Next.js application
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,6 +39,8 @@ export default defineAgent({
 
     const participant = await ctx.waitForParticipant();
     const userId = participant.identity;
+    let trace: HarnessTrace = { traceId: createTraceId("voice"), sessionId: ctx.room.name, startedAt: new Date().toISOString(), events: [] };
+    trace = addEvent(trace, createHarnessEvent("turn.started", trace.traceId, { source: "voice", userId }));
     const userName = participant.name || "User";
     console.log(`[voice-agent] Participant joined. ID: ${userId}, Name: ${userName}`);
 
@@ -64,6 +67,7 @@ export default defineAgent({
               return "Failed to search memories.";
             }
             const data = await res.json();
+            trace = addEvent(trace, createHarnessEvent("memory.retrieval", trace.traceId, { query, resultCount: Array.isArray(data?.results) ? data.results.length : undefined }));
             return JSON.stringify(data);
           } catch (err: any) {
             console.error("[tool:search_memories] Fetch error:", err);
@@ -94,6 +98,7 @@ export default defineAgent({
               console.error("[tool:create_journal] HTTP error:", res.status);
               return "Failed to create journal entry.";
             }
+            trace = addEvent(trace, createHarnessEvent("memory.write", trace.traceId, { kind: "journal", success: true }));
             return "Journal entry created successfully.";
           } catch (err: any) {
             console.error("[tool:create_journal] Fetch error:", err);
@@ -215,6 +220,9 @@ If the user asks about their past or queries information, always call your searc
 
     // Initial greeting
     console.log(`[voice-agent] Greeting participant: "Hello ${userName}!"`);
+    trace = addEvent(trace, createHarnessEvent("turn.completed", trace.traceId, { greeting: true }));
+    trace = finishTrace(trace);
+    console.log(`[voice-harness] trace=${trace.traceId} events=${trace.events.length}`);
     session.say(`Hello ${userName}! I am Debo. How can I help you today?`);
   },
 });
