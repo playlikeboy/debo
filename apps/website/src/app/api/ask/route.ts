@@ -20,6 +20,7 @@ import { classifyIntent, classifyRetrievalIntent, classifyOrchestrationIntent } 
 import { getComposioToolsForUser } from "@/server/connectors/composio";
 import { getCustomMcpToolsForUser } from "@/server/connectors/custom-mcp";
 import { decryptSecret } from "@/lib/secret-box";
+import { safeOutboundFetch } from "@/lib/outbound-url";
 import { retrieveMemory } from "@/server/langgraph/nodes/retrieve-memory.node";
 import {
   buildSystemPrompt,
@@ -66,7 +67,7 @@ const webFetchTool = tool(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
 
-      const response = await fetch(url, {
+      const response = await safeOutboundFetch(url, {
         signal: controller.signal,
         headers: {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
