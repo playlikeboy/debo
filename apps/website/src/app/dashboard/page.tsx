@@ -13,12 +13,12 @@ export default function DashboardPage() {
       <CaptureHero />
       <ActionTriad />
 
-      <div className="mb-6 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <TodayRail />
         <OpenLoops />
       </div>
 
-      <div className="mb-6">
+      <div className="mb-8">
         <DeboChatWidget />
       </div>
 
