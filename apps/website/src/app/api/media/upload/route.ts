@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { db } from "@debo/db";
 import { sources, sourceFiles, voiceSessions, auditLogs, tasks, memoryItems } from "@debo/db/schema";
@@ -7,6 +7,7 @@ import {
   newId,
   requireSession,
   withErrorHandling,
+  guardRateLimit,
 } from "@/lib/api-helpers";
 import { extractMemories } from "@/server/langgraph/graphs/extraction.graph";
 import { indexSource } from "@/server/ingestion";
@@ -18,6 +19,23 @@ const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 const ALLOWED_PREFIXES = ["image/", "audio/", "video/"];
 const ALLOWED_EXACT = new Set(["application/pdf"]);
 const BLOCKED_MIME_TYPES = new Set(["image/svg+xml"]);
+function hasValidSignature(mime: string, bytes: Uint8Array): boolean {
+  const s = String.fromCharCode(...bytes.slice(0, 12));
+  const is = (...values: string[]) => values.some((value) => s.startsWith(value));
+  if (mime === "application/pdf") return s.startsWith("%PDF-");
+  if (mime === "image/png") return is("\x89PNG");
+  if (mime === "image/jpeg") return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  if (mime === "image/gif") return is("GIF8");
+  if (mime === "image/webp") return bytes.slice(0, 4).join(",") === "82,73,70,70" && s.slice(8, 12) === "WEBP";
+  if (mime === "audio/wav" || mime === "audio/x-wav") return s.startsWith("RIFF") && s.slice(8, 12) === "WAVE";
+  if (mime === "audio/mpeg") return s.startsWith("ID3") || (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0);
+  if (mime === "audio/ogg") return s.startsWith("OggS");
+  if (mime === "audio/flac") return s.startsWith("fLaC");
+  if (mime === "video/webm") return bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3;
+  if (mime === "video/mp4" || mime === "video/quicktime" || mime === "video/3gpp") return s.slice(4, 8) === "ftyp";
+  if (mime === "video/x-msvideo") return s.startsWith("RIFF") && s.slice(8, 12) === "AVI ";
+  return true;
+}
 
 function isAllowedMime(mime: string): boolean {
   if (!mime || BLOCKED_MIME_TYPES.has(mime.toLowerCase())) return false;
@@ -144,13 +162,16 @@ async function processVoiceOrAudio(opts: {
 
 /**
  * POST /api/media/upload
- * multipart/form-data with `file` field. Uploads to Cloudflare R2 or falls back to public/uploads,
+ * multipart/form-data with `file` field. Uploads to private Cloudflare R2 storage,
  * then creates source + source_files row.
  */
 export async function POST(req: Request) {
   const session = await requireSession(req);
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
+
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 20, prefix: "media-upload", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
 
   return withErrorHandling(async () => {
     let formData: FormData;
@@ -169,10 +190,14 @@ export async function POST(req: Request) {
       return apiError("file_too_large", 413, { maxBytes: MAX_BYTES });
     }
 
-    const mimeType = file.type || "application/octet-stream";
+    const mimeType = (file.type || "application/octet-stream").toLowerCase();
     if (!isAllowedMime(mimeType)) {
       return apiError("unsupported_mime_type", 415, { mimeType });
     }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const body = new Uint8Array(arrayBuffer);
+    if (!hasValidSignature(mimeType, body)) return apiError("file_signature_mismatch", 415);
 
     const requestedType = formData.get("type");
     const customType = typeof requestedType === "string" ? requestedType : null;
@@ -191,13 +216,13 @@ export async function POST(req: Request) {
     const fileId = newId("file");
     const safeName = `${Date.now()}_${file.name.replace(/[^\w.\-]+/g, "_")}`;
 
-    const arrayBuffer = await file.arrayBuffer();
-    const body = new Uint8Array(arrayBuffer);
+    if (!r2 && process.env.NODE_ENV === "production") {
+      return apiError("media_storage_unavailable", 503);
+    }
 
     if (!r2) {
-      // Local fallback to public/uploads
-      console.log(`[media-upload] R2 is not configured. Falling back to public/uploads storage.`);
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      // Development-only private filesystem fallback. Never write user media to a public directory.
+      const uploadDir = path.join(process.cwd(), ".debo", "uploads");
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
@@ -276,14 +301,13 @@ export async function POST(req: Request) {
         }).catch((err) => console.error("[media-upload] voiceSessions insert failed:", err));
       }
 
-      processVoiceOrAudio({
-        sourceId,
-        userId: user.id,
-        workspaceId,
-        fileBuffer: body,
-        mimeType,
-        filename: file.name,
-      }).catch((err) => console.error("[media-upload] bg process call error:", err));
+      after(async () => {
+        try {
+          await processVoiceOrAudio({ sourceId, userId: user.id, workspaceId, fileBuffer: body, mimeType, filename: file.name });
+        } catch (err) {
+          console.error("[media-upload] background processing failed:", err);
+        }
+      });
     }
 
     await db.insert(auditLogs).values({
