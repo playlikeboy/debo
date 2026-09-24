@@ -10,9 +10,9 @@ import { FounderNote } from "@/components/landing/FounderNote";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 
 export const metadata: Metadata = {
-  title: "Debo | Your Life’s MCP",
+  title: "Debo | Personal AI Memory & Context",
   description:
-    "The foundational memory layer for personal intelligence. Build a searchable knowledge graph and give your personal AI the context of your entire life.",
+    "A personal AI memory layer for journals, voice recordings, documents, and connected-app context, with source-backed retrieval and MCP access.",
   openGraph: {
     title: "Debo: The Memory Context Protocol for Humans",
     description:
