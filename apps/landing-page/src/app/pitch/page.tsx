@@ -12,11 +12,11 @@ import {
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Debo | Your Life’s MCP",
-  description: "The foundational memory layer for personal intelligence. Build a searchable knowledge graph and give your personal AI the context of your entire life.",
+  title: "Debo | Personal AI Memory Infrastructure",
+  description: "How Debo turns journals, voice recordings, documents, and connected-app context into a personal AI memory layer.",
   openGraph: {
-    title: "Debo: The Memory Context Protocol for Humans",
-    description: "AI without memory is temporary. Debo provides the permanent context layer that turns your history into a searchable personal intelligence protocol.",
+    title: "Debo: Personal AI Memory & Context Infrastructure",
+    description: "A personal context layer for source-backed retrieval, memory, and MCP-enabled AI assistants.",
   },
 };
 
@@ -40,8 +40,8 @@ export default function PitchPage() {
                 AI without memory is temporary. Debo is the permanent infrastructure that turns your journals, voice recordings, and documents into a searchable context layer for personal intelligence.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row justify-center lg:justify-start">
-                <Link href="/#waitlist" className="inline-flex h-12 items-center justify-center rounded-xl bg-landing-accent px-8 text-landing-sm font-semibold text-white transition-all hover:bg-landing-accent-hover hover:-translate-y-0.5 shadow-sm hover:shadow-md">
-                  Join Private Beta
+                <Link href="https://app.debo.life/" target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center rounded-xl bg-landing-accent px-8 text-landing-sm font-semibold text-white transition-all hover:bg-landing-accent-hover hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+                  Open Debo
                 </Link>
                 <a href="/pitch.pdf" download className="inline-flex h-12 items-center justify-center rounded-xl border border-landing-border bg-landing-surface px-8 text-landing-sm font-semibold text-landing-text-primary transition-all hover:bg-landing-surface-subtle hover:-translate-y-0.5 shadow-sm gap-2">
                   <FileDown className="h-4 w-4 text-landing-accent" />
@@ -136,7 +136,7 @@ export default function PitchPage() {
               <FeatureCard
                 icon={Shield}
                 title="Private Infrastructure"
-                desc="Local-first, end-to-end encrypted, and sovereign. Your memory belongs to you."
+                desc="Private by design, account-scoped, and built around user-controlled memory."
               />
               <FeatureCard
                 icon={Bot}
