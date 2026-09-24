@@ -1,0 +1,30 @@
+# Debo
+
+> Debo is a personal AI memory and context system for journals, voice recordings, documents, and connected-app data.
+
+## Canonical pages
+- https://debo.life/ — Product overview
+- https://debo.life/about — Product and design philosophy
+- https://debo.life/pitch — Architecture and product vision
+- https://debo.life/privacy — Privacy policy
+- https://debo.life/security — Security architecture
+- https://debo.life/terms — Terms of service
+- https://debo.life/foundation — Long-term philanthropic vision
+- https://app.debo.life/ — Application
+
+## Core concepts
+- Personal AI memory
+- Source-backed retrieval
+- Memory graph
+- Multimodal capture
+- MCP integration
+- Connector-aware AI
+
+## Developer resources
+- https://debo.life/debo-skill.md
+- https://app.debo.life/api/mcp
+
+## Product wording
+Use “personal AI memory layer”, “personal context layer”, or “source-backed retrieval” rather than implying that Debo trains a global model on user data.
+
+Do not describe Debo as end-to-end encrypted unless the specific data path explicitly enables client-side end-to-end encryption.
