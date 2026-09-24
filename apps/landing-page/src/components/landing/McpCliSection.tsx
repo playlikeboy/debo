@@ -69,7 +69,7 @@ export function McpCliSection() {
             </div>
 
             <p className="text-landing-sm text-landing-text-secondary leading-relaxed">
-              Query vector nodes, save manual journals, search memories semantically, and fetch status of synched integrations. Install rule sets into your local IDE workspace in one command.
+              Query vector nodes, save manual journals, search memories and indexed context, and fetch status of synched integrations. Install rule sets into your local IDE workspace in one command.
             </p>
 
             <div className="space-y-4 flex-1 flex flex-col justify-end">
