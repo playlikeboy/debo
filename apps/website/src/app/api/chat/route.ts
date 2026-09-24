@@ -20,6 +20,8 @@ import { retrieveMemory } from "@/server/langgraph/nodes/retrieve-memory.node";
 import { classifyOrchestrationIntent } from "@/server/langgraph/nodes/classify-intent.node";
 import { resolveProvider } from "@/server/llm/provider";
 import { z } from "zod";
+import { decryptSecret } from "@/lib/secret-box";
+import { safeOutboundFetch } from "@/lib/outbound-url";
 
 export const runtime = "nodejs";
 
@@ -617,13 +619,13 @@ export async function POST(req: Request) {
         let headers: Record<string, string> = {};
         if (server.headersJson) {
           try {
-            headers = JSON.parse(server.headersJson);
+            headers = JSON.parse(decryptSecret(server.headersJson));
           } catch {}
         }
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 2000); // 2s timeout
-        const response = await fetch(server.url, {
+        const response = await safeOutboundFetch(server.url, {
           method: "POST",
           headers: { "Content-Type": "application/json", ...headers },
           body: JSON.stringify({
@@ -659,7 +661,7 @@ export async function POST(req: Request) {
                 execute: async ({ arguments: args }: { arguments?: any }) => {
                   const callController = new AbortController();
                   const callTimeout = setTimeout(() => callController.abort(), 5000);
-                  const callRes = await fetch(server.url, {
+                  const callRes = await safeOutboundFetch(server.url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json", ...headers },
                     body: JSON.stringify({
