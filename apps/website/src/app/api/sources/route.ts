@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@debo/db";
 import { sources, auditLogs, connectorAccounts } from "@debo/db/schema";
@@ -123,17 +123,27 @@ export async function POST(req: Request) {
 
     // Best-effort ingestion. Don't block create if vector infra is down.
     if (created?.plainText) {
-      indexSource({
-        sourceId: created.id,
-        userId: user.id,
-        workspaceId,
-        plainText: created.plainText,
-      }).catch((err) => console.error("[sources] index failed", err));
+      after(async () => {
+        try {
+          await indexSource({
+            sourceId: created.id,
+            userId: user.id,
+            workspaceId,
+            plainText: created.plainText!,
+          });
+        } catch (err) {
+          console.error("[sources] index failed", err);
+        }
+      });
 
-      // Trigger IoT automations if the source is a journal entry
       if (created.type === "journal") {
-        evaluateIotAutomations(user.id, workspaceId, created.plainText)
-          .catch((err) => console.error("[sources] IoT trigger evaluation failed:", err));
+        after(async () => {
+          try {
+            await evaluateIotAutomations(user.id, workspaceId, created.plainText!);
+          } catch (err) {
+            console.error("[sources] IoT trigger evaluation failed:", err);
+          }
+        });
       }
     }
 
