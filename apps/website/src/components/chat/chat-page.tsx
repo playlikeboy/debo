@@ -654,7 +654,14 @@ export function ChatPage({ threadId: initialThreadId }: { threadId?: string }) {
 
  {/* Collapsible Left Sidebar for Thread History */}
  {historyOpen && (
- <div className="w-80 border-r border-border/40 bg-card/10 backdrop-blur-md flex flex-col shrink-0 z-20 relative h-full">
+ <div className="absolute inset-0 z-50 md:relative md:inset-auto md:z-20 md:w-80">
+ <button
+   type="button"
+   aria-label="Close chat history"
+   onClick={() => setHistoryOpen(false)}
+   className="absolute inset-0 bg-black/50 md:hidden"
+ />
+ <div className="relative z-10 w-[86vw] max-w-[340px] md:w-80 border-r border-border/40 bg-card/10 backdrop-blur-md flex flex-col shrink-0 h-full">
  <div className="flex flex-col h-full p-4 space-y-4">
  <div className="flex items-center justify-between">
  <Button
@@ -1072,7 +1079,7 @@ export function ChatPage({ threadId: initialThreadId }: { threadId?: string }) {
 
  {/* Collapsible Details Panel on the right */}
  {(selectedSource || selectedToolCall) && (
- <div className="w-[420px] border-l border-border/40 bg-card/15 backdrop-blur-lg flex flex-col shrink-0 overflow-hidden h-full z-20 relative">
+ <div className="fixed inset-0 z-50 w-full border-l border-border/40 bg-card/15 backdrop-blur-xl flex flex-col overflow-hidden md:relative md:inset-auto md:w-[420px] md:z-20">
  {/* Header */}
  <div className="h-14 border-b border-border/40 px-6 flex items-center justify-between bg-card/40 backdrop-blur-md shrink-0">
  <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">

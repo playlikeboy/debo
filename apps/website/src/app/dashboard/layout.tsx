@@ -6,6 +6,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-shell/sidebar";
 import { Topbar } from "@/components/app-shell/topbar";
 import { CommandMenu } from "@/components/app-shell/command-menu";
+import { MobileNav } from "@/components/app-shell/mobile-nav";
 
 export default function DashboardLayout({
   children,
@@ -57,7 +58,12 @@ function DashboardLayoutContent({
         {!isFocused && (
           <Topbar onCommandMenuOpen={() => setCommandMenuOpen(true)} />
         )}
-        <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden">{children}</div>
+        <div className="flex-1 min-h-0 flex flex-col h-full overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0">
+            {children}
+          </div>
+          {!isFocused && <MobileNav />}
+        </div>
       </SidebarInset>
 
       <CommandMenu

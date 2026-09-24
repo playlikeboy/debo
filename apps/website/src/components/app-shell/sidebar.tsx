@@ -44,7 +44,6 @@ import {
   SidebarMenuButton,
   SidebarMenuBadge,
   SidebarSeparator,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -138,9 +137,10 @@ export function AppSidebar() {
               >
                 {section.label}
               </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {items.map((item) => (
+              {!section.collapsed && (
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {items.map((item) => (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton
                         asChild
@@ -157,8 +157,9 @@ export function AppSidebar() {
                       )}
                     </SidebarMenuItem>
                   ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              )}
             </SidebarGroup>
           );
         })}
@@ -187,7 +188,6 @@ export function AppSidebar() {
 }
 
 function SidebarUser() {
-  const router = usePathname();
   const sidebar = useSidebar();
   const user = useUser();
 

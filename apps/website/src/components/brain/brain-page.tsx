@@ -612,7 +612,9 @@ export function BrainPage() {
  ctx.stroke();
 
  // text label
- const shouldShowLabel = !selectedNode || isSelected || isConnectedToSelected || scale > 1.1;
+ const shouldShowLabel = selectedNode
+      ? isSelected || isConnectedToSelected
+      : scale > (window.innerWidth < 768 ? 1.45 : 1.1);
  if (shouldShowLabel) {
  ctx.fillStyle = isSelected ? "#ffffff" : isConnectedToSelected ? "#e4e4e7" : `rgba(255, 255, 255, ${opacity * 0.95})`;
  ctx.font = `${isSelected ? "bold" : "normal"} ${Math.max(7.5, Math.min(13.5, 9.5 * scale))}px system-ui`;

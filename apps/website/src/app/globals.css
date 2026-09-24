@@ -112,3 +112,55 @@
     font-family: var(--font-sans);
   }
 }
+
+
+/* Responsive product foundations */
+html {
+  min-height: 100%;
+  background: var(--background);
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--primary) 22%, transparent);
+}
+
+.debo-safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.debo-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 767px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

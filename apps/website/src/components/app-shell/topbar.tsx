@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useUser } from "@stackframe/stack";
 import { Search, Moon, Sun } from "lucide-react";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
 
 const TITLES: Record<string, string> = {
   "/dashboard": "Home",
@@ -49,23 +48,28 @@ export function Topbar({
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const title = deriveTitle(pathname);
+  const [isMac, setIsMac] = useState(true);
+
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad/i.test(window.navigator.platform));
+  }, []);
 
   return (
-    <header className="flex h-14 items-center gap-3 border-b border-border bg-background px-4 shrink-0">
+    <header className="flex h-14 min-h-14 items-center gap-2 sm:gap-3 border-b border-border bg-background px-3 sm:px-4 shrink-0">
       <SidebarTrigger className="-ml-1" />
-      <h1 className="text-base font-semibold truncate">{title}</h1>
+      <h1 className="hidden sm:block text-base font-semibold truncate">{title}</h1>
 
       <div className="flex-1" />
 
       <button
         onClick={onCommandMenuOpen}
-        className="flex h-9 w-72 items-center gap-2 rounded-md border border-input bg-muted/40 px-3 text-muted-foreground text-sm hover:bg-muted transition-colors"
+        className="flex h-9 min-w-0 flex-1 sm:flex-none sm:w-72 items-center gap-2 rounded-xl border border-input bg-muted/40 px-3 text-muted-foreground text-sm hover:bg-muted transition-colors"
         aria-label="Open command menu"
       >
         <Search className="size-4 shrink-0" />
         <span className="truncate">Search or ask Debo...</span>
         <kbd className="ml-auto hidden sm:inline-flex h-5 items-center rounded border border-border bg-background px-1.5 font-mono text-[10px]">
-          ⌘K
+          {isMac ? "⌘K" : "Ctrl K"}
         </kbd>
       </button>
 

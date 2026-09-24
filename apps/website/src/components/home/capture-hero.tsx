@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   MessageSquare,
@@ -41,17 +41,46 @@ function classifyInput(raw: string): "ask" | "link" | "journal" {
 
 export function CaptureHero() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const focusCapture = () => textareaRef.current?.focus();
+    window.addEventListener("debo:focus-capture", focusCapture);
+    if (searchParams.get("capture") === "1") {
+      requestAnimationFrame(() => textareaRef.current?.focus());
+      router.replace("/dashboard", { scroll: false });
+    }
+    return () => window.removeEventListener("debo:focus-capture", focusCapture);
+  }, [router, searchParams]);
 
   const submit = async () => {
     const text = value.trim();
     if (!text || busy) return;
     const intent = classifyInput(text);
 
-    if (intent === "ask" || intent === "journal") {
+    if (intent === "ask") {
       router.push(`/dashboard/chat?q=${encodeURIComponent(text)}`);
+      return;
+    }
+
+    if (intent === "journal") {
+      setBusy(true);
+      try {
+        await api.journal.create({
+          title: text.split(/\s+/).slice(0, 7).join(" ") || "Untitled thought",
+          content: text,
+        });
+        toast.success("Saved to your journal");
+        setValue("");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Could not save");
+      } finally {
+        setBusy(false);
+      }
       return;
     }
 
@@ -123,6 +152,7 @@ export function CaptureHero() {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKey}
           placeholder="Capture a thought, paste a link, or ask a question..."
+          ref={textareaRef}
           rows={2}
           className="resize-none border-0 bg-transparent text-base md:text-lg leading-relaxed shadow-none focus-visible:ring-0 p-0"
         />
