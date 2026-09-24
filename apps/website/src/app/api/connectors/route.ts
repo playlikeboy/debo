@@ -144,7 +144,6 @@ export async function GET(req: Request) {
           status: row ? (row.status === "disconnected" ? "disconnected" : row.status) : "disconnected",
           lastSyncedAt: row ? row.lastSyncedAt : null,
           externalAccountId: row ? row.externalAccountId : null,
-          metadataJson: row ? row.metadataJson : null,
         };
       });
     } else {
@@ -184,7 +183,6 @@ export async function GET(req: Request) {
           status: row.status,
           lastSyncedAt: row.lastSyncedAt,
           externalAccountId: row.externalAccountId,
-          metadataJson: row.metadataJson,
         });
       }
     }
