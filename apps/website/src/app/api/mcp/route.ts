@@ -374,7 +374,7 @@ export async function POST(req: Request) {
           const rows = await db
             .select()
             .from(sources)
-            .where(and(eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId), eq(sources.type, "journal"))))
+            .where(and(eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId), eq(sources.type, "journal")))
             .orderBy(desc(sources.createdAt));
 
           textOutput = rows.length === 0
@@ -476,14 +476,14 @@ export async function POST(req: Request) {
 
         case "debo_delete_journal": {
           const journalId = args.journalId;
-          await db.delete(memoryChunks).where(eq(memoryChunks.sourceId, journalId));
+          await db.delete(memoryChunks).where(and(eq(memoryChunks.sourceId, journalId), eq(memoryChunks.userId, user.id), eq(memoryChunks.workspaceId, workspaceId)));
           await db.delete(sources).where(and(eq(sources.id, journalId), eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId), eq(sources.type, "journal")));
           textOutput = `Journal deleted successfully.`;
           break;
         }
 
         case "debo_list_media": {
-          const limit = args.limit ?? 10;
+          const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 25);
           const mediaTypes = ["file", "image", "audio", "video", "pdf"];
           const rows = await db
             .select()
