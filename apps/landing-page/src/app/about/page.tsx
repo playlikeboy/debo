@@ -70,7 +70,7 @@ export default function AboutPage() {
                 />
                 <ProtocolItem
                   title="Personal Tinker"
-                  desc="Researcher-grade control over your personal model fine-tuning."
+                  desc="Researcher-grade control over your personal context, memory sources, and retrieval preferences."
                 />
                 <ProtocolItem
                   title="Latent Connectionism"
@@ -136,7 +136,7 @@ export default function AboutPage() {
             <FlowCard
               step="03"
               title="Synthesis"
-              desc="A personal intelligence layer trained on your evidence provides cited, proactive insights."
+              desc="A personal intelligence layer grounded in your evidence provides cited, context-aware insights."
             />
           </div>
         </div>
