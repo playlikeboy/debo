@@ -17,9 +17,10 @@ import { eq, and } from "drizzle-orm";
 const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 const ALLOWED_PREFIXES = ["image/", "audio/", "video/"];
 const ALLOWED_EXACT = new Set(["application/pdf"]);
+const BLOCKED_MIME_TYPES = new Set(["image/svg+xml"]);
 
 function isAllowedMime(mime: string): boolean {
-  if (!mime) return false;
+  if (!mime || BLOCKED_MIME_TYPES.has(mime.toLowerCase())) return false;
   if (ALLOWED_EXACT.has(mime)) return true;
   return ALLOWED_PREFIXES.some((p) => mime.startsWith(p));
 }
@@ -173,8 +174,13 @@ export async function POST(req: Request) {
       return apiError("unsupported_mime_type", 415, { mimeType });
     }
 
-    const customType = formData.get("type") as string | null;
-    const sourceType = customType || inferSourceType(mimeType);
+    const requestedType = formData.get("type");
+    const customType = typeof requestedType === "string" ? requestedType : null;
+    const inferredType = inferSourceType(mimeType);
+    const sourceType =
+      inferredType === "audio" && customType === "voice"
+        ? "voice"
+        : inferredType;
     const voiceSessionId = formData.get("voiceSessionId") as string | null;
 
     const r2 = getR2Config();
