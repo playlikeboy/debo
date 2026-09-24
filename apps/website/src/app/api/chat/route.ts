@@ -75,13 +75,13 @@ export async function POST(req: Request) {
   let body: { messages?: any[]; threadId?: string };
   try {
     body = await req.json();
-    console.log("ROUTE API BODY:", JSON.stringify(body, null, 2));
   } catch {
     return apiError("invalid_json", 400);
   }
 
-  const rawMessages = body.messages || [];
+  const rawMessages = Array.isArray(body.messages) ? body.messages : [];
   if (rawMessages.length === 0) return apiError("messages_required", 400);
+  if (rawMessages.length > 50) return apiError("too_many_messages", 413);
 
   // Extract text from UIMessage format (parts) or legacy format (content)
   function extractText(msg: any): string {
