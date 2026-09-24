@@ -24,6 +24,9 @@ dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const agentsSecret = process.env.AGENTS_INTERNAL_SECRET || "";
+if (!agentsSecret) {
+  throw new Error("AGENTS_INTERNAL_SECRET is required for the Debo voice worker.");
+}
 
 export default defineAgent({
   prewarm: async (proc: JobProcess) => {
@@ -114,7 +117,6 @@ export default defineAgent({
           description: z.string().optional().describe("Optional description details of the task"),
         }),
         execute: async ({ title, description }: { title: string; description?: string }) => {
-          console.log(`[tool:create_task] title: "${title}" for user: ${userId}`);
           try {
             const res = await fetch(`${appUrl}/api/tasks`, {
               method: "POST",
@@ -141,7 +143,6 @@ export default defineAgent({
         description: "Retrieve a list of the user's active tasks.",
         parameters: z.object({}),
         execute: async () => {
-          console.log(`[tool:list_tasks] requested for user: ${userId}`);
           try {
             const res = await fetch(`${appUrl}/api/tasks?status=inbox`, {
               headers: {
