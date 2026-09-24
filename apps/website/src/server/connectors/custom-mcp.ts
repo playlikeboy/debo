@@ -3,6 +3,8 @@ import { customMcpServers } from "@debo/db/schema";
 import { and, eq } from "drizzle-orm";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import { decryptSecret, encryptSecret, isEncryptedSecret } from "@/lib/secret-box";
+import { safeOutboundFetch } from "@/lib/outbound-url";
 
 function jsonSchemaToZod(schema: any): z.ZodType<any> {
   if (!schema) return z.any();
@@ -75,7 +77,23 @@ export async function getCustomMcpToolsForUser(userId: string, workspaceId: stri
       let headers: Record<string, string> = {};
       if (server.headersJson) {
         try {
-          headers = JSON.parse(server.headersJson);
+          const rawHeaders = decryptSecret(server.headersJson);
+          const parsedHeaders: unknown = JSON.parse(rawHeaders);
+          if (!parsedHeaders || Array.isArray(parsedHeaders) || typeof parsedHeaders !== "object") {
+            throw new Error("headers must be a JSON object");
+          }
+          const entries = Object.entries(parsedHeaders as Record<string, unknown>);
+          if (entries.some(([, value]) => typeof value !== "string")) {
+            throw new Error("header values must be strings");
+          }
+          headers = Object.fromEntries(entries) as Record<string, string>;
+
+          // Migrate legacy plaintext connector headers after first successful read.
+          if (!isEncryptedSecret(server.headersJson)) {
+            await db.update(customMcpServers)
+              .set({ headersJson: encryptSecret(JSON.stringify(headers)), updatedAt: new Date().toISOString() })
+              .where(and(eq(customMcpServers.id, server.id), eq(customMcpServers.userId, userId), eq(customMcpServers.workspaceId, workspaceId)));
+          }
         } catch {
           console.warn(`[custom-mcp] Failed to parse headers for ${server.name}`);
         }
@@ -86,7 +104,7 @@ export async function getCustomMcpToolsForUser(userId: string, workspaceId: stri
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
-        const response = await fetch(server.url, {
+        const response = await safeOutboundFetch(server.url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -123,7 +141,7 @@ export async function getCustomMcpToolsForUser(userId: string, workspaceId: stri
                 const callController = new AbortController();
                 const callTimeout = setTimeout(() => callController.abort(), 8000); // 8s timeout
 
-                const callRes = await fetch(server.url, {
+                const callRes = await safeOutboundFetch(server.url, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
