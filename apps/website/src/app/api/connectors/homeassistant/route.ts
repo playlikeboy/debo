@@ -11,6 +11,8 @@ import {
   withErrorHandling,
 } from "@/lib/api-helpers";
 import { parseAutomationInstruction } from "@/server/connectors/automations/parser";
+import { encryptSecret, decryptSecret } from "@/lib/secret-box";
+import { safeOutboundFetch, assertSafeOutboundUrl } from "@/lib/outbound-url";
 
 const DEFAULT_SIMULATED_DEVICES = {
   "light.living_room": { entity_id: "light.living_room", name: "Living Room Light", state: "off", brightness: 128 },
@@ -173,10 +175,10 @@ export async function POST(req: Request) {
                 service = auto.state === "lock" || auto.state === "locked" ? "lock" : "unlock";
               }
               try {
-                await fetch(`${metadata.url}/api/services/${domain}/${service}`, {
+                await safeOutboundFetch(`${metadata.url}/api/services/${domain}/${service}`, {
                   method: "POST",
                   headers: {
-                    Authorization: `Bearer ${metadata.token}`,
+                    Authorization: `Bearer ${decryptSecret(metadata.token || "")}`,
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify(body),
@@ -215,12 +217,16 @@ export async function POST(req: Request) {
       if (!url) return apiError("url_required_for_real_mode", 400);
       if (!token) return apiError("token_required_for_real_mode", 400);
 
-      finalUrl = url.trim().replace(/\/+$/, "");
+      try {
+        finalUrl = await assertSafeOutboundUrl(url.trim());
+      } catch (error) {
+        return apiError(error instanceof Error ? error.message : "unsafe_outbound_url", 422);
+      }
       finalToken = token.trim();
 
       // Test connection
       try {
-        const testRes = await fetch(`${finalUrl}/api/`, {
+        const testRes = await safeOutboundFetch(`${finalUrl}/api/`, {
           headers: {
             Authorization: `Bearer ${finalToken}`,
             "Content-Type": "application/json",
@@ -231,7 +237,7 @@ export async function POST(req: Request) {
           return apiError(`Failed to connect to Home Assistant API. Status: ${testRes.status}`, 400);
         }
 
-        const statesRes = await fetch(`${finalUrl}/api/states`, {
+        const statesRes = await safeOutboundFetch(`${finalUrl}/api/states`, {
           headers: {
             Authorization: `Bearer ${finalToken}`,
             "Content-Type": "application/json",
@@ -271,7 +277,7 @@ export async function POST(req: Request) {
 
     const metadata = {
       url: finalUrl,
-      token: finalToken,
+      token: encryptSecret(finalToken),
       simulated: isSimulated,
       devices: deviceStates,
       automations: [],
@@ -376,7 +382,8 @@ export async function PATCH(req: Request) {
     if (!account) return apiError("connector_not_connected", 404);
 
     const metadata = JSON.parse(account.metadataJson || "{}");
-    const { url, token, simulated, devices = {} } = metadata;
+    const { url, simulated, devices = {} } = metadata;
+    const token = decryptSecret(metadata.token || "");
 
     const device = devices[entityId];
     if (!device) return apiError("device_not_found", 404);
@@ -411,7 +418,7 @@ export async function PATCH(req: Request) {
       }
 
       try {
-        await fetch(`${url}/api/services/${domain}/${service}`, {
+        await safeOutboundFetch(`${url}/api/services/${domain}/${service}`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
