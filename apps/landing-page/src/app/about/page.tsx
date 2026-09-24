@@ -172,8 +172,8 @@ export default function AboutPage() {
             intelligence.
           </p>
           <div className="flex justify-center">
-            <Link href="/#waitlist" className="inline-flex h-12 items-center justify-center rounded-xl bg-landing-accent px-8 text-landing-sm font-semibold text-white transition-all hover:bg-landing-accent-hover hover:-translate-y-0.5 shadow-sm hover:shadow-md gap-2">
-              Join Waitlist
+            <Link href="https://app.debo.life/" target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center rounded-xl bg-landing-accent px-8 text-landing-sm font-semibold text-white transition-all hover:bg-landing-accent-hover hover:-translate-y-0.5 shadow-sm hover:shadow-md gap-2">
+              Open Debo
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
