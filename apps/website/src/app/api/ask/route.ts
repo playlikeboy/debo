@@ -19,6 +19,7 @@ import { requireSession, apiError } from "@/lib/api-helpers";
 import { classifyIntent, classifyRetrievalIntent, classifyOrchestrationIntent } from "@/server/langgraph/nodes/classify-intent.node";
 import { getComposioToolsForUser } from "@/server/connectors/composio";
 import { getCustomMcpToolsForUser } from "@/server/connectors/custom-mcp";
+import { decryptSecret } from "@/lib/secret-box";
 import { retrieveMemory } from "@/server/langgraph/nodes/retrieve-memory.node";
 import {
   buildSystemPrompt,
@@ -272,7 +273,8 @@ const controlIotDeviceTool = (userId: string, workspaceId: string) => tool(
       }
 
       const metadata = JSON.parse(account.metadataJson || "{}");
-      const { url, token, simulated, devices = {} } = metadata;
+      const { url, simulated, devices = {} } = metadata;
+      const token = decryptSecret(metadata.token || "");
 
       const device = devices[entityId];
       if (!device) {
@@ -361,6 +363,9 @@ export async function POST(req: Request) {
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
 
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 30, prefix: "ask", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   let body: { question?: string; mode?: string; threadId?: string };
   try {
     body = await req.json();
@@ -438,7 +443,7 @@ export async function POST(req: Request) {
         let contextText = "";
         if (shouldSearchMemory) {
           send({ type: "retrieval_started" });
-          const retrieved = await retrieveMemory(user.id, question, 8);
+          const retrieved = await retrieveMemory(user.id, question, 8, workspaceId);
           sourcesFound = retrieved.sourcesFound;
           contextText = retrieved.contextText;
 
@@ -665,7 +670,7 @@ export async function POST(req: Request) {
         console.error("[ask] pipeline error:", err);
         send({
           type: "error",
-          message: err instanceof Error ? err.message : "internal_error",
+          message: "internal_error",
         });
         send({ type: "done", answer: "", confidence: "no_source_found" });
       }
