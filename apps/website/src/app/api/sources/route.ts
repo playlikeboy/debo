@@ -11,7 +11,7 @@ import {
   withErrorHandling,
 } from "@/lib/api-helpers";
 import { indexSource } from "@/server/ingestion";
-import { decryptSecret } from "@/lib/secret-box";
+import { decryptSecret, encryptSecret, isEncryptedSecret } from "@/lib/secret-box";
 import { safeOutboundFetch } from "@/lib/outbound-url";
 
 const SOURCE_TYPES = [
@@ -170,7 +170,13 @@ async function evaluateIotAutomations(userId: string, workspaceId: string, plain
 
     if (!account) return;
 
-    const metadata = JSON.parse(account.metadataJson || "{}");
+    const metadata = JSON.parse(account.metadataJson || "{}") as Record<string, any>;
+    if (typeof metadata.token === "string" && metadata.token && !isEncryptedSecret(metadata.token)) {
+      metadata.token = encryptSecret(metadata.token);
+      await db.update(connectorAccounts)
+        .set({ metadataJson: JSON.stringify(metadata), updatedAt: new Date().toISOString() })
+        .where(and(eq(connectorAccounts.id, account.id), eq(connectorAccounts.userId, userId), eq(connectorAccounts.workspaceId, workspaceId)));
+    }
     const automations = metadata.automations || [];
     const devices = metadata.devices || {};
     let updated = false;
