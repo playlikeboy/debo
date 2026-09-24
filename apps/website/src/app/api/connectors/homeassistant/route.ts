@@ -9,6 +9,7 @@ import {
   readJson,
   requireSession,
   withErrorHandling,
+  guardRateLimit,
 } from "@/lib/api-helpers";
 import { parseAutomationInstruction } from "@/server/connectors/automations/parser";
 import { encryptSecret, decryptSecret, isEncryptedSecret } from "@/lib/secret-box";
@@ -49,6 +50,9 @@ export async function POST(req: Request) {
   const session = await requireSession(req);
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
+
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 30, prefix: "homeassistant", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
 
   return withErrorHandling(async () => {
     const raw = await readJson<unknown>(req);
@@ -389,7 +393,7 @@ export async function PATCH(req: Request) {
 
     if (!account) return apiError("connector_not_connected", 404);
 
-    const metadata = JSON.parse(account.metadataJson || "{}");
+    const metadata = await readMetadata(account, user.id, workspaceId);
     const { url, simulated, devices = {} } = metadata;
     const token = decryptSecret(metadata.token || "");
 
