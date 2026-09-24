@@ -9,6 +9,7 @@ import {
   readJson,
   requireSession,
   withErrorHandling,
+  guardRateLimit,
 } from "@/lib/api-helpers";
 import {
   getComposio,
@@ -30,6 +31,9 @@ export async function POST(req: Request) {
   const session = await requireSession(req);
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
+
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 10, prefix: "connector-connect", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
 
   return withErrorHandling(async () => {
     const raw = await readJson<unknown>(req);
