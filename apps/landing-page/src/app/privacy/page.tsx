@@ -16,10 +16,10 @@ export default function PrivacyPage() {
             Privacy First
           </div>
           <h1 className="text-4xl md:text-5xl font-heading font-semibold text-landing-text-primary leading-[1.1]">
-            Your memories are <span className="text-landing-accent">safe with us.</span>
+            Your memories deserve <span className="text-landing-accent">clear boundaries.</span>
           </h1>
           <p className="mt-6 text-landing-lg font-medium text-landing-text-secondary max-w-2xl mx-auto leading-relaxed">
-            We built Debo to be your private memory engine. Your data is never sold, and your thoughts remain entirely yours.
+            We built Debo as a personal memory system. We do not sell your personal memory data, and the product is designed around account-level access controls and user-managed memory.
           </p>
         </div>
 
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
             title="Data Sovereignty"
             icon={<Lock className="w-5 h-5 text-landing-text-primary" />}
           >
-            Debo is built on the principle of personal memory sovereignty. Your journals, reflections, and extracted memories are yours. We do not sell your data or use it to train global models that could compromise your privacy. Our architecture ensures your thoughts remain entirely under your control.
+            Debo is built around personal memory sovereignty. Your journals, reflections, and extracted memories are associated with your account and workspace. We do not sell your personal memory data or use it to train a shared Debo model.
           </PrivacySection>
 
           <PrivacySection 
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             title="Memory Extraction"
             icon={<BrainIcon className="w-5 h-5 text-landing-text-primary" />}
           >
-            When you journal, our engine extracts key facts and patterns to build your personal memory database. This process is strictly isolated to your user account and uses secure, encrypted storage. No other user or entity can query or access your extracted memory graph.
+            When you journal, the engine can extract facts, tasks, and relationships into your personal memory graph. Database queries are scoped to the authenticated account and workspace, and connector credentials are protected with application-level authenticated encryption.
           </PrivacySection>
 
           <PrivacySection 
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
             title="AI Processing"
             icon={<Eye className="w-5 h-5 text-landing-text-primary" />}
           >
-            We use advanced Edge AI and specialized models to provide personal insights. These requests are processed seamlessly in real-time. Critically, your prompts and personal data are not retained by underlying model providers to improve their global services beyond the immediate scope of generating your private insights.
+            Some features use external inference or transcription providers, such as configured OpenAI/NVIDIA-compatible models or Deepgram. Debo sends data required for the requested feature; each provider has its own retention and privacy terms. Debo does not use your content to train a shared Debo model.
           </PrivacySection>
 
           <PrivacySection 
@@ -53,13 +53,13 @@ export default function PrivacyPage() {
             title="Security Practices"
             icon={<CheckCircle2 className="w-5 h-5 text-landing-text-primary" />}
           >
-            We implement industry-standard security measures to protect your data. This includes robust encryption in transit and at rest, secure database connections, and stringent access controls to ensure only you have access to your timeline and memory vaults.
+            We use TLS for network transport, account/workspace-scoped authorization, encrypted connector credentials, and private object-storage access patterns. We also avoid exposing private media through public upload directories. See the security architecture page for implementation details.
           </PrivacySection>
         </div>
 
         <div className="mt-16 p-8 rounded-[20px] border border-landing-border bg-landing-surface text-center shadow-sm">
           <p className="text-landing-xs font-bold text-landing-text-tertiary uppercase tracking-widest mb-2">Last Updated</p>
-          <p className="text-landing-base font-semibold text-landing-text-primary">April 29, 2026</p>
+          <p className="text-landing-base font-semibold text-landing-text-primary">September 24, 2026</p>
         </div>
       </div>
     </div>
