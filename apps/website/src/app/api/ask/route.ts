@@ -15,7 +15,7 @@
 
 import { NextResponse } from "next/server";
 import { HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages";
-import { requireSession, apiError } from "@/lib/api-helpers";
+import { requireSession, apiError, guardRateLimit } from "@/lib/api-helpers";
 import { classifyIntent, classifyRetrievalIntent, classifyOrchestrationIntent } from "@/server/langgraph/nodes/classify-intent.node";
 import { getComposioToolsForUser } from "@/server/connectors/composio";
 import { getCustomMcpToolsForUser } from "@/server/connectors/custom-mcp";
@@ -45,7 +45,7 @@ import {
   connectorAccounts,
 } from "@debo/db/schema";
 import { eq, and, or, ilike, ne } from "drizzle-orm";
-import { newId } from "@/lib/api-helpers";
+
 import {
   getEventsTool,
   getHealthEventsTool,
