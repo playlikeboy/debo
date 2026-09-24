@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireSession, apiError } from "@/lib/api-helpers";
+import { requireSession, apiError, guardRateLimit } from "@/lib/api-helpers";
 import { db } from "@debo/db";
 import { sources, memoryChunks, tasks, connectorAccounts, connectorSyncRuns, auditLogs } from "@debo/db/schema";
 import { eq, and, desc, ilike, inArray } from "drizzle-orm";
@@ -206,6 +206,9 @@ export async function POST(req: Request) {
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
 
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 60, prefix: "mcp", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   let body: any;
   try {
     body = await req.json();
@@ -237,7 +240,7 @@ export async function POST(req: Request) {
       switch (name) {
         case "debo_search_memory": {
           const query = (args.query ?? "").trim();
-          const limit = args.limit ?? 5;
+          const limit = Math.min(Math.max(Number(args.limit) || 5, 1), 25);
           if (!query) {
             textOutput = "Query was empty.";
             break;
@@ -256,6 +259,7 @@ export async function POST(req: Request) {
             .where(
               and(
                 eq(memoryChunks.userId, user.id),
+                eq(memoryChunks.workspaceId, workspaceId),
                 ilike(memoryChunks.text, `%${query}%`)
               )
             )
@@ -270,7 +274,7 @@ export async function POST(req: Request) {
               const percent = Math.round(score * 100);
               return [
                 `### [${row.sourceType.toUpperCase()} | ${row.title || "Untitled"}]`,
-                `*   **Confidence**: ${percent}%`,
+                `*   **Retrieval relevance**: ${percent}%`,
                 `*   **Source ID**: \`${row.sourceId}\``,
                 `*   **Snippet**:`,
                 `    > ${row.content.split("\n").join("\n    > ")}`
@@ -285,7 +289,7 @@ export async function POST(req: Request) {
           const [source] = await db
             .select()
             .from(sources)
-            .where(and(eq(sources.id, sourceId), eq(sources.userId, user.id)))
+            .where(and(eq(sources.id, sourceId), eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId)))
             .limit(1);
 
           if (!source) {
@@ -294,7 +298,7 @@ export async function POST(req: Request) {
             const chunks = await db
               .select({ text: memoryChunks.text })
               .from(memoryChunks)
-              .where(eq(memoryChunks.sourceId, sourceId))
+              .where(and(eq(memoryChunks.sourceId, sourceId), eq(memoryChunks.userId, user.id), eq(memoryChunks.workspaceId, workspaceId)))
               .orderBy(memoryChunks.chunkIndex);
 
             const fullText = chunks.map(c => c.text).join("\n\n") || source.plainText || "No content.";
@@ -370,7 +374,7 @@ export async function POST(req: Request) {
           const rows = await db
             .select()
             .from(sources)
-            .where(and(eq(sources.userId, user.id), eq(sources.type, "journal")))
+            .where(and(eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId), eq(sources.type, "journal"))))
             .orderBy(desc(sources.createdAt));
 
           textOutput = rows.length === 0
@@ -450,7 +454,7 @@ export async function POST(req: Request) {
               .where(eq(sources.id, journalId));
 
             if (args.content) {
-              await db.delete(memoryChunks).where(eq(memoryChunks.sourceId, journalId));
+              await db.delete(memoryChunks).where(and(eq(memoryChunks.sourceId, journalId), eq(memoryChunks.userId, user.id), eq(memoryChunks.workspaceId, workspaceId)));
               const chunks = chunkText(updatedContent);
               if (chunks.length > 0) {
                 const chunkRows = chunks.map((chunk, index) => ({
@@ -473,7 +477,7 @@ export async function POST(req: Request) {
         case "debo_delete_journal": {
           const journalId = args.journalId;
           await db.delete(memoryChunks).where(eq(memoryChunks.sourceId, journalId));
-          await db.delete(sources).where(and(eq(sources.id, journalId), eq(sources.userId, user.id), eq(sources.type, "journal")));
+          await db.delete(sources).where(and(eq(sources.id, journalId), eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId), eq(sources.type, "journal")));
           textOutput = `Journal deleted successfully.`;
           break;
         }
@@ -484,7 +488,7 @@ export async function POST(req: Request) {
           const rows = await db
             .select()
             .from(sources)
-            .where(and(eq(sources.userId, user.id), inArray(sources.type, mediaTypes as any)))
+            .where(and(eq(sources.userId, user.id), eq(sources.workspaceId, workspaceId), inArray(sources.type, mediaTypes as any)))
             .orderBy(desc(sources.createdAt))
             .limit(limit);
 
@@ -498,7 +502,7 @@ export async function POST(req: Request) {
           const rows = await db
             .select()
             .from(connectorAccounts)
-            .where(eq(connectorAccounts.userId, user.id));
+            .where(and(eq(connectorAccounts.userId, user.id), eq(connectorAccounts.workspaceId, workspaceId)));
 
           textOutput = rows.length === 0
             ? "No connectors configured."
@@ -511,7 +515,7 @@ export async function POST(req: Request) {
           const [connector] = await db
             .select()
             .from(connectorAccounts)
-            .where(and(eq(connectorAccounts.id, connectorAccountId), eq(connectorAccounts.userId, user.id)))
+            .where(and(eq(connectorAccounts.id, connectorAccountId), eq(connectorAccounts.userId, user.id), eq(connectorAccounts.workspaceId, workspaceId)))
             .limit(1);
 
           if (!connector) {
