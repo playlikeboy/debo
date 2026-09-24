@@ -182,8 +182,8 @@ export default function PitchPage() {
                        <a href="mailto:founder@debo.life" className="text-landing-sm font-bold text-landing-text-primary hover:text-landing-accent transition-colors">founder@debo.life</a>
                      </div>
                   </div>
-                  <Link href="/#waitlist" className="inline-flex h-12 items-center justify-center rounded-xl bg-landing-accent px-8 text-landing-sm font-semibold text-white transition-all hover:bg-landing-accent-hover hover:-translate-y-0.5 shadow-sm hover:shadow-md">
-                     Join Private Beta
+                  <Link href="https://app.debo.life/" target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center justify-center rounded-xl bg-landing-accent px-8 text-landing-sm font-semibold text-white transition-all hover:bg-landing-accent-hover hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+                     Open Debo
                   </Link>
                </div>
             </div>
