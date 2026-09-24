@@ -4,6 +4,8 @@ import { customMcpServers } from "@debo/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireSession, withErrorHandling, newId } from "@/lib/api-helpers";
 import { z } from "zod";
+import { assertSafeOutboundUrl } from "@/lib/outbound-url";
+import { encryptSecret } from "@/lib/secret-box";
 
 export const runtime = "nodejs";
 
@@ -20,14 +22,17 @@ export async function GET(req: Request) {
 
   return withErrorHandling(async () => {
     const servers = await db
-      .select()
+      .select({
+        id: customMcpServers.id,
+        userId: customMcpServers.userId,
+        workspaceId: customMcpServers.workspaceId,
+        name: customMcpServers.name,
+        url: customMcpServers.url,
+        createdAt: customMcpServers.createdAt,
+        updatedAt: customMcpServers.updatedAt,
+      })
       .from(customMcpServers)
-      .where(
-        and(
-          eq(customMcpServers.userId, user.id),
-          eq(customMcpServers.workspaceId, workspaceId)
-        )
-      );
+      .where(and(eq(customMcpServers.userId, user.id), eq(customMcpServers.workspaceId, workspaceId)));
     return NextResponse.json(servers);
   });
 }
@@ -52,9 +57,25 @@ export async function POST(req: Request) {
 
     const { name, url, headersJson } = parsed.data;
 
+    let safeUrl: string;
+    try {
+      safeUrl = await assertSafeOutboundUrl(url);
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "unsafe_outbound_url" }, { status: 422 });
+    }
+
+    let encryptedHeaders: string | null = null;
     if (headersJson) {
       try {
-        JSON.parse(headersJson);
+        const parsedHeaders: unknown = JSON.parse(headersJson);
+        if (!parsedHeaders || Array.isArray(parsedHeaders) || typeof parsedHeaders !== "object") {
+          return NextResponse.json({ error: "invalid_headers_json" }, { status: 400 });
+        }
+        const entries = Object.entries(parsedHeaders as Record<string, unknown>);
+        if (entries.some(([, value]) => typeof value !== "string")) {
+          return NextResponse.json({ error: "header_values_must_be_strings" }, { status: 400 });
+        }
+        encryptedHeaders = encryptSecret(JSON.stringify(Object.fromEntries(entries)));
       } catch {
         return NextResponse.json({ error: "invalid_headers_json" }, { status: 400 });
       }
@@ -67,11 +88,19 @@ export async function POST(req: Request) {
         userId: user.id,
         workspaceId,
         name,
-        url,
-        headersJson: headersJson || null,
+        url: safeUrl,
+        headersJson: encryptedHeaders,
       })
       .returning();
 
-    return NextResponse.json(newServer);
+    return NextResponse.json({
+      id: newServer!.id,
+      userId: newServer!.userId,
+      workspaceId: newServer!.workspaceId,
+      name: newServer!.name,
+      url: newServer!.url,
+      createdAt: newServer!.createdAt,
+      updatedAt: newServer!.updatedAt,
+    });
   });
 }
