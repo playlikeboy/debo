@@ -762,7 +762,6 @@ export function ChatPage({ threadId: initialThreadId }: { threadId?: string }) {
   )}
  </div>
  </div>
- </div>
  )}
 
  {/* Main Chat Column */}
