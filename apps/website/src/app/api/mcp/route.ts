@@ -73,11 +73,11 @@ function calculateRelevance(content: string, query: string): number {
 const TOOLS = [
   {
     name: "debo_search_memory",
-    description: "Semantic text query to search notes, journals, and files in Debo memory graph",
+    description: "Text query to search notes, journals, and files in the Debo memory graph",
     inputSchema: {
       type: "object",
       properties: {
-        query: { type: "string", description: "Semantic search text" },
+        query: { type: "string", description: "Text search query" },
         limit: { type: "number", description: "Max results, default 5" },
       },
       required: ["query"],
