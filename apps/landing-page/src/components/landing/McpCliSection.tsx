@@ -78,7 +78,7 @@ export function McpCliSection() {
                 <code className="select-all">{installCommand}</code>
                 <button
                   onClick={() => copyToClipboard(installCommand, setCopiedCmd)}
-                  className="p-1.5 rounded-lg hover:bg-white/5 text-landing-text-tertiary hover:text-white transition-colors cursor-pointer"
+                  aria-label="Copy CLI install command" className="p-1.5 rounded-lg hover:bg-white/5 text-landing-text-tertiary hover:text-white transition-colors cursor-pointer"
                 >
                   {copiedCmd ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 </button>
@@ -125,7 +125,7 @@ export function McpCliSection() {
                   <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-500/60">claude_desktop_config.json</span>
                   <button
                     onClick={() => copyToClipboard(mcpConfig, setCopiedMcp)}
-                    className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+                    aria-label="Copy MCP configuration" className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
                   >
                     {copiedMcp ? (
                       <>
