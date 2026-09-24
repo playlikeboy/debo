@@ -198,7 +198,7 @@ export async function POST(req: Request) {
   if (intent === "recall") {
     console.log("[api/chat] Intent is RECALL. Querying vector memory (4s timeout)...");
     const retrieved = await withTimeout(
-      retrieveMemory(user.id, question, 8),
+      retrieveMemory(user.id, question, 8, workspaceId),
       4000,
       { sourcesFound: [], contextText: "" }
     );
