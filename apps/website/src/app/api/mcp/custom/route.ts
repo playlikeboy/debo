@@ -45,6 +45,9 @@ export async function POST(req: Request) {
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
 
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 30, prefix: "mcp-config", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   return withErrorHandling(async () => {
     let body;
     try {
