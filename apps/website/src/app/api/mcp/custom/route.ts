@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@debo/db";
 import { customMcpServers } from "@debo/db/schema";
 import { and, eq } from "drizzle-orm";
-import { requireSession, withErrorHandling, newId } from "@/lib/api-helpers";
+import { requireSession, withErrorHandling, newId, guardRateLimit } from "@/lib/api-helpers";
 import { z } from "zod";
 import { assertSafeOutboundUrl } from "@/lib/outbound-url";
 import { encryptSecret } from "@/lib/secret-box";
@@ -19,6 +19,9 @@ export async function GET(req: Request) {
   const session = await requireSession(req);
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
+
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 30, prefix: "mcp-config", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
 
   return withErrorHandling(async () => {
     const servers = await db
