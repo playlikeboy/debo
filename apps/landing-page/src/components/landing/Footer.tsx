@@ -12,6 +12,7 @@ export function Footer() {
           <div className="flex flex-wrap gap-8 justify-center">
             <Link href="/pitch" className="hover:text-landing-text-primary transition-colors">Vision</Link>
             <Link href="/privacy" className="hover:text-landing-text-primary transition-colors">Privacy</Link>
+            <Link href="/security" className="hover:text-landing-text-primary transition-colors">Security</Link>
             <Link href="/terms" className="hover:text-landing-text-primary transition-colors">Terms</Link>
             <a href="https://github.com/sh20raj/debo" target="_blank" rel="noopener noreferrer" className="hover:text-landing-text-primary transition-colors">GitHub</a>
             <a href="mailto:contact@debo.life" className="hover:text-landing-text-primary transition-colors">Contact</a>
