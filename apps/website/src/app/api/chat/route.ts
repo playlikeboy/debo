@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { streamText, convertToModelMessages, type UIMessage, stepCountIs } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { requireSession, apiError, newId } from "@/lib/api-helpers";
+import { requireSession, apiError, newId, guardRateLimit } from "@/lib/api-helpers";
 import { db } from "@debo/db";
 import {
   chatThreads,
@@ -68,6 +68,9 @@ export async function POST(req: Request) {
   const session = await requireSession(req);
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
+
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 30, prefix: "chat", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
 
   let body: { messages?: any[]; threadId?: string };
   try {
