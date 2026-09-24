@@ -15,7 +15,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Debo Foundation | Philanthropy & Vision",
-  description: "Debo's vision for a better world: building wells, cleaning rivers, and creating schools and hospitals with full transparency.",
+  description: "Debo's long-term philanthropic vision for supporting water, education, environmental, and health initiatives with transparent reporting.",
 };
 
 export default function FoundationPage() {
@@ -57,22 +57,22 @@ export default function FoundationPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <PillarCard 
               title="Pure Water"
-              description="Building sustainable deep-bore wells to provide clean, safe drinking water to remote communities."
+              description="A future program focused on supporting sustainable access to clean drinking water in underserved communities."
               icon={<Droplets className="h-6 w-6 text-landing-text-primary" />}
             />
             <PillarCard 
               title="River Restoration"
-              description="Implementing modern filtration and cleanup initiatives to revitalize local river ecosystems."
+              description="A future program focused on river restoration, cleanup, and ecological recovery."
               icon={<Waves className="h-6 w-6 text-landing-text-primary" />}
             />
             <PillarCard 
               title="Future Schools"
-              description="Creating tech-enabled learning centers to empower the next generation of thinkers and doers."
+              description="A future program focused on supporting accessible, technology-enabled learning."
               icon={<GraduationCap className="h-6 w-6 text-landing-text-primary" />}
             />
             <PillarCard 
               title="Health Centers"
-              description="Establishing primary health facilities to ensure quality medical care is accessible to all."
+              description="A future program focused on supporting accessible primary healthcare initiatives."
               icon={<Hospital className="h-6 w-6 text-landing-text-primary" />}
             />
           </div>
@@ -93,12 +93,12 @@ export default function FoundationPage() {
                 <span className="text-landing-accent">Fully documented.</span>
               </h2>
               <p className="text-landing-lg md:text-landing-xl font-medium text-landing-text-secondary leading-relaxed">
-                We believe in complete transparency. Every dollar spent, every brick laid, and every well dug is documented and shared openly with our community.
+                We believe in complete transparency. Any funded initiative will be documented with project-level updates and financial reporting as the program matures.
               </p>
               
               <div className="grid sm:grid-cols-2 gap-4">
-                <ImpactItem icon={<ShieldCheck className="h-5 w-5 text-landing-accent" />} text="Live Impact Tracking" />
-                <ImpactItem icon={<Globe className="h-5 w-5 text-landing-accent" />} text="Open Source Philanthropy" />
+                <ImpactItem icon={<ShieldCheck className="h-5 w-5 text-landing-accent" />} text="Project Updates" />
+                <ImpactItem icon={<Globe className="h-5 w-5 text-landing-accent" />} text="Transparent Reporting" />
                 <ImpactItem icon={<Sparkles className="h-5 w-5 text-landing-accent" />} text="No Admin Fees" />
               </div>
 
