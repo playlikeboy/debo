@@ -3,37 +3,43 @@ import { db } from "@debo/db";
 import { workspaces, users } from "@debo/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAuth, type AuthUser } from "@/lib/auth";
+import { enforceRateLimit, RateLimitError } from "@/app/agents/lib/rate-limit";
 
-/**
- * Standard JSON error response.
- */
 export function apiError(message: string, status = 500, extra?: Record<string, unknown>) {
   return NextResponse.json({ error: message, ...extra }, { status });
 }
 
-/**
- * Wrap a route handler so unhandled errors surface as { error } JSON
- * instead of crashing the function and returning the platform 500 page.
- */
-export function withErrorHandling<T>(
-  handler: () => Promise<T>,
-): Promise<T | NextResponse> {
+export function withErrorHandling<T>(handler: () => Promise<T>): Promise<T | NextResponse> {
   return handler().catch((err: unknown) => {
-    const message = err instanceof Error ? err.message : "internal_error";
-    console.error("[api]", message, err);
-    return apiError(message, 500);
+    const requestId = crypto.randomUUID();
+    console.error("[api]", requestId, err);
+    if (err instanceof RateLimitError) {
+      return apiError("rate_limited", 429, { retryAfter: err.retryAfter, requestId });
+    }
+    return apiError("internal_error", 500, { requestId });
   });
+}
+
+export async function guardRateLimit(options: {
+  key: string;
+  limit: number;
+  prefix: string;
+  windowSeconds: number;
+}): Promise<NextResponse | null> {
+  try {
+    await enforceRateLimit(options);
+    return null;
+  } catch (err) {
+    if (err instanceof RateLimitError) {
+      return apiError("rate_limited", 429, { retryAfter: err.retryAfter });
+    }
+    console.error("[rate-limit] unavailable; failing open", err);
+    return null;
+  }
 }
 
 export { newId } from "./new-id";
 
-/**
- * Authenticate the request and ensure the user has a personal workspace
- * row in our DB. Returns { user, workspaceId } or a 401/500 NextResponse.
- *
- * Stack Auth is the source of truth for identity; this just mirrors the user
- * row + a default workspace into our DB so foreign keys are satisfied.
- */
 export async function requireSession(
   req: Request,
 ): Promise<{ user: AuthUser; workspaceId: string } | NextResponse> {
@@ -41,7 +47,6 @@ export async function requireSession(
   if (authResult instanceof NextResponse) return authResult;
   const user = authResult;
 
-  // Ensure the user row exists. Stack Auth owns identity; we mirror it.
   const existingUser = await db
     .select({ id: users.id })
     .from(users)
@@ -57,8 +62,6 @@ export async function requireSession(
     });
   }
 
-  // Ensure a personal workspace exists for this user.
-  // Convention: workspace.id === user.id for the personal workspace.
   const workspaceId = user.id;
   const existingWs = await db
     .select({ id: workspaces.id })
@@ -78,9 +81,6 @@ export async function requireSession(
   return { user, workspaceId };
 }
 
-/**
- * Parse JSON body safely, returning a 400 on parse error.
- */
 export async function readJson<T>(req: Request): Promise<T | NextResponse> {
   try {
     return (await req.json()) as T;
