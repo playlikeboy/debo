@@ -57,19 +57,19 @@ const DEFAULT_SECTIONS: SidebarSectionDef[] = [
     id: "core",
     label: "Core",
     collapsed: false,
-    itemIds: ["home", "ask", "journal", "apps", "library"],
+    itemIds: ["home", "ask", "journal", "library"],
   },
   {
     id: "tools",
     label: "Tools",
     collapsed: true,
-    itemIds: ["voice-notes", "voice-talk", "media", "mail", "connectors", "vault","mcp"],
+    itemIds: ["voice-talk", "voice-notes", "media", "mail", "connectors", "vault", "mcp"],
   },
   {
     id: "memory",
     label: "Memory",
     collapsed: true,
-    itemIds: ["inbox", "debrief", "timeline"],
+    itemIds: ["inbox", "timeline", "debrief"],
   },
   {
     id: "work",
