@@ -16,7 +16,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setCommandMenuOpen((prev) => !prev);
       }
@@ -27,7 +27,10 @@ export default function DashboardLayout({
 
   return (
     <Suspense fallback={null}>
-      <DashboardLayoutContent setCommandMenuOpen={setCommandMenuOpen}>
+      <DashboardLayoutContent
+        commandMenuOpen={commandMenuOpen}
+        setCommandMenuOpen={setCommandMenuOpen}
+      >
         {children}
       </DashboardLayoutContent>
     </Suspense>
@@ -36,15 +39,16 @@ export default function DashboardLayout({
 
 function DashboardLayoutContent({
   children,
+  commandMenuOpen,
   setCommandMenuOpen,
 }: {
   children: React.ReactNode;
+  commandMenuOpen: boolean;
   setCommandMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isFocused = searchParams.get("focus") === "true" && pathname === "/dashboard/journal";
-  const [commandMenuOpen, setOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -58,7 +62,7 @@ function DashboardLayoutContent({
 
       <CommandMenu
         open={commandMenuOpen}
-        onOpenChange={setOpen}
+        onOpenChange={setCommandMenuOpen}
         onClose={() => setCommandMenuOpen(false)}
       />
     </SidebarProvider>
