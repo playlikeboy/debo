@@ -21,6 +21,7 @@ export async function retrieveMemory(
   userId: string,
   question: string,
   limit = 8,
+  workspaceId?: string,
 ): Promise<{ sourcesFound: SourceFound[]; contextText: string }> {
   let sourcesFound: SourceFound[] = [];
 
@@ -48,6 +49,7 @@ export async function retrieveMemory(
             .where(
               and(
                 eq(memoryChunks.userId, userId),
+                ...(workspaceId ? [eq(memoryChunks.workspaceId, workspaceId)] : []),
                 inArray(memoryChunks.id, chunkIds),
               ),
             );
@@ -94,6 +96,7 @@ export async function retrieveMemory(
         .where(
           and(
             eq(sources.userId, userId),
+            ...(workspaceId ? [eq(sources.workspaceId, workspaceId)] : []),
             ne(sources.status, "deleted"),
             or(...conditions)
           )
