@@ -38,7 +38,7 @@ export function FounderNote() {
             <div className="flex gap-6 items-center text-landing-xs font-medium text-landing-text-secondary">
               <a href="https://github.com/sh20raj/debo" className="hover:text-landing-text-primary transition-colors flex items-center gap-1.5"><GithubIcon className="w-[18px] h-[18px]" /> GitHub</a>
               <a href="https://x.com/sh20raj" className="hover:text-landing-text-primary transition-colors flex items-center gap-1.5"><TwitterIcon className="w-[18px] h-[18px]" /> X/Twitter</a>
-              <Link href={waitlistUrl} className="hover:text-landing-text-primary transition-colors">Waitlist</Link>
+              <Link href={waitlistUrl} className="hover:text-landing-text-primary transition-colors">Open Debo</Link>
             </div>
           </div>
         </div>
