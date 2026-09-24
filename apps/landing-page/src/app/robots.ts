@@ -1,12 +1,9 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next"
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: '/dashboard/',
-    },
-    sitemap: 'https://debo.life/sitemap.xml',
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/dashboard/", "/api/"] }],
+    sitemap: "https://debo.life/sitemap.xml",
+    host: "https://debo.life",
   }
 }
