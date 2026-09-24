@@ -3,10 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "bun@1.3.11",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "bun run dev:website",
     "cli": "bun run --filter @debo.life/cli start",
@@ -16,6 +13,7 @@
     "dev:web": "bun run dev:landing",
     "dev:app": "bun run dev:website",
     "build": "bun run build:packages && (if [ \"$VERCEL\" = \"1\" ]; then bun run build:website; else bun run build:landing && bun run build:website && bun run build:voice; fi)",
+    "build:packages": "bun run build:packages",
     "build:packages": "bun run --filter './packages/*' build",
     "build:landing": "bun run --filter '@debo/landing-page' build",
     "build:website": "bun run --filter '@debo/website' build",
@@ -41,7 +39,7 @@
     "wrangler": "^4.87.0"
   },
   "dependencies": {
-    "next": "16.2.4",
+    "next": "16.3.6",
     "zod": "^4.4.3"
   }
 }
