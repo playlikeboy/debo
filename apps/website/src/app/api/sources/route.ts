@@ -11,6 +11,8 @@ import {
   withErrorHandling,
 } from "@/lib/api-helpers";
 import { indexSource } from "@/server/ingestion";
+import { decryptSecret } from "@/lib/secret-box";
+import { safeOutboundFetch } from "@/lib/outbound-url";
 
 const SOURCE_TYPES = [
   "journal", "voice", "audio", "video", "file", "image",
@@ -200,10 +202,10 @@ async function evaluateIotAutomations(userId: string, workspaceId: string, plain
                 service = auto.state === "lock" || auto.state === "locked" ? "lock" : "unlock";
               }
               try {
-                await fetch(`${metadata.url}/api/services/${domain}/${service}`, {
+                await safeOutboundFetch(`${metadata.url}/api/services/${domain}/${service}`, {
                   method: "POST",
                   headers: {
-                    Authorization: `Bearer ${metadata.token}`,
+                    Authorization: `Bearer ${decryptSecret(metadata.token || "")}`,
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify(body),
