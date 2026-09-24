@@ -30,6 +30,9 @@ export function Navbar() {
           >
             Privacy
           </Link>
+          <Link href="/security" className="text-landing-sm font-medium text-landing-text-secondary transition-colors hover:text-landing-text-primary">
+            Security
+          </Link>
           <a
             href="https://github.com/sh20raj/debo"
             target="_blank"
