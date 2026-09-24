@@ -7,6 +7,7 @@ import {
   apiError,
   requireSession,
   withErrorHandling,
+  guardRateLimit,
 } from "@/lib/api-helpers";
 import { embedQuery } from "@/server/llm/embeddings";
 import { isQdrantConfigured, searchSimilar } from "@/server/vector/qdrant";
@@ -30,6 +31,9 @@ export async function GET(req: Request) {
   if (session instanceof NextResponse) return session;
   const { user, workspaceId } = session;
 
+  const rateLimitResponse = await guardRateLimit({ key: user.id, limit: 60, prefix: "search", windowSeconds: 60 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   return withErrorHandling(async () => {
     const url = new URL(req.url);
     const parsed = QuerySchema.safeParse(Object.fromEntries(url.searchParams));
@@ -52,6 +56,7 @@ export async function GET(req: Request) {
             .where(
               and(
                 eq(memoryChunks.userId, user.id),
+                eq(memoryChunks.workspaceId, workspaceId),
                 inArray(memoryChunks.id, chunkIds),
               ),
             );
