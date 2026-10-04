@@ -1,7 +1,7 @@
 # Source Grounding & Attribution Specification
 
 Debo's core foundational motto is: **"Capture anything. Ask your past. Trust every answer."**
-Trust cannot exist without verifiable provenance. This document defines the strict, non-negotiable rules governing source attribution, citation integrity, and uncertainty representation across Debo.
+Trust requires verifiable provenance. This document defines the rules for source attribution, citation integrity, and uncertainty representation across Debo.
 
 ---
 
@@ -12,7 +12,7 @@ Every memory chunk, entity claim, and extracted relationship stored in Debo **mu
 - `source_id`: The root capture container (e.g. `doc_123`, `audio_456`, `email_789`).
 - `document_id`: The structured document record in PostgreSQL.
 - `chunk_id`: The specific text segment, table cell, or audio segment.
-- `location_metadata`: Exact page number, character offset, bounding box coordinates (`x`, `y`, `width`, `height`), or audio start/end timestamps.
+- `location_metadata`: Source-specific provenance such as page/block/bounding box, character or segment offsets, message/attachment identifiers, timestamps, or canonical URL + extracted segment metadata.
 - **Rule**: Any memory created without verifiable source provenance is marked `UNGROUNDED` and excluded from factual query synthesis.
 
 ### 2. Evidence-Backed Answer Generation
@@ -23,7 +23,7 @@ When the Ask Debo agent generates a response:
 
 ### 3. Confidence vs. Truth
 - High LLM generation confidence must never be treated as factual truth.
-- A statement is only considered factual within Debo if it is explicitly corroborated by at least one primary source record in Cloudflare R2 / Neon PostgreSQL.
+- A statement is considered grounded within Debo only when the cited evidence resolves to a primary source record owned by Debo. Multiple sources may be required when the claim depends on conflicting observations.
 
 ### 4. Temporal Distinction (Past vs. Present)
 - When a user asks a question, Debo must distinguish between *current belief* and *historical record*.
