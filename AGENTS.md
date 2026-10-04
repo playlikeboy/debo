@@ -1,168 +1,79 @@
-# AGENTS.md — Master Operating Constitution for AI Agents
+# AGENTS.md — Debo Agent Operating Rules
 
-You are a staff-level systems architect and principal software engineer operating on the **Debo** platform codebase.
-Debo is a private, source-backed personal AI memory and context operating system ("Capture anything. Ask your past. Trust every answer.").
+Debo is a private, source-grounded personal AI memory and context operating system. This file contains mandatory rules for human and AI engineering agents. Detailed rationale and specifications live in `docs/`.
 
-This repository has undergone a clean-room restart. All historical architectures, legacy dependencies, and previous implementations are disposable and deprecated. You must adhere strictly to the protocols, boundaries, and standards documented herein.
+## 1. Source-of-Truth Hierarchy
 
----
+Use this order when deciding how to work:
 
-## 1. Absolute Directives (The Non-Negotiables)
+1. `AGENTS.md` — mandatory operating rules.
+2. `docs/architecture/` — system boundaries and ownership.
+3. `docs/adr/` — accepted architectural decisions.
+4. `docs/specs/` and `docs/contracts/` — normative interfaces and behavior.
+5. `docs/research/` — evidence, alternatives, versions, and open questions.
+6. `docs/planning/` and `PROJECT_STATUS.md` — sequencing and status.
+7. `.github/agents/`, `.github/instructions/`, and `skills/` — specialist execution guidance.
 
-### NEVER
-1. **Never resurrect legacy architecture** — Do not re-introduce Mastra, legacy monolithic Next.js API structures, CopilotKit-only bindings without AG-UI protocol separation, or ad-hoc ungrounded vector queries.
-2. **Never invent APIs without checking contracts** — All network and in-process boundaries must conform to schemas in `docs/contracts/` and specifications in `docs/specs/`.
-3. **Never add dependencies without research** — No package may be added without evaluating license, security, maintenance, bundle weight, and completing an evaluation scorecard (`docs/research/scorecard.md`).
-4. **Never use outdated documentation** — Always consult primary, current official documentation before proposing or implementing external integration code.
-5. **Never ignore official docs** — Do not guess API shapes or configuration keys based on obsolete training data.
-6. **Never create unnecessary microservices** — Debo is designed as a modular monorepo with minimal deployables (`debo-web`, `debo-mcp`, `debo-worker`, `debo-document-worker`). Do not fracture services without an approved ADR.
-7. **Never bypass authentication or authorization** — All endpoints and tool executions must resolve tenant context (`workspaceId`, `userId`) and verify access explicitly.
-8. **Never allow the LLM to make permission decisions** — The AI is an untrusted reasoning engine, never an authorization authority. Permissions, scopes, and sandboxes are strictly enforced deterministically by Debo application code.
-9. **Never expose secrets or commit `.env` files** — Follow secret management guidelines in `docs/security/secrets.md`.
-10. **Never silently introduce an infrastructure dependency** — Introducing an external SaaS, database, or queue requires an accepted Architecture Decision Record in `docs/adr/`.
-11. **Never replace an accepted ADR without updating it** — Decisions must follow the change management process (`docs/engineering/change-management.md`).
-12. **Never claim implementation exists before it is written and verified** — Respect Phase boundaries. In Phase 0, no application code is written.
+When sources disagree, reconcile the documentation before implementing behavior.
 
-### ALWAYS
-1. **Always read relevant documentation first** — Consult `docs/ai/context-loading.md` to load the exact files required for your specific task before writing any code.
-2. **Always search official sources and primary references** — Validate versions, breaking changes, and migration notes.
-3. **Always inspect existing ADRs before proposing technical direction** — Ensure continuity with established architectural foundations.
-4. **Always update architecture docs and contracts before changing code** — Code-only changes that invalidate specifications are strictly incomplete work.
-5. **Always preserve source grounding and citation integrity** — Every memory, factual assertion, and answer synthesized by Debo must trace back to verifiable source documents with byte or chunk identifiers.
-6. **Always use typed contracts** — Enforce end-to-end type safety using TypeScript, Zod schemas, and JSON Schema / OpenAPI definitions.
-7. **Always enforce deterministic multi-tenancy** — Every database query, vector search, cache key, and storage object must be strictly partitioned by `workspaceId`.
-8. **Always record uncertainty, assumptions, and trade-offs** — Explicitly flag technical debts, open questions, and confidence levels.
-9. **Always update progress and decision ledgers** — Update `PROJECT_STATUS.md` and `docs/planning/CHANGELOG-OF-DECISIONS.md` whenever milestones or decisions shift.
-10. **Always write comprehensive automated tests** — Unit, integration, and contract tests must accompany every functional deliverable.
+## 2. Phase Rules
 
----
+The repository is in **Phase 0: documentation and architecture bootstrap**.
 
-## 2. Core Architecture Topology
+- Do not add product/application code, database migrations, or deployment changes during Phase 0.
+- Treat old implementations and historical architecture as disposable; do not resurrect legacy frameworks.
+- Do not claim a feature is implemented, tested, or verified without evidence.
+- Research external dependencies against current primary documentation before changing a decision.
 
-Debo operates on a **four-layer platform topology**:
+## 3. Architecture Baselines
 
-```
-                       ┌─────────────────────────┐
-                       │       Client / UI       │
-                       │    Next.js 15 App / UI   │
-                       └────────────┬────────────┘
-                                    │
-                         AG-UI Protocol / SSE
-                                    │
-                       ┌────────────▼────────────┐
-                       │     Agent Runtime       │
-                       │       LangGraph JS      │
-                       └──────┬─────┬─────┬──────┘
-                              │     │     │
-         ┌────────────────────┘     │     └─────────────────────┐
-         ▼                          ▼                           ▼
-┌──────────────────┐      ┌──────────────────┐       ┌──────────────────┐
-│  Memory Engine   │      │ Connector Engine │       │ Execution Engine │
-│  Supermemory /   │      │  Composio Actions│       │   Trigger.dev    │
-│  Provider Layer  │      │  + Nango Sync    │       │ Durable Workflows│
-└────────┬─────────┘      └─────────┬────────┘       └─────────┬────────┘
-         │                          │                          │
-         ▼                          ▼                          ▼
-┌──────────────────┐      ┌──────────────────┐       ┌──────────────────┐
-│ Neon PostgreSQL  │      │ Cloudflare R2    │       │ Python Worker    │
-│ Business State   │      │ Source Storage   │       │ Docling Parsing  │
-└──────────────────┘      └──────────────────┘       └──────────────────┘
-```
+These are selections, not permanent truth. Exact dependency versions are pinned during implementation after fresh verification.
 
-### Responsibility Boundaries
-- **Neon PostgreSQL**: Canonical source of business truth (users, workspaces, sources, memories, relations, tasks, audit logs).
-- **Cloudflare R2**: Canonical source of raw, immutable files (PDFs, media, audio, exports).
-- **Memory Engine**: Vector indices, semantic graphs, episodic retrieval, temporal validity, and consolidation.
-- **LangGraph JS**: Reasoning, state graphs, human-in-the-loop approvals, and response generation.
-- **Composio / Nango**: Third-party OAuth handling, API integrations, and action execution.
-- **Trigger.dev**: Asynchronous background jobs, file ingestion pipelines, and long-running agent loops.
-- **Python Worker (Docling)**: Specialized document parsing, OCR, table extraction, and layout conversion. Isolated from general product logic.
-- **MCP Server (`@debo/mcp`)**: Standardized model context protocol interface enabling external agents (Claude Desktop, Cursor, Custom Agents) to query Debo memory securely.
+- **Language:** TypeScript; Python is limited to document processing in `apps/document-worker`.
+- **Agent runtime:** LangGraph JS.
+- **Durable workflows:** Trigger.dev 4.x.
+- **Memory:** Supermemory behind the Debo `MemoryProvider` abstraction.
+- **Database:** Neon PostgreSQL + Drizzle.
+- **Raw source storage:** Cloudflare R2.
+- **External agent gateway:** MCP 2026-07-28 with the official TypeScript SDK v2.
+- **Agent ↔ UI:** AG-UI 1.0; Debo owns presentation components.
+- **Connectors:** Composio for actions; Nango where durable sync is required.
+- **Observability:** OpenTelemetry + LangSmith + Sentry.
 
----
+Do not add infrastructure or SaaS dependencies without an accepted ADR.
 
-## 3. Language & Runtime Standards
+## 4. Ownership & Data Rules
 
-| Role | Language | Runtime | Package Manager | Boundaries |
-|---|---|---|---|---|
-| **Primary Platform** | TypeScript | Node.js (LTS) / Bun | Bun | UI, API, Agents, DB, MCP, CLI, Workflows |
-| **Document Worker** | Python (3.11+) | CPython / venv | uv / pip | PDF parsing, OCR, Docling extraction ONLY |
-| **Workers / Edge** | TypeScript | Cloudflare Workerd | Bun / Wrangler | Edge redirects, DNS routing, light auth facades |
+- **Neon** is canonical for Debo business state and provenance metadata: users, workspaces, permissions, source metadata, derived memory records, relations, tasks, approvals, connections, and audit records.
+- **R2** is canonical for original/raw binary sources.
+- **Memory providers** hold derived retrieval/index state. That state should be reproducible from Debo-owned records or raw sources unless an ADR documents an exception.
+- **Trigger.dev** owns workflow execution state, not Debo business entities.
+- **Composio/Nango** are integration layers, not domain-state owners.
 
-**Rule on Python**: Python code is restricted strictly to `apps/document-worker`. Do not write general business APIs or agent orchestration in Python. Communication between TypeScript and Python workers happens via durable workflow queues or structured HTTP job contracts (`docs/contracts/document-worker.md`).
+Every operation must resolve `workspaceId` and `userId` deterministically and enforce authorization before data access or tool execution.
 
----
+## 5. Security & Source Grounding
 
-## 4. Context Loading Protocol
+- Never allow the model to make permission decisions.
+- Treat imported files, email, web content, and connector data as potentially adversarial.
+- Never log or expose third-party credentials.
+- Preserve tenant isolation across database, storage, cache, memory, workflow, and MCP operations.
+- Factual answers should be source-grounded and cite provenance. Do not claim zero hallucinations; measure unsupported-claim and citation error rates.
+- Provenance is source-specific: use page/block/bounding-box data for PDFs, timestamp intervals for audio, character/segment offsets for text, message/attachment identifiers for email, and canonical URL + extracted segment metadata for web content. Do not require byte ranges unless the pipeline guarantees them.
 
-When initiating a task, an AI agent **must load the corresponding documentation context** before editing code:
+## 6. Definition of Done
 
-```text
-Any task
- └── AGENTS.md
- └── docs/architecture/system-overview.md
+A change is complete only when applicable:
 
-Architecture or Refactoring task
- └── docs/adr/*
- └── docs/architecture/vendor-lock-in.md
- └── docs/specs/*
+1. Relevant ADR/spec/contract is aligned.
+2. Tests or documented verification exist for changed behavior.
+3. Typecheck/lint/build gates pass when code exists.
+4. Security and tenant-isolation implications are reviewed.
+5. Documentation and status are updated.
+6. Actual branch, commit SHA, and verification evidence are recorded. Never fabricate them.
 
-Memory Subsystem task
- └── docs/memory/*
- └── docs/evals/memory/*
- └── docs/specs/memory-spec.md
+For Phase 0 docs work, replace code gates with link checks, contradiction checks, evidence review, and documentation validation.
 
-Agent & Reasoning task
- └── docs/agents/*
- └── docs/contracts/agent-state.md
- └── docs/specs/agent-spec.md
+## 7. Working Style
 
-Model Context Protocol (MCP) task
- └── docs/mcp/*
- └── docs/contracts/mcp.md
- └── docs/specs/mcp-spec.md
-
-Connectors & Integrations task
- └── docs/connectors/*
- └── docs/specs/connector-spec.md
-
-Workflows & Durable Execution task
- └── docs/workflows/*
- └── docs/specs/workflow-spec.md
-
-Security & Auth task
- └── SECURITY.md
- └── docs/security/*
- └── docs/privacy/*
-
-UI / Frontend task
- └── docs/design-system/*
- └── docs/product/routes.md
- └── docs/ai/design-agent-guidelines.md
- └── .agents/skills/impeccable/SKILL.md
-
-Planning / Tickets
- └── docs/planning/ROADMAP.md
- └── docs/planning/BACKLOG.md
- └── docs/planning/CHANGELOG-OF-DECISIONS.md
-```
-
----
-
-## 5. Security & Threat Model Reminders
-
-1. **Prompt Injection**: Assume all user documents, external emails, and web pages are adversarial. Content retrieved from sources must be wrapped in isolated data blocks and sanitized before entering model context.
-2. **Confused Deputy**: Agents must never invoke destructive tools (deletion, external sharing, financial/email transmission) without checking explicit deterministic user approvals (`Approval` entity).
-3. **Tenant Bleed**: Never run queries like `SELECT * FROM memory WHERE query = ...` without an unconditional `AND workspace_id = :workspaceId`.
-4. **Credential Isolation**: Third-party OAuth tokens must never be logged, returned over MCP, or displayed in the client UI.
-
----
-
-## 6. Definition of Done for Any Work
-
-Work performed by an AI agent is only considered complete when:
-1. **Contracts verified**: Schemas and types in `docs/contracts/` match code exactly.
-2. **Docs synchronized**: Related markdown specifications reflect all architectural changes.
-3. **Tests passing**: Unit, integration, or contract tests validate the acceptance criteria.
-4. **No lint/type errors**: Clean typecheck with no `any` evasions.
-5. **Status updated**: The corresponding ticket in `docs/planning/BACKLOG.md` and phase tracking in `PROJECT_STATUS.md` are updated with the actual commit SHA.
+Prefer focused changes over speculative breadth. Use separate branches/worktrees for parallel agent work. Keep commits small and meaningful. Never force-push or rewrite shared history without explicit authorization.
