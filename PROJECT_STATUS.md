@@ -36,11 +36,12 @@ All host daemon ingress is configured via Cloudflare Custom Domains on Cloudflar
 | Domain / Subdomain | Protocol | Target / Edge Provider | Port / Status | Description |
 |---|---|---|---|---|
 | `debo.life` | HTTPS / HTTP/2 | Cloudflare Edge / OpenNext | 200 OK | Public product landing page |
-| `app.debo.life` | HTTPS / HTTP/2 | Vercel / Next.js App | 307 &rarr; /handler/sign-in | Web Application, Dashboard & AG-UI Streaming |
 | `docs.debo.life` | HTTPS / HTTP/1.1 | Cloudflare Edge Worker | 200 OK | Platform Architecture, Warm Paper Documentation & Specs |
+| `web.debo.life` | HTTPS / HTTP/2 | Cloudflare Edge Worker | 200 OK | Clean-Room Rebuild Web Application (Overview, Ask, Journal, Library, Timeline) |
 | `worker.debo.life` | HTTPS / JSON | Cloudflare Edge + VPS | 200 OK (`:8787`) | Debo Durable Workflow Engine & Event Ingestion |
 | `mcp.debo.life` | MCP 2026-07-28 | Cloudflare Edge + VPS | 200 OK (`:8082`) | Official Model Context Protocol Streamable HTTP Server |
 | `docworker.debo.life` | HTTPS / JSON | Cloudflare Edge + VPS | 200 OK (`:8005`) | Specialized Python Docling Document Worker |
+| `app.debo.life` | HTTPS / HTTP/2 | Vercel (Legacy CNAME) | 307 &rarr; /handler/sign-in | Legacy Vercel deployment; remove CNAME in CF DNS to route to Edge |
 
 ### VPS Daemon Supervisor (`scripts/manage-vps-services.sh`)
 Persistent background daemons managed on VPS host (`rachel.local`):
