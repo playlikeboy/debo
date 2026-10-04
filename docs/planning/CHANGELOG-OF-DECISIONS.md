@@ -4,7 +4,7 @@ This ledger records all formal architectural decisions, status transitions, and 
 
 ---
 
-## 2026-10-04 — Phase 0 Clean-Room Baseline Established
+## 2026-10-04 — Phase 0 Clean-Room Baseline Established (`f724e9e32223ea31961142c0df044b4022084031`)
 
 ### Clean-Room Reset Executed
 - **Action**: Complete removal of legacy application code, obsolete configurations, and deprecated frameworks (Mastra, CopilotKit-only bindings, unstructured API routes).
