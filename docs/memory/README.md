@@ -1,65 +1,66 @@
 # Debo Memory Subsystem Architecture
 
-Debo is a **private personal AI memory and context operating system**. 
-Unlike standard chatbots that discard conversation history or rely on naive semantic search, Debo models human memory: episodic recall, semantic concept linking, declarative facts, temporal validity, contradiction updates, and source grounding.
+Debo models personal context as source-grounded, time-aware memory. The architecture deliberately separates **Debo-owned canonical state** from **provider-owned derived retrieval state**.
 
----
+## 1. Memory Domains
 
-## 1. Memory Subsystem Taxonomy
+- **Episodic:** events and experiences situated in time.
+- **Semantic:** concepts, topics, associations, and knowledge.
+- **Declarative:** explicit facts and preferences.
+- **Temporal:** validity over real-world time plus when Debo learned or recorded information.
 
-Debo classifies personal context into four distinct memory domains:
+These are conceptual domains; they do not imply four separate databases or four custom engines.
 
-```text
-                               PERSONAL MEMORY GRAPH
-                                        │
-         ┌──────────────────┬───────────┴───────────┬──────────────────┐
-         ▼                  ▼                       ▼                  ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ Episodic Memory │ │ Semantic Memory │ │Declarative Facts│ │ Temporal Memory │
-│ Events, calls,  │ │ Concepts, tags, │ │ Preferences, IDs│ │ Validity dates, │
-│ meetings, time  │ │ associations    │ │ addresses, specs│ │ state changes   │
-└─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘
-```
+## 2. Ownership Boundaries
 
-1. **Episodic Memory**: Experiences situated in time and place (e.g. *"Discussed the Q3 budget with Sarah in London on Tuesday"*). Indexed with start time, duration, participants, and original audio/transcript pointers.
-2. **Semantic Memory**: Knowledge, concepts, and topical affinities (e.g. *"Sarah leads the enterprise sales division"*). Clustered in embedding space for associative recall.
-3. **Declarative Memory (Profile & State)**: High-confidence, explicit user facts (e.g. *"Prefers dark chocolate"*, *"Passport number expires in 2028"*). Consolidated into a fast-access user profile cache.
-4. **Temporal Memory (Bi-temporal tracking)**: Distinguishes between when an event happened in the real world (`valid_from` to `valid_to`) and when Debo learned about it (`transaction_time`).
+| Layer | Responsibility | Source of truth |
+|---|---|---|
+| Neon PostgreSQL | users, workspaces, source metadata, memory records, relations, provenance, lifecycle, audit records | **Canonical Debo state** |
+| Cloudflare R2 | original uploaded/raw files and media | **Canonical raw bytes** |
+| Memory provider | embeddings, derived indices, provider retrieval structures, provider-specific consolidation | **Derived retrieval state** |
+| LangGraph | reasoning and answer synthesis | **Execution state, not product truth** |
 
----
+A provider outage must not make canonical Debo data unrecoverable.
 
-## 2. Core Processing Capabilities
+## 3. Retrieval Strategy
 
-### 1. Hybrid Retrieval & Reranking
-Retrieval combines three complementary scoring methods:
-- **Dense Vector Similarity**: Cosine similarity over multilingual embeddings (e.g. text-embedding-3-large or BGE-M3).
-- **Sparse Lexical Search**: BM25 full-text keyword indexing in PostgreSQL for exact acronyms, names, phone numbers, and code identifiers.
-- **Recency & Decay Scoring**: Temporal exponential decay function prioritizing recent context unless an explicit historical timeframe is requested.
+The first implementation should use provider capabilities through `MemoryProvider` rather than rebuilding a second memory engine inside Debo.
 
-$$\text{Score} = \alpha \cdot \text{VectorScore} + \beta \cdot \text{BM25Score} + \gamma \cdot e^{-\lambda \Delta t}$$
+- Provider-supported dense/sparse retrieval remains provider-owned.
+- Debo-owned filtering remains explicit for workspace, source lifecycle, permissions, and temporal constraints.
+- Optional Debo-side reranking or lexical fallback is introduced only when evaluation proves the provider path is insufficient.
+- Any PostgreSQL-only fallback is **degraded retrieval**, not an equivalent replacement.
 
-After candidate retrieval, a cross-encoder reranker (e.g. Cohere or BGE Reranker) rescores the top-50 candidates down to top-10.
+Do not introduce BM25 + custom cross-encoder + custom entity-resolution + custom contradiction logic simultaneously with the selected provider unless a measured gap justifies it.
 
-### 2. Entity Resolution & Profile Synthesis
-As memories are ingested, an entity extraction node in LangGraph identifies named entities (`Person`, `Project`, `Company`, `Decision`). Mentions like *"Mom"*, *"Linda"*, and *"Linda (Home)"* are resolved to a single canonical `Person` record in the database using alias matching and social proximity heuristics.
+## 4. Lifecycle & Contradictions
 
-### 3. Contradiction Handling & Belief Updates
-When newly ingested information conflicts with an existing memory (e.g., *"My new phone number is 555-0199"* vs previous *"Phone number is 555-0123"*):
-- The contradiction is detected during the memory consolidation phase.
-- The older record's `valid_to` and `superseded_at` timestamps are set to the current timestamp.
-- The memory state transitions from `ACTIVE` to `SUPERSEDED` (`docs/memory/lifecycle.md`).
-- Both records remain preserved in PostgreSQL for historical auditing and temporal queries.
+Canonical lifecycle state and provenance live in Debo-owned records; provider indices may be rebuilt.
 
-### 4. Source Grounding & Attribution
-**Zero hallucination tolerance**. Every memory item retains foreign keys to its origin `Source`, `Document`, `Page`, and paragraph `Chunk`:
-- Answers generated by Debo cite the exact chunk ID and byte range.
-- The user can click any citation in the UI to open the original PDF/audio recording at the exact highlighted sentence.
+Contradictory observations should be retained with temporal validity and supersession metadata rather than silently overwriting historical state.
 
----
+## 5. Source Grounding
 
-## 3. Memory Subsystem Documents
+A factual answer is grounded only when the cited evidence resolves to a canonical source record.
 
-- **[Provider Abstraction Contract](file:///home/kunalkashyap8024/sop/debo/docs/memory/provider-abstraction.md)** — Standard TypeScript interface for zero vendor lock-in.
-- **[Source Grounding Rules](file:///home/kunalkashyap8024/sop/debo/docs/memory/source-grounding.md)** — Invariants for citation accuracy, evidence verification, and uncertainty marking.
-- **[Memory Lifecycle Specification](file:///home/kunalkashyap8024/sop/debo/docs/memory/lifecycle.md)** — State machine from capture to processing, active, superseded, archived, and deleted.
-- **[Memory Evaluation Plan](file:///home/kunalkashyap8024/sop/debo/docs/memory/evaluation-plan.md)** — Rigorous verification matrix and benchmark suite.
+Provenance is source-specific:
+
+- **PDF/document:** page, block/paragraph, bounding box when available.
+- **Audio:** start/end timestamp and transcript segment.
+- **Text/note:** character range or stable segment identifier.
+- **Email:** message identifier plus stable body segment/attachment reference.
+- **Web content:** canonical URL plus extracted segment and retrieval timestamp.
+
+Do not promise byte-range precision unless the ingestion pipeline guarantees it.
+
+## 6. Provider Abstraction
+
+All provider access flows through `MemoryProvider`. The adapter may expose capabilities, limits, and degraded-mode signals so application code can make explicit decisions.
+
+The abstraction is about portability; it does not pretend all providers implement identical semantics.
+
+## 7. Evaluation
+
+Accuracy, latency, contradiction handling, tenant isolation, and citation correctness become empirical only after running the Debo benchmark suites in `docs/evals/`.
+
+See [provider-abstraction.md](provider-abstraction.md), [source-grounding.md](source-grounding.md), [lifecycle.md](lifecycle.md), and [evaluation-plan.md](evaluation-plan.md).
