@@ -340,7 +340,7 @@ tasks:
     description: "Implement @debo/connectors wrapping Composio for actions and Nango for durable sync with encrypted OAuth vaults."
     phase: 7
     priority: "P2"
-    status: "pending"
+    status: "verified"
     owner: "connector-team"
     agent: "composio-agent"
     depends_on: ["DEBO-0002", "DEBO-0003", "DEBO-0004"]

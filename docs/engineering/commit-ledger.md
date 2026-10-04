@@ -94,4 +94,21 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
 
+---
+
+## `DEBO-0011` — External Connectors Layer (Composio & Nango)
+
+- **Packages**: `@debo/connectors`.
+- **Tests**: `bun test` passed 47 tests across 11 files; `turbo run typecheck` passed 11 tasks. Verified:
+  - AES-256-GCM authenticated encryption/decryption for credentials at rest with tampering detection.
+  - Composio action connector client adapter with tool discovery and structured parameter dispatch.
+  - Non-LLM Authority enforcement on Risk Tiers: Tier 0 low-risk automatic execution; Tier 2/3 high-risk actions (mutations, destructive actions) strictly block with `ForbiddenError` without human `approvalId`.
+  - Multi-tenant connection lifecycle: connect, disconnect/revoke, and status monitoring.
+  - Cross-tenant connection isolation: unauthorized workspace connection usage strictly blocked with `TenantMismatchError`.
+  - Nango sync connector client adapter with cursor-based synchronization.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
+
+
 

@@ -60,6 +60,18 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/connectors": {
+      "name": "@debo/connectors",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/permissions": "workspace:*",
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/db": {
       "name": "@debo/db",
       "version": "0.1.0",
@@ -171,6 +183,8 @@
     "@debo/citations": ["@debo/citations@workspace:packages/citations"],
 
     "@debo/config": ["@debo/config@workspace:packages/config"],
+
+    "@debo/connectors": ["@debo/connectors@workspace:packages/connectors"],
 
     "@debo/db": ["@debo/db@workspace:packages/db"],
 
