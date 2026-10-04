@@ -12,7 +12,7 @@ Debo needs durable execution for ingestion, document-processing dispatch, transc
 
 - **Observed current release:** Trigger.dev **v4.6.4**, from the official changelog checked on 2026-10-04.
 - **v4 status:** Trigger.dev v4 reached general availability in August 2025.
-- **v3 status:** Trigger.dev v3 support was removed in v4.5.4+, so Debo does not target v3.
+- **v3 status:** Trigger.dev v3 is no longer supported in v4.5.4+, so Debo does not target v3.
 - **Pricing observed:** Free $0/month with $5 monthly credits; Hobby $10/month with $10 monthly credits; Pro $50/month with $50 monthly credits. Treat pricing as vendor-reported and re-check before purchase decisions.
 - **Self-hosting:** Official self-hosted Docker releases exist; exact infrastructure requirements must be verified during Phase 1 before committing to an operating model.
 
