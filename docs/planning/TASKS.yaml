@@ -72,7 +72,7 @@ tasks:
     description: "Implement 24 normalized PostgreSQL tables in Drizzle ORM with strict workspace_id tenancy and migrations."
     phase: 2
     priority: "P0"
-    status: "pending"
+    status: "verified"
     owner: "database-team"
     agent: "database-agent"
     depends_on: ["DEBO-0001", "DEBO-0002"]

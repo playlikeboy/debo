@@ -22,3 +22,14 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **Tests**: Ingress validation `cloudflared tunnel ingress validate` returned `OK`; systemd service restarted and verified active across 4 edge connections.
 - **Review**: Approved by Root Orchestrator.
 - **Status**: `verified`
+
+---
+
+## `DEBO-0001` & `DEBO-0002` — Monorepo Tooling & Domain Primitives
+
+- **Implementation Commit**: [`c5c52199b4aa2388031e847c2fa83984360e5a6a`](https://github.com/SH20RAJ/debo/commit/c5c52199b4aa2388031e847c2fa83984360e5a6a)
+- **Packages**: `debo` (root), `@debo/types`, `@debo/config`.
+- **Tests**: `bun test` passed 5 unit tests across 2 files; `turbo run typecheck` passed 3 tasks; Prettier formatting checks passed.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
