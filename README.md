@@ -1,144 +1,182 @@
-# Debo — Your Private Memory OS
+# Debo — Private AI Memory & Context Operating System
 
-<p align="center">
-  <img src="./apps/landing-page/public/debo.png" alt="Debo" width="200" />
-</p>
+[![Phase](https://img.shields.io/badge/Phase_0-Clean--Room_Documentation-blue.svg)](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md)
+[![Architecture Status](https://img.shields.io/badge/Architecture-Design_Baseline-success.svg)](file:///home/kunalkashyap8024/sop/debo/docs/architecture/system-overview.md)
+[![Implementation Status](https://img.shields.io/badge/Implementation-Not_Started-orange.svg)](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](file:///home/kunalkashyap8024/sop/debo/LICENSE)
 
-> Capture anything. Ask your past. Trust every answer.
+> **"Capture anything. Ask your past. Trust every answer."**
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
-[![LangGraph](https://img.shields.io/badge/AI-LangGraph-1C3C3C)](https://docs.langchain.com/oss/javascript/langgraph)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+---
 
-## What is Debo?
+## 1. What is Debo?
 
-Debo is a **private AI memory operating system**. It turns your writing, voice notes, files, and connected apps into a source-backed memory graph. When you ask Debo a question, every answer links back to the exact source — a voice note, journal entry, email, or document.
+Debo is an open-source, private personal memory and context operating system. It ingests voice memos, daily journals, research documents, PDFs, calendar events, communications, and connected tools into a structured, temporal memory graph. 
 
-### Core Features
+Whenever you query Debo, it retrieves relevant facts, synthesizes answers through a deterministic agent graph, and **provides strict, source-backed citations linking directly back to the original immutable source data**.
 
-- **Source-Backed Answers** — Every answer Debo gives has citations you can verify
-- **Multimodal Capture** — Process text, voice, files (PDF/images), and connected apps
-- **Voice Capture** — Real-time voice interface powered by LiveKit
-- **Character Graph** — People mentioned in your memories become editable profiles
-- **Connectors** — Import from Gmail, Calendar, Notion, GitHub, and Slack
-- **IoT & Smart Home** — Control and monitor smart devices (lights, switches, locks, climate) via dashboard widget or natural language. Supports Live Home Assistant API & Simulated Demo mode.
-- **Debo Mail** — Internal Debo-to-Debo messaging with memory integration
-- **Private by Design** — Your data stays yours. No training on your memories.
+Debo also serves as an external context layer for external AI agents (Claude Desktop, Cursor, local LLMs) via the standardized **Model Context Protocol (MCP)**.
 
-## Tech Stack
+---
 
-| Layer | Technology |
-|-------|-----------|
-| **Landing** | `apps/landing-page` — Next.js 16 (App Router), React 19 |
-| **Product App** | `apps/website` — Next.js 16 full-stack UI + API routes |
-| **AI Orchestration** | LangChain + LangGraph |
-| **AI Providers** | NVIDIA NIM primary, OpenAI-compatible APIs |
-| **IoT / Smart Home** | Home Assistant REST API or DB-persisted Simulated State |
-| **Database** | Neon (PostgreSQL) via Drizzle ORM |
-| **Vector DB** | Qdrant |
-| **Media Storage** | Cloudflare R2 |
-| **Auth** | Stack Auth |
-| **Voice** | LiveKit |
-| **Deployment** | `apps/landing-page` on Cloudflare Workers; `apps/website` on Vercel |
+## 2. Why Debo Exists
 
-## Architecture
+Most current AI assistants suffer from three fundamental architectural flaws:
+1. **Context amnesia**: Every conversation resets to zero, or relies on noisy, ungrounded chat history buffers.
+2. **Hallucination without verification**: Models make plausible factual assertions without citing exact sentences or timestamps from your actual life and documents.
+3. **Vendor lock-in & privacy loss**: Your private thoughts, financial records, and correspondence are siloed in proprietary closed-cloud platforms.
 
+Debo solves these challenges by combining:
+- **Immutable raw storage** (Cloudflare R2)
+- **High-fidelity document understanding** (Docling OCR & layout parsing)
+- **Temporal & semantic memory graphs** (Supermemory / Provider Abstraction)
+- **Auditable agent reasoning** (LangGraph JS)
+- **Universal agent accessibility** (Model Context Protocol)
+
+---
+
+## 3. Architecture Topology
+
+```text
+                                  DEBO
+
+                           ┌───────────────┐
+                           │    Web App    │
+                           │ Next.js 15 UI │
+                           └───────┬───────┘
+                                   │
+                             AG-UI Protocol
+                                   │
+                                   ↓
+                         LangGraph Agent Runtime
+                                   │
+                      ┌────────────┼─────────────┐
+                      ↓            ↓             ↓
+                 Supermemory    Composio      Debo Tools
+                    Memory       Actions     (Permissions,
+                      │            │          Citations)
+                      │            └── External APIs
+                      ↓
+               Debo Source-of-Truth
+             ┌─────────────────────┐
+             │ Neon DB (Metadata)  │
+             │ Cloudflare R2 (Raw) │
+             └─────────────────────┘
+
+                          Trigger.dev
+                       Durable Workflows
+                               │
+                        ┌──────┴──────┐
+                        ↓             ↓
+                     TS Worker    Python Worker
+                                      │
+                                   Docling
+
+                       External AI Clients
+                               │
+                               ↓
+                        Debo MCP Server
+                        (mcp.debo.life)
+                               │
+                      ┌────────┼─────────┐
+                      ↓        ↓         ↓
+                    Tools   Resources  Prompts
+                               │
+                            MCP Apps
 ```
-┌───────────────────────┐       ┌─────────────────────────────┐
-│ apps/landing-page     │       │ apps/website                │
-│ Landing               │       │ Full-stack Next.js product  │
-│ debo.life             │       │ app.debo.life               │
-└───────────────────────┘       │ UI + API routes + AI        │
-                         │  LangChain/LangGraph        │
-                         │  Node runtime               │
-                         └──────────────┬──────────────┘
-                                        │
-                         ┌──────────────┼──────────────┐
-                         │              │              │
-                   ┌─────▼────┐  ┌─────▼────┐   ┌─────▼────┐
-                   │ Neon PG  │  │ Qdrant   │   │ R2       │
-                   │ Drizzle  │  │ Vector   │   │ Media    │
-                   └──────────┘  └──────────┘   └──────────┘
-```
 
-**Key rule:** `apps/website` is the full product and must run on Vercel's Node runtime. Do not deploy it as a Cloudflare Worker or to Netlify; LangChain/LangGraph and the product API surface live inside its Next.js app and route handlers.
+---
 
-## Monorepo Structure
+## 4. Planned Monorepo Structure
 
-```bash
+Debo uses Bun Workspaces and Turborepo with minimal network services:
+
+```text
 debo/
 ├── apps/
-│   ├── landing-page/     # Public landing page (debo.life) — Cloudflare Worker
-│   └── website/          # Full-stack product (app.debo.life) — Vercel
-└── packages/
-    ├── db/               # Drizzle schema, Neon DB client, migrations
-    ├── ai/               # AI SDK wrappers, embeddings, extraction
-    ├── memory/           # Source-backed retrieval, citations, chunking
-    ├── storage/          # Cloudflare R2 upload/download helpers
-    ├── config/           # Environment validation, constants
-    ├── types/            # Shared TypeScript types and Zod schemas
-    ├── shared/           # Shared validators and error classes
-    └── ui/               # Shared React components (shadcn/ui)
+│   ├── web/               # Next.js product dashboard & user interface
+│   ├── mcp/               # Standalone MCP server (mcp.debo.life)
+│   ├── worker/            # TypeScript background job & ingestion processor
+│   ├── document-worker/   # Python worker for Docling PDF/OCR processing
+│   └── docs/              # Public developer documentation (docs.debo.life)
+│
+├── packages/
+│   ├── agent/             # LangGraph state graphs, nodes, and tool routing
+│   ├── ai/                # LLM client abstractions, embeddings, and token utilities
+│   ├── memory/            # MemoryProvider interface & vector/graph adapters
+│   ├── connectors/        # Composio actions and Nango sync adapters
+│   ├── workflows/         # Trigger.dev durable task definitions
+│   ├── mcp/               # MCP tools, resources, and prompt definitions
+│   ├── permissions/       # Deterministic RBAC/ABAC and human-in-the-loop policies
+│   ├── citations/         # Grounding validator and citation resolution engine
+│   ├── db/                # Neon PostgreSQL connection and Drizzle schema
+│   ├── storage/           # Cloudflare R2 S3-compatible client
+│   ├── auth/              # Stack Auth / Session verification utilities
+│   ├── types/             # Shared TypeScript domain types and Zod schemas
+│   ├── ui/                # Calm editorial component library (Radix + Tailwind)
+│   └── config/            # Shared environment, linting, and build configs
+│
+├── docs/                  # Full system architecture, ADRs, and specs
+├── skills/                # Portable Agent Skills (SKILL.md)
+└── infrastructure/        # Cloudflare, Docker, and deployment configurations
 ```
 
-## Getting Started
+---
 
-```bash
-# Install dependencies
-bun install
+## 5. Technology Strategy
 
-# Copy environment template
-cp .env.example .env.local
+Debo relies on rigorous technical evaluation rather than popularity:
 
-# Run dashboard
-bun run dev
+| Domain | Technology | Rationale |
+|---|---|---|
+| **Language** | TypeScript (Primary) | Full end-to-end type safety across UI, API, Agents, DB, and MCP. |
+| **Parsing Worker** | Python 3.11 + Docling | State-of-the-art document layout, OCR, and table extraction isolated from web tier. |
+| **Agent Runtime** | LangGraph JS | Deterministic graph orchestration, state checkpointing, and human approvals. |
+| **Memory Engine** | Supermemory (with Provider Abstraction) | Hybrid semantic/temporal memory with zero vendor lock-in. |
+| **Action Connectors** | Composio | Managed OAuth and execution for 1000+ external SaaS tools. |
+| **Durable Workflows**| Trigger.dev v3 | Code-first serverless durable tasks with real-time streaming and local dev support. |
+| **Database** | Neon PostgreSQL | Serverless PostgreSQL with instant branching and Drizzle ORM. |
+| **Object Store** | Cloudflare R2 | Zero-egress fee S3-compatible storage for raw source files. |
+| **External Agent API**| Model Context Protocol (MCP) | Universal protocol supported by Claude, Cursor, and emerging agents. |
 
-# Run landing page
-bun run dev:landing
+---
 
-# Run product website explicitly
-bun run dev:website
-```
+## 6. Documentation Navigator
 
-Then open [http://localhost:3000](http://localhost:3000)
+All architectural decisions, technical specifications, and research evaluations are documented under [`docs/`](file:///home/kunalkashyap8024/sop/debo/docs/README.md):
 
-## Deployment
+- **[System Architecture](file:///home/kunalkashyap8024/sop/debo/docs/architecture/system-overview.md)** — Core components, communication patterns, and boundaries.
+- **[Architecture Decision Records (ADRs)](file:///home/kunalkashyap8024/sop/debo/docs/adr/README.md)** — Historical context and justifications for all 15 foundational decisions.
+- **[Technology Research & Scorecards](file:///home/kunalkashyap8024/sop/debo/docs/research/scorecard.md)** — Empirical 17-vector evaluations of candidate technologies.
+- **[Memory Engine & Evals](file:///home/kunalkashyap8024/sop/debo/docs/memory/README.md)** — Memory lifecycle, source-grounding rules, and retrieval benchmarks.
+- **[MCP Server Specification](file:///home/kunalkashyap8024/sop/debo/docs/mcp/README.md)** — Tool taxonomy, SSE transports, and injection defenses.
+- **[Data Model & Tenancy](file:///home/kunalkashyap8024/sop/debo/docs/data-model/README.md)** — Complete domain entities, lifecycle states, and tenant scoping.
+- **[Security & Threat Model](file:///home/kunalkashyap8024/sop/debo/SECURITY.md)** — Zero-trust access invariants, non-LLM permission authority, and secret hygiene.
+- **[Product Roadmap & Backlog](file:///home/kunalkashyap8024/sop/debo/docs/planning/ROADMAP.md)** — 16-phase implementation plan and detailed DEBO tickets.
 
-```bash
-# Required for apps/website Vercel deploys
-export VERCEL_TOKEN="your-vercel-token"        # https://vercel.com/account/settings/tokens
-# Optional explicit project link (otherwise apps/website/.vercel/project.json is used)
-export VERCEL_ORG_ID="team_xxx"
-export VERCEL_PROJECT_ID="prj_xxx"
+---
 
-# Deploy landing page to Cloudflare and website to Vercel
-bun run deploy
-```
+## 7. Current Project Status
 
-First-time setup (per machine):
+Debo is currently executing **Phase 0 (Clean-Room Documentation & Architecture Bootstrap)**. 
+- **Legacy code**: Successfully deleted and archived.
+- **Product implementation**: Not yet started.
+- **Verification**: All specifications, schemas, ADRs, and threat models must be fully aligned and approved before functional code is merged in Phase 1.
 
-```bash
-cd apps/website
-bun run vercel:link        # picks an existing project or creates a new one
-bun run vercel:env:pull    # writes .env.local from project env
-```
+Track live progress in [PROJECT_STATUS.md](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md).
 
-## Data Flow
+---
 
-1. **Capture** → Source created (journal, voice, file, connector import)
-2. **Process** → Chunked, parsed, entities extracted, summarized
-3. **Store** → Chunks in Neon + embeddings in Qdrant
-4. **Ask** → Semantic + structured retrieval from both stores
-5. **Answer** → Grounded response with source citations
-6. **Smart Home Commands** → Decides IoT intents, invokes control tools, updates HA state
+## 8. Contributing & Governance
 
-## Design Philosophy: Editorial Calm
+Contributions to Debo follow our strict architectural review process. All PRs must align with established ADRs and pass documentation validation:
+- Review [AGENTS.md](file:///home/kunalkashyap8024/sop/debo/AGENTS.md) for coding agent guidelines.
+- Review [CONTRIBUTING.md](file:///home/kunalkashyap8024/sop/debo/CONTRIBUTING.md) for branch and PR workflows.
+- Review [CODE_OF_CONDUCT.md](file:///home/kunalkashyap8024/sop/debo/CODE_OF_CONDUCT.md) for community standards.
 
-- **Typography-First** — Large, readable headings; warm aesthetics
-- **Warm Canvas** — Peach/cream (`#FAF8F5`) and warm ink (`#26251e`), with vermilion (`#E04006`) accent details
-- **Minimal UI** — Large rounded card corners (`rounded-[1.75rem]`), fine borders, and smooth micro-animations
-- **Source Trust** — Every answer shows where it came from
+---
 
-## License
+## 9. License
 
-MIT © [SH20RAJ](https://github.com/SH20RAJ)
+Debo is licensed under the [MIT License](file:///home/kunalkashyap8024/sop/debo/LICENSE).
+Copyright (c) 2026 Debo Contributors.

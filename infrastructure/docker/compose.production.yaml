@@ -1,0 +1,78 @@
+# Production VPS Docker Compose Blueprint
+# Runs background workers and MCP gateway behind Cloudflare Tunnel with strict resource limits
+version: '3.8'
+
+services:
+  document-worker:
+    image: debo/document-worker:latest
+    container_name: debo-document-worker
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DOCLING_NUM_THREADS: "4"
+      DEBO_INTERNAL_AUTH_SECRET: ${DEBO_INTERNAL_AUTH_SECRET}
+    deploy:
+      resources:
+        limits:
+          cpus: '3.0'
+          memory: 4096M
+        reservations:
+          cpus: '1.0'
+          memory: 1024M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - debo-internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  mcp-server:
+    image: debo/mcp:latest
+    container_name: debo-mcp-server
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      DATABASE_URL: ${DATABASE_URL}
+      SUPERMEMORY_API_KEY: ${SUPERMEMORY_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - debo-internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: debo-cloudflared-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - debo-internal
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "2"
+
+networks:
+  debo-internal:
+    driver: bridge

@@ -1,0 +1,12 @@
+# Global Codeowners for Debo
+* @SH20RAJ
+
+# Architecture & Specifications
+/docs/ @SH20RAJ
+/AGENTS.md @SH20RAJ
+/SECURITY.md @SH20RAJ
+/PROJECT_STATUS.md @SH20RAJ
+
+# Infrastructure
+/infrastructure/ @SH20RAJ
+/.github/ @SH20RAJ

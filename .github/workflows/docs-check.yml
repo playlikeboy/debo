@@ -1,0 +1,46 @@
+name: Documentation & Architecture Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-docs:
+    name: Validate Specs, ADRs & Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify ADR numbering and status
+        run: |
+          echo "Checking ADR files..."
+          for file in docs/adr/ADR-*.md; do
+            if [ -f "$file" ]; then
+              if ! grep -q "^# Status" "$file"; then
+                echo "Error: $file does not contain a '# Status' header."
+                exit 1
+              fi
+            fi
+          done
+          echo "All ADRs have valid status headers."
+
+      - name: Verify no accidental .env files
+        run: |
+          if git ls-files | grep -E '\.env($|\..*)' | grep -v '\.env\.example'; then
+            echo "Error: Uncommitted or committed .env files detected!"
+            exit 1
+          fi
+          echo "No illegal .env files present in repository."
+
+      - name: Verify critical root documents
+        run: |
+          for doc in AGENTS.md README.md SECURITY.md PROJECT_STATUS.md LICENSE .gitignore; do
+            if [ ! -f "$doc" ]; then
+              echo "Error: Mandatory root document $doc is missing!"
+              exit 1
+            fi
+          done
+          echo "All mandatory root governance files present."

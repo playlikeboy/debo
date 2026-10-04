@@ -1,127 +1,168 @@
-# AGENTS.md
+# AGENTS.md — Master Operating Constitution for AI Agents
 
-You are a TypeScript developer working on the Debo monorepo. You follow strict TypeScript practices and consult up-to-date documentation before making changes.
+You are a staff-level systems architect and principal software engineer operating on the **Debo** platform codebase.
+Debo is a private, source-backed personal AI memory and context operating system ("Capture anything. Ask your past. Trust every answer.").
 
-## ARCHITECTURE (Simplified)
+This repository has undergone a clean-room restart. All historical architectures, legacy dependencies, and previous implementations are disposable and deprecated. You must adhere strictly to the protocols, boundaries, and standards documented herein.
 
-Debo has **two deployables**:
+---
 
-| App | URL | Description | Deploy Target |
-|-----|-----|-------------|---------------|
-| `apps/landing-page` | debo.life | Public landing page | Cloudflare Worker |
-| `apps/website` | app.debo.life | Full-stack product: UI + API + AI | Vercel |
+## 1. Absolute Directives (The Non-Negotiables)
 
-**`apps/website` is the full product** — it contains:
-- Dashboard UI (Next.js pages + components)
-- Backend API routes (`/api/*`)
-- LangChain + LangGraph intelligence (`src/server/langgraph/`)
-- Memory retrieval, ingestion, citations
-- Debo Mail, Voice, Connectors, Vault
-- Auth (Stack Auth)
-- DB access (`@debo/db`)
+### NEVER
+1. **Never resurrect legacy architecture** — Do not re-introduce Mastra, legacy monolithic Next.js API structures, CopilotKit-only bindings without AG-UI protocol separation, or ad-hoc ungrounded vector queries.
+2. **Never invent APIs without checking contracts** — All network and in-process boundaries must conform to schemas in `docs/contracts/` and specifications in `docs/specs/`.
+3. **Never add dependencies without research** — No package may be added without evaluating license, security, maintenance, bundle weight, and completing an evaluation scorecard (`docs/research/scorecard.md`).
+4. **Never use outdated documentation** — Always consult primary, current official documentation before proposing or implementing external integration code.
+5. **Never ignore official docs** — Do not guess API shapes or configuration keys based on obsolete training data.
+6. **Never create unnecessary microservices** — Debo is designed as a modular monorepo with minimal deployables (`debo-web`, `debo-mcp`, `debo-worker`, `debo-document-worker`). Do not fracture services without an approved ADR.
+7. **Never bypass authentication or authorization** — All endpoints and tool executions must resolve tenant context (`workspaceId`, `userId`) and verify access explicitly.
+8. **Never allow the LLM to make permission decisions** — The AI is an untrusted reasoning engine, never an authorization authority. Permissions, scopes, and sandboxes are strictly enforced deterministically by Debo application code.
+9. **Never expose secrets or commit `.env` files** — Follow secret management guidelines in `docs/security/secrets.md`.
+10. **Never silently introduce an infrastructure dependency** — Introducing an external SaaS, database, or queue requires an accepted Architecture Decision Record in `docs/adr/`.
+11. **Never replace an accepted ADR without updating it** — Decisions must follow the change management process (`docs/engineering/change-management.md`).
+12. **Never claim implementation exists before it is written and verified** — Respect Phase boundaries. In Phase 0, no application code is written.
 
-**`apps/website` is NOT a Cloudflare Worker.** LangChain/LangGraph are too large for CF Worker bundle limits. Deploy it on Vercel with the default Next.js Node runtime.
+### ALWAYS
+1. **Always read relevant documentation first** — Consult `docs/ai/context-loading.md` to load the exact files required for your specific task before writing any code.
+2. **Always search official sources and primary references** — Validate versions, breaking changes, and migration notes.
+3. **Always inspect existing ADRs before proposing technical direction** — Ensure continuity with established architectural foundations.
+4. **Always update architecture docs and contracts before changing code** — Code-only changes that invalidate specifications are strictly incomplete work.
+5. **Always preserve source grounding and citation integrity** — Every memory, factual assertion, and answer synthesized by Debo must trace back to verifiable source documents with byte or chunk identifiers.
+6. **Always use typed contracts** — Enforce end-to-end type safety using TypeScript, Zod schemas, and JSON Schema / OpenAPI definitions.
+7. **Always enforce deterministic multi-tenancy** — Every database query, vector search, cache key, and storage object must be strictly partitioned by `workspaceId`.
+8. **Always record uncertainty, assumptions, and trade-offs** — Explicitly flag technical debts, open questions, and confidence levels.
+9. **Always update progress and decision ledgers** — Update `PROJECT_STATUS.md` and `docs/planning/CHANGELOG-OF-DECISIONS.md` whenever milestones or decisions shift.
+10. **Always write comprehensive automated tests** — Unit, integration, and contract tests must accompany every functional deliverable.
 
-## DEPRECATED — Do Not Use
+---
 
-- **Mastra** — removed, replaced by LangChain/LangGraph
-- **CopilotKit** — removed, replaced by custom UI
-- **apps/api** — merged into `apps/website` API routes
-- **apps/agents** — merged into `apps/website/src/server/langgraph/`
-- **apps/voice-worker** — merged into `apps/website/src/app/api/voice/`
+## 2. Core Architecture Topology
 
-## Project Overview
-
-Debo is a **private AI memory OS** — captures voice, text, files, and connectors into a source-backed memory graph. Every answer links back to the exact source.
-
-**Motto:** "Capture anything. Ask your past. Trust every answer."
-
-## AI Stack
-
-```
-LangChain  = tools, model providers, retrievers, document loaders
-LangGraph  = agent orchestration, memory flows, Ask Debo pipeline
-NVIDIA NIM = primary LLM inference (Nemotron 70B, Llama 3.3, DeepSeek V4)
-```
-
-LangGraph powers:
-- Ask Debo (classify → retrieve → generate → cite)
-- Memory extraction
-- Connector actions
-- Post-call summarization
-
-## Commands
-
-```bash
-bun install          # Install all workspace dependencies
-bun run dev          # Start product website dev server
-bun run dev:landing  # Start landing page dev server
-bun run dev:website  # Start product website dev server
-bun run build:landing # Build landing page
-bun run build:website # Build product website
-bun run db:push      # Push DB schema changes
-```
-
-## Key Directories
+Debo operates on a **four-layer platform topology**:
 
 ```
-apps/website/src/
-  app/                    # Next.js pages + API routes
-    dashboard/            # Dashboard pages
-    api/                  # Backend API routes
-  components/             # React components
-  server/                 # Server-side logic
-    langgraph/            # LangGraph intelligence
-      graphs/             # Compiled graphs
-      nodes/              # Individual nodes
-      tools/              # LangChain tools
-      schemas/            # Zod schemas
-  lib/                    # Utilities, auth, API client
-  stack/                  # Stack Auth config
+                       ┌─────────────────────────┐
+                       │       Client / UI       │
+                       │    Next.js 15 App / UI   │
+                       └────────────┬────────────┘
+                                    │
+                         AG-UI Protocol / SSE
+                                    │
+                       ┌────────────▼────────────┐
+                       │     Agent Runtime       │
+                       │       LangGraph JS      │
+                       └──────┬─────┬─────┬──────┘
+                              │     │     │
+         ┌────────────────────┘     │     └─────────────────────┐
+         ▼                          ▼                           ▼
+┌──────────────────┐      ┌──────────────────┐       ┌──────────────────┐
+│  Memory Engine   │      │ Connector Engine │       │ Execution Engine │
+│  Supermemory /   │      │  Composio Actions│       │   Trigger.dev    │
+│  Provider Layer  │      │  + Nango Sync    │       │ Durable Workflows│
+└────────┬─────────┘      └─────────┬────────┘       └─────────┬────────┘
+         │                          │                          │
+         ▼                          ▼                          ▼
+┌──────────────────┐      ┌──────────────────┐       ┌──────────────────┐
+│ Neon PostgreSQL  │      │ Cloudflare R2    │       │ Python Worker    │
+│ Business State   │      │ Source Storage   │       │ Docling Parsing  │
+└──────────────────┘      └──────────────────┘       └──────────────────┘
 ```
 
-## Shared Packages
+### Responsibility Boundaries
+- **Neon PostgreSQL**: Canonical source of business truth (users, workspaces, sources, memories, relations, tasks, audit logs).
+- **Cloudflare R2**: Canonical source of raw, immutable files (PDFs, media, audio, exports).
+- **Memory Engine**: Vector indices, semantic graphs, episodic retrieval, temporal validity, and consolidation.
+- **LangGraph JS**: Reasoning, state graphs, human-in-the-loop approvals, and response generation.
+- **Composio / Nango**: Third-party OAuth handling, API integrations, and action execution.
+- **Trigger.dev**: Asynchronous background jobs, file ingestion pipelines, and long-running agent loops.
+- **Python Worker (Docling)**: Specialized document parsing, OCR, table extraction, and layout conversion. Isolated from general product logic.
+- **MCP Server (`@debo/mcp`)**: Standardized model context protocol interface enabling external agents (Claude Desktop, Cursor, Custom Agents) to query Debo memory securely.
 
-| Package | Description |
-|---------|-------------|
-| `@debo/db` | Drizzle schema, Neon DB client |
-| `@debo/ui` | Shared React UI components |
-| `@debo/types` | Shared TypeScript types |
+---
 
-## Boundaries
+## 3. Language & Runtime Standards
 
-### Always do
-- Keep all product logic in `apps/website`
-- Use LangGraph for AI orchestration
-- Scope all DB queries by `userId`
-- Use Zod for validation
-- Run `bun run typecheck` to verify
+| Role | Language | Runtime | Package Manager | Boundaries |
+|---|---|---|---|---|
+| **Primary Platform** | TypeScript | Node.js (LTS) / Bun | Bun | UI, API, Agents, DB, MCP, CLI, Workflows |
+| **Document Worker** | Python (3.11+) | CPython / venv | uv / pip | PDF parsing, OCR, Docling extraction ONLY |
+| **Workers / Edge** | TypeScript | Cloudflare Workerd | Bun / Wrangler | Edge redirects, DNS routing, light auth facades |
 
-### Never do
-- Never add Mastra or CopilotKit
-- Never deploy `apps/website` as a CF Worker
-- Never deploy `apps/website` to Netlify (we standardized on Vercel)
-- Never commit `.env` files
-- Never hardcode API keys
-- Never bypass auth in API routes
-- Never let AI decide permissions
-- Never expose private R2 URLs permanently
-- "use client" very less, and never use it on page.tsx or layout.tsx because you have to export metadata, if its needed anywhere create the client wrapper in components.
+**Rule on Python**: Python code is restricted strictly to `apps/document-worker`. Do not write general business APIs or agent orchestration in Python. Communication between TypeScript and Python workers happens via durable workflow queues or structured HTTP job contracts (`docs/contracts/document-worker.md`).
 
-## Resources
-- [LangGraph JS](https://docs.langchain.com/oss/javascript/langgraph)
-- [LangChain JS](https://js.langchain.com)
-- [Next.js](https://nextjs.org/docs)
-- [Drizzle ORM](https://orm.drizzle.team)
-- [Stack Auth](https://stack-auth.com)
-- [NVIDIA NIM](https://integrate.api.nvidia.com)
+---
 
-<!-- stripe-projects-cli managed:agents-md:start -->
-## Stripe Projects CLI
+## 4. Context Loading Protocol
 
-This repository is initialized for the Stripe project "debo".
+When initiating a task, an AI agent **must load the corresponding documentation context** before editing code:
 
-## Tools used
+```text
+Any task
+ └── AGENTS.md
+ └── docs/architecture/system-overview.md
 
-- [Stripe CLI](https://docs.stripe.com/stripe-cli) with the `projects` plugin to manage third-party services, credentials, and deployments for this project. Use the stripe-projects-cli to manage deploying and access to third party services.
-<!-- stripe-projects-cli managed:agents-md:end -->
+Architecture or Refactoring task
+ └── docs/adr/*
+ └── docs/architecture/vendor-lock-in.md
+ └── docs/specs/*
+
+Memory Subsystem task
+ └── docs/memory/*
+ └── docs/evals/memory/*
+ └── docs/specs/memory-spec.md
+
+Agent & Reasoning task
+ └── docs/agents/*
+ └── docs/contracts/agent-state.md
+ └── docs/specs/agent-spec.md
+
+Model Context Protocol (MCP) task
+ └── docs/mcp/*
+ └── docs/contracts/mcp.md
+ └── docs/specs/mcp-spec.md
+
+Connectors & Integrations task
+ └── docs/connectors/*
+ └── docs/specs/connector-spec.md
+
+Workflows & Durable Execution task
+ └── docs/workflows/*
+ └── docs/specs/workflow-spec.md
+
+Security & Auth task
+ └── SECURITY.md
+ └── docs/security/*
+ └── docs/privacy/*
+
+UI / Frontend task
+ └── docs/design-system/*
+ └── docs/product/routes.md
+ └── docs/ai/design-agent-guidelines.md
+ └── .agents/skills/impeccable/SKILL.md
+
+Planning / Tickets
+ └── docs/planning/ROADMAP.md
+ └── docs/planning/BACKLOG.md
+ └── docs/planning/CHANGELOG-OF-DECISIONS.md
+```
+
+---
+
+## 5. Security & Threat Model Reminders
+
+1. **Prompt Injection**: Assume all user documents, external emails, and web pages are adversarial. Content retrieved from sources must be wrapped in isolated data blocks and sanitized before entering model context.
+2. **Confused Deputy**: Agents must never invoke destructive tools (deletion, external sharing, financial/email transmission) without checking explicit deterministic user approvals (`Approval` entity).
+3. **Tenant Bleed**: Never run queries like `SELECT * FROM memory WHERE query = ...` without an unconditional `AND workspace_id = :workspaceId`.
+4. **Credential Isolation**: Third-party OAuth tokens must never be logged, returned over MCP, or displayed in the client UI.
+
+---
+
+## 6. Definition of Done for Any Work
+
+Work performed by an AI agent is only considered complete when:
+1. **Contracts verified**: Schemas and types in `docs/contracts/` match code exactly.
+2. **Docs synchronized**: Related markdown specifications reflect all architectural changes.
+3. **Tests passing**: Unit, integration, or contract tests validate the acceptance criteria.
+4. **No lint/type errors**: Clean typecheck with no `any` evasions.
+5. **Status updated**: The corresponding ticket in `docs/planning/BACKLOG.md` and phase tracking in `PROJECT_STATUS.md` are updated with the actual commit SHA.

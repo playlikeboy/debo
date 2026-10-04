@@ -49,6 +49,18 @@
       "skillPath": "SKILL.md",
       "computedHash": "79a1e606ecf33eed33c1f3adc1cc266de391e19aa9237ca37e4f3aa3fba6b228"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "6b5ebc0ee592c7d4620827b20f1554706607e3363835a951c78ee37ac63a7df0"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "computedHash": "ac2c94885f34ff8492dc12aa4543182f661f32ea1722b8d6b6c2c7045af33ae3"
+    },
     "sandbox-sdk": {
       "source": "cloudflare/skills",
       "sourceType": "github",

@@ -1,91 +1,41 @@
 # Contributing to Debo
 
-First off, thank you for considering contributing to Debo! We value your help in building a better Life Intelligence System.
+Thank you for contributing to Debo! We are building a private, source-backed personal AI memory and context operating system.
 
-## 🕯️ Our Philosophy: Editorial Calm
+---
 
-Debo is designed to be a "quietly-confident" space for reflection. When contributing UI changes:
-- **Prioritize Typography**: Use large, readable headings and JetBrains Mono for metadata.
-- **Warm Aesthetics**: Avoid pure whites and blacks; use the cream canvas (\`#f7f7f4\`) and warm ink (\`#26251e\`).
-- **Minimal Depth**: No drop shadows. Use 1px hairlines for separation.
-- **Generous Rhythm**: Maintain an 80px vertical rhythm between major sections.
+## 1. Clean-Room Architecture & Current Status
 
-## 🛠️ Development Setup
+Debo has undergone a complete clean-room restart and is currently in **Phase 0 (Clean-Room Documentation & Architecture Bootstrap)**:
+- We are establishing normative specifications, ADRs, research evaluations, and contract schemas.
+- **Do not submit PRs implementing legacy frameworks** (Mastra, ungrounded vector search, or fragmented microservices).
+- All proposals and contributions must adhere to [AGENTS.md](file:///home/kunalkashyap8024/sop/debo/AGENTS.md) and accepted ADRs in [`docs/adr/`](file:///home/kunalkashyap8024/sop/debo/docs/adr/README.md).
 
-### 1. Prerequisites
-- [Bun](https://bun.sh/) (Runtime & Package Manager)
-- [Neon](https://neon.tech/) (Postgres Database)
-- [Stack Auth](https://stack-auth.com/) (Authentication)
-- [Qdrant](https://qdrant.tech/) (Vector Search)
+---
 
-### 2. Initial Setup
-```bash
-# Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/debo.git
-cd debo
+## 2. Design Philosophy: Calm Editorial Precision
 
-# Install dependencies
-bun install
-```
+Debo prioritizes clarity, cognitive tranquility, and source transparency over flashy AI gimmicks:
+- **Typography-first**: High-contrast, beautifully kerned editorial typography.
+- **Warm Canvas**: Restful surfaces avoiding stark digital neon.
+- **Zero Hallucination Tolerance**: Every assertion rendered in the UI must display clickable provenance linking directly to the underlying raw source in Cloudflare R2.
+- **Deterministic Control**: The LLM suggests; deterministic application code and explicit human approvals authorize.
 
-### 3. Environment Variables
-Copy the root environment template:
-```bash
-cp .env.example .env.local
-```
+---
 
-### 4. Database & Auth
-```bash
-# Sync your database schema (scoped to the db package)
-bun run db:push
-```
+## 3. Contribution Workflow
 
-### 5. Run Development Server
-```bash
-# Run the main application
-bun dev
+1. **Check the Backlog**: Consult [`docs/planning/BACKLOG.md`](file:///home/kunalkashyap8024/sop/debo/docs/planning/BACKLOG.md) for active tickets (DEBO-XXXX).
+2. **Review Specifications**: Ensure your proposed work aligns with normative specs in [`docs/specs/`](file:///home/kunalkashyap8024/sop/debo/docs/specs/).
+3. **Propose Architecture Changes First**: If you need to introduce an external dependency or alter system boundaries, submit an ADR in `docs/adr/` before writing code.
+4. **Follow Semantic Commit Conventions**: Use conventional commits (`docs:`, `spec:`, `feat:`, `fix:`, `refactor:`, `test:`).
+5. **Update Documentation**: Any change to interfaces or models must update corresponding documentation in `docs/` in the same PR.
 
-# Or run specific apps
-bun run dev:landing
-bun run dev:website
-```
+---
 
-## 💻 Monorepo Structure
+## 4. Code Standards & Boundaries
 
-Debo uses a **Bun monorepo** to separate concerns:
-
-- **`apps/landing-page`**: Public landing page deployed as a Cloudflare Worker.
-- **`apps/website`**: Full-stack product deployed on Vercel with Next.js route handlers, UI, and LangGraph server code.
-- **`packages/*`**: Shared logic and configuration used across apps.
-
-When adding a new feature:
-1. **Shared Logic**: If the logic (e.g., a new DB table or AI utility) is used by multiple apps, add it to the corresponding package in `packages/`.
-2. **UI Components**: Add shared components to `packages/ui`.
-3. **App Logic**: Add app-specific routes, actions, or components to the relevant app in `apps/`.
-
-- **React 19 & Next.js 16**: Use functional components, Server Components by default, and Server Actions for data mutations.
-- **TypeScript**: Strict type safety is required. Avoid \`any\`.
-- **Styling**: Tailwind CSS v4. Stick to the design tokens defined in \`tailwind.config.ts\`.
-- **Orchestration**: Agent logic should be added to `apps/website/src/server/langgraph`.
-- **Database**: Use Drizzle ORM for all database operations.
-
-## 🌿 Branching & PRs
-
-1. Create a branch: \`git checkout -b feat/your-feature-name\` or \`fix/bug-name\`.
-2. Make your changes and ensure they follow the design philosophy.
-3. Run linting: \`bun run lint\`.
-4. Open a Pull Request against the \`main\` branch.
-5. Provide a clear description and screenshots (for UI changes).
-
-## 🚩 Reporting Issues
-
-- **Bug Reports**: Provide steps to reproduce, expected vs. actual behavior, and environment details.
-- **Feature Requests**: Explain the "Why" and "How" it fits into the Life Intelligence System.
-
-## 📜 Code of Conduct
-
-By participating in this project, you agree to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).
-
-## 📄 License
-
-By contributing, you agree that your contributions will be licensed under the [MIT License](./LICENSE).
+- **TypeScript Primary**: Strict TypeScript is enforced across all apps, packages, and tools.
+- **Python Isolation**: Python is strictly restricted to `apps/document-worker` for Docling OCR and PDF layout parsing.
+- **Tenant Scoping**: All database queries and memory lookups must unconditionally filter on `workspace_id`.
+- **Secret Protection**: Never commit secrets or `.env` files. Follow [`docs/security/secrets.md`](file:///home/kunalkashyap8024/sop/debo/docs/security/secrets.md).

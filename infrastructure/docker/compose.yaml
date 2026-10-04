@@ -1,0 +1,40 @@
+# Local Development Docker Compose Blueprint
+# Used for offline local development and integration testing emulation
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: debo-local-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: debo
+      POSTGRES_USER: debo
+      POSTGRES_PASSWORD: debo_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - debo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U debo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: debo-local-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: debo_minio_admin
+      MINIO_ROOT_PASSWORD: debo_minio_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - debo-miniodata:/data
+
+volumes:
+  debo-pgdata:
+  debo-miniodata:
