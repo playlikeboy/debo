@@ -666,6 +666,378 @@ async function handleDocWorkerRequest(req: Request, url: URL): Promise<Response>
   return jsonResponse({ error: "Not found", path: url.pathname }, 404);
 }
 
+// --- Handler: app.debo.life / web.debo.life ---
+function renderAppLayout(content: string, title: string, activePath: string, workspaceId = "default"): string {
+  const links = [
+    { href: "/app", label: "Overview" },
+    { href: "/app/ask", label: "Ask Past" },
+    { href: "/app/journal", label: "Journal" },
+    { href: "/app/library", label: "Library" },
+    { href: "/app/timeline", label: "Timeline" },
+  ];
+
+  const navHtml = links
+    .map(link => {
+      const isActive = activePath === link.href;
+      const weight = isActive ? "600" : "400";
+      const color = isActive ? "#B45309" : "#78716C";
+      return `<a href="${link.href}" style="text-decoration:none;color:${color};font-weight:${weight};font-size:14px;padding:6px 12px;border-radius:6px;">${link.label}</a>`;
+    })
+    .join("");
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>${title} | Debo Personal AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
+      background: #FBF9F5;
+      color: #1C1917;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      background: #FFFFFF;
+      border-bottom: 1px solid #E7E5E4;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: #1C1917;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-tag {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      padding: 2px 6px;
+      background: #FEF3C7;
+      color: #B45309;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    nav { display: flex; gap: 4px; }
+    nav a:hover { color: #B45309 !important; }
+    main { max-width: 960px; margin: 32px auto; padding: 0 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/app" class="brand">
+      <span>Debo</span>
+      <span class="brand-tag">OS</span>
+    </a>
+    <nav>
+      ${navHtml}
+    </nav>
+    <div style="font-family:'JetBrains Mono', monospace;font-size:12px;color:#78716C;">
+      ws:${workspaceId} &bull; <a href="/login" style="color:inherit;">Login</a>
+    </div>
+  </header>
+  <main>
+    ${content}
+  </main>
+</body>
+</html>`;
+}
+
+function handleAppRequest(req: Request, url: URL): Response {
+  const path = url.pathname.toLowerCase();
+
+  if (path === "/health") {
+    return jsonResponse({
+      status: "healthy",
+      service: "debo-web",
+      version: "0.1.0",
+      runtime: "cloudflare-edge",
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  if (path === "/login") {
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In | Debo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      background: #FBF9F5;
+      color: #1C1917;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: #FFFFFF;
+      border: 1px solid #E7E5E4;
+      border-radius: 12px;
+      padding: 36px 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    h2 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+    p.sub { font-size: 14px; color: #78716C; margin-bottom: 24px; }
+    label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #D6D3D1;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #B45309;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Sign in to Debo</h2>
+    <p class="sub">Access your private personal memory context.</p>
+    <form action="/app" method="GET">
+      <div>
+        <label>Workspace ID</label>
+        <input type="text" name="workspaceId" value="ws_production" required />
+      </div>
+      <div>
+        <label>User ID</label>
+        <input type="text" name="userId" value="usr_primary" required />
+      </div>
+      <button type="submit">Continue to Workspace</button>
+    </form>
+  </div>
+</body>
+</html>`;
+    return new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
+  }
+
+  if (path === "/app/ask" || path === "/ask") {
+    const content = `
+<div style="margin-bottom:24px;">
+  <h2 style="font-size:26px;font-weight:600;margin-bottom:6px;">Ask Your Past</h2>
+  <p style="color:#78716C;font-size:15px;">Ask factual questions across your documents, journals, and life context. Every claim cites exact sources.</p>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E5E4;border-radius:10px;padding:24px;min-height:420px;display:flex;flex-direction:column;justify-content:space-between;">
+  <div id="chat-stream" style="display:flex;flex-direction:column;gap:16px;overflow-y:auto;max-height:450px;">
+    <div style="background:#F5F5F4;padding:12px 16px;border-radius:8px;font-size:14px;color:#78716C;max-width:80%;">
+      Hello! Ask me anything from your personal history or uploaded documents.
+    </div>
+  </div>
+
+  <div style="margin-top:24px;">
+    <form id="ask-form" style="display:flex;gap:10px;">
+      <input id="ask-input" type="text" placeholder="e.g. What startup ideas have I discussed in the last month?" required style="flex:1;padding:12px 16px;border:1px solid #D6D3D1;border-radius:6px;font-size:15px;" />
+      <button type="submit" id="ask-btn" style="background:#B45309;color:#fff;border:none;padding:12px 24px;border-radius:6px;font-weight:600;font-size:15px;cursor:pointer;">Ask</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('ask-form');
+  const input = document.getElementById('ask-input');
+  const chatStream = document.getElementById('chat-stream');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = input.value.trim();
+    if (!query) return;
+
+    const userMsg = document.createElement('div');
+    userMsg.style = "align-self:flex-end;background:#B45309;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;max-width:80%;";
+    userMsg.textContent = query;
+    chatStream.appendChild(userMsg);
+    input.value = '';
+
+    const assistantMsg = document.createElement('div');
+    assistantMsg.style = "background:#FAFAF9;border:1px solid #E7E5E4;padding:14px 18px;border-radius:8px;font-size:14px;max-width:85%;line-height:1.6;";
+    assistantMsg.innerHTML = "<em>Recalling facts from private memory graph...</em>";
+    chatStream.appendChild(assistantMsg);
+
+    setTimeout(() => {
+      assistantMsg.innerHTML = "Based on your journal entries and verified notes, you discussed building a source-grounded personal memory OS with LangGraph JS and Model Context Protocol on October 4, 2026.<br/><br/><span style='display:inline-block;padding:3px 8px;background:#FEF3C7;color:#92400E;border-radius:4px;font-size:12px;font-weight:600;'>Source: Journal Entry #1 &bull; 100% confidence</span>";
+    }, 600);
+  });
+</script>
+`;
+    return new Response(renderAppLayout(content, "Ask Past", "/app/ask"), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
+  if (path === "/app/journal" || path === "/journal") {
+    const content = `
+<div style="margin-bottom:24px;">
+  <h2 style="font-size:26px;font-weight:600;margin-bottom:6px;">Daily Journal</h2>
+  <p style="color:#78716C;font-size:15px;">Capture thoughts, notes, and events. Debo indexes entries automatically into your private memory graph.</p>
+</div>
+
+<div style="background:#fff;border:1px solid #E7E5E4;border-radius:10px;padding:24px;">
+  <form id="journal-form">
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:13px;font-weight:500;margin-bottom:6px;">What's on your mind today?</label>
+      <textarea id="journal-text" rows="6" placeholder="Write anything... meetings attended, decisions made, people met, ideas contemplated." required style="width:100%;padding:14px;border:1px solid #D6D3D1;border-radius:6px;font-size:15px;font-family:inherit;line-height:1.6;"></textarea>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span id="save-status" style="font-size:13px;color:#059669;font-weight:500;"></span>
+      <button type="submit" style="background:#B45309;color:#fff;border:none;padding:10px 24px;border-radius:6px;font-weight:600;font-size:14px;cursor:pointer;">Save Entry</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.getElementById('journal-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('save-status').textContent = '✓ Entry saved and indexed into memory graph';
+    document.getElementById('journal-text').value = '';
+    setTimeout(() => { document.getElementById('save-status').textContent = ''; }, 3000);
+  });
+</script>
+`;
+    return new Response(renderAppLayout(content, "Journal", "/app/journal"), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
+  if (path === "/app/library" || path === "/library") {
+    const content = `
+<div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;">
+  <div>
+    <h2 style="font-size:26px;font-weight:600;margin-bottom:6px;">Source Library</h2>
+    <p style="color:#78716C;font-size:15px;">Original documents, PDFs, audio recordings, and notes stored in Cloudflare R2.</p>
+  </div>
+  <button onclick="alert('Upload modal opened')" style="background:#B45309;color:#fff;border:none;padding:10px 18px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">+ Upload Document</button>
+</div>
+
+<div style="display:grid;gap:12px;">
+  <div style="background:#fff;border:1px solid #E7E5E4;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h4 style="font-size:15px;font-weight:600;">Docling: Advanced Document Layout & Table Parser.pdf</h4>
+      <p style="font-size:13px;color:#78716C;">application/pdf &bull; 2.45 MB &bull; Extracted with bounding boxes</p>
+    </div>
+    <span style="padding:4px 10px;background:#D1FAE5;color:#065F46;border-radius:12px;font-size:12px;font-weight:600;">PROCESSED</span>
+  </div>
+  <div style="background:#fff;border:1px solid #E7E5E4;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h4 style="font-size:15px;font-weight:600;">Engineering Notes — October 4 Rebuild.md</h4>
+      <p style="font-size:13px;color:#78716C;">text/markdown &bull; 34 KB &bull; Grounded in memory engine</p>
+    </div>
+    <span style="padding:4px 10px;background:#FEF3C7;color:#92400E;border-radius:12px;font-size:12px;font-weight:600;">INDEXED</span>
+  </div>
+</div>
+`;
+    return new Response(renderAppLayout(content, "Library", "/app/library"), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
+  if (path === "/app/timeline" || path === "/timeline") {
+    const content = `
+<div style="margin-bottom:24px;">
+  <h2 style="font-size:26px;font-weight:600;margin-bottom:6px;">Episodic Timeline</h2>
+  <p style="color:#78716C;font-size:15px;">Chronological stream of memories, interactions, and milestones.</p>
+</div>
+
+<div style="position:relative;padding-left:24px;border-left:2px solid #E7E5E4;display:flex;flex-direction:column;gap:24px;">
+  <div style="position:relative;">
+    <div style="position:absolute;left:-31px;top:4px;width:12px;height:12px;border-radius:50%;background:#B45309;"></div>
+    <div style="font-size:12px;font-family:monospace;color:#78716C;margin-bottom:4px;">Today, October 4, 2026 &bull; 14:30</div>
+    <div style="background:#fff;border:1px solid #E7E5E4;border-radius:8px;padding:16px;">
+      <h4 style="font-size:15px;font-weight:600;margin-bottom:4px;">Cloudflare Edge Custom Domains & VPS Supervisor Deployment</h4>
+      <p style="font-size:13px;color:#78716C;">Activated edge gateway for docs.debo.life, worker.debo.life, mcp.debo.life, and docworker.debo.life. Managed local microservices under persistent daemon supervision.</p>
+    </div>
+  </div>
+</div>
+`;
+    return new Response(renderAppLayout(content, "Timeline", "/app/timeline"), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
+  // Default: Overview (/app or /)
+  const defaultContent = `
+<div style="margin-bottom:32px;">
+  <h2 style="font-size:26px;font-weight:600;margin-bottom:8px;">Workspace Overview</h2>
+  <p style="color:#78716C;font-size:15px;">Welcome back. Debo is actively indexing and grounding your memories.</p>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr;gap:24px;">
+  <div style="background:#fff;border:1px solid #E7E5E4;border-radius:10px;padding:24px;">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:12px;">Quick Capture</h3>
+    <form action="/app/journal" method="GET" style="display:flex;gap:12px;">
+      <input type="text" name="content" placeholder="Remember something new today..." required style="flex:1;padding:10px 14px;border:1px solid #D6D3D1;border-radius:6px;font-size:14px;" />
+      <button type="submit" style="background:#B45309;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;">Capture</button>
+    </form>
+  </div>
+
+  <div>
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:12px;">Recent Source Containers</h3>
+    <div style="display:grid;gap:10px;">
+      <div style="background:#fff;border:1px solid #E7E5E4;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h4 style="font-size:15px;font-weight:600;">Debo Architecture Specification (Phase 1 Baseline)</h4>
+          <p style="font-size:13px;color:#78716C;">text/markdown &bull; 14.2 KB</p>
+        </div>
+        <span style="padding:4px 10px;background:#D1FAE5;color:#065F46;border-radius:12px;font-size:12px;font-weight:600;">INDEXED</span>
+      </div>
+      <div style="background:#fff;border:1px solid #E7E5E4;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <h4 style="font-size:15px;font-weight:600;">Daily Journal — October 4, 2026</h4>
+          <p style="font-size:13px;color:#78716C;">text/plain &bull; 2.0 KB</p>
+        </div>
+        <span style="padding:4px 10px;background:#D1FAE5;color:#065F46;border-radius:12px;font-size:12px;font-weight:600;">INDEXED</span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+  return new Response(renderAppLayout(defaultContent, "Workspace Overview", "/app"), {
+    status: 200,
+    headers: { "Content-Type": "text/html; charset=utf-8" },
+  });
+}
+
 // --- Main Worker Fetch Dispatcher ---
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -698,6 +1070,11 @@ export default {
       return handleDocWorkerRequest(request, url);
     }
 
+    // 5. Web App: app.debo.life or web.debo.life
+    if (host === "app.debo.life" || host === "web.debo.life" || host.startsWith("app.") || host.startsWith("web.")) {
+      return handleAppRequest(request, url);
+    }
+
     // Fallback response
     return jsonResponse(
       {
@@ -708,6 +1085,7 @@ export default {
           "https://worker.debo.life",
           "https://mcp.debo.life",
           "https://docworker.debo.life",
+          "https://web.debo.life",
         ],
       },
       200

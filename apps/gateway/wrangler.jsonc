@@ -7,6 +7,7 @@
     { "pattern": "worker.debo.life", "custom_domain": true },
     { "pattern": "docs.debo.life", "custom_domain": true },
     { "pattern": "mcp.debo.life", "custom_domain": true },
-    { "pattern": "docworker.debo.life", "custom_domain": true }
+    { "pattern": "docworker.debo.life", "custom_domain": true },
+    { "pattern": "web.debo.life", "custom_domain": true }
   ]
 }
