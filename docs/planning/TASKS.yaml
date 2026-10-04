@@ -140,7 +140,7 @@ tasks:
     description: "Author @debo/storage wrapper around Cloudflare R2 with streaming uploads, mime validation, and 15-min presigned URLs."
     phase: 3
     priority: "P1"
-    status: "pending"
+    status: "verified"
     owner: "storage-team"
     agent: "storage-agent"
     depends_on: ["DEBO-0002", "DEBO-0004"]

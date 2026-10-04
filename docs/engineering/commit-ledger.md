@@ -54,3 +54,13 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **Review**: Approved by Root Orchestrator.
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
+
+---
+
+## `DEBO-0005` — Cloudflare R2 Object Storage Client & Presigned URLs
+
+- **Packages**: `@debo/storage`.
+- **Tests**: `bun test packages/storage` passed 4 tests with 9 assertions; path traversal sanitization and SigV4 client verified.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
