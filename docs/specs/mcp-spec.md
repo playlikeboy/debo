@@ -1,22 +1,20 @@
 # Normative Specification: Model Context Protocol (MCP)
 
-This document is a normative specification using RFC 2119 language.
+This document is normative. The Debo MCP server MUST conform to the pinned MCP specification and SDK version used by the implementation.
 
----
+## 1. Protocol & Transport
 
-## 1. Protocol & Transport Compliance
+1. **Protocol baseline:** MCP 2026-07-28 unless a later version is explicitly accepted by ADR.
+2. **SDK:** official MCP TypeScript SDK v2.
+3. **Remote transport:** Streamable HTTP at `https://mcp.debo.life/mcp`.
+4. **Local transport:** stdio.
+5. **Legacy HTTP+SSE:** MUST NOT be Debo's primary remote transport.
+6. **Authentication:** remote requests MUST satisfy Debo's configured authentication mechanism before tool/resource dispatch.
+7. **Authorization:** every tool/resource operation MUST resolve tenant context and verify required capabilities deterministically.
+8. **Protocol compliance:** wire behavior MUST follow the pinned official spec/SDK rather than hand-written approximations.
 
-1. **SDK Standard**: The Debo MCP server MUST implement the official `@modelcontextprotocol/sdk` (TypeScript).
-2. **Dual Transports**:
-   - The server MUST provide a remote HTTP/SSE transport listening at `https://mcp.debo.life/mcp`.
-   - The server MUST provide a local stdio transport for local agent execution.
-3. **Authentication**: Remote MCP requests MUST include a valid `Authorization: Bearer debo_mcp_<token>` header. Unauthenticated or malformed requests MUST be rejected with HTTP 401.
-4. **Scope Verification**: Every MCP tool execution MUST deterministically verify that the presenting API key possesses the required capability scope before dispatching the tool.
+## 2. Tool Output Security
 
----
-
-## 2. Tool Output Sanitization
-
-- Tool outputs containing user documents or memory text MUST be enclosed in `<source_data>...</source_data>` tags to prevent indirect prompt injection.
-- Tools MUST NOT return plaintext OAuth credentials, session tokens, or API secrets under any circumstances.
-- Tool responses MUST adhere strictly to the JSON schemas defined in `docs/contracts/mcp.md`.
+- Tool outputs containing user source material MUST be clearly delimited as untrusted source data before entering model context.
+- Tools MUST NOT return OAuth credentials, session tokens, API secrets, or other credential material.
+- Tool responses MUST conform to `docs/contracts/mcp.md`.
