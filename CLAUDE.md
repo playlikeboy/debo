@@ -1,16 +1,23 @@
 # CLAUDE.md
 
-This repository is in **Phase 0: Clean-Room Rebuild / Documentation-First Bootstrap**.
-All legacy application code has been removed. Do NOT attempt to resurrect legacy implementations or frameworks (Mastra, CopilotKit-only, etc.).
+Debo is in **Phase 0: documentation and architecture bootstrap**.
 
-## Absolute Guidance
-1. **Operating Rules**: Consult [AGENTS.md](file:///home/kunalkashyap8024/sop/debo/AGENTS.md) before undertaking any task.
-2. **Context Loading**: Follow [context-loading.md](file:///home/kunalkashyap8024/sop/debo/docs/ai/context-loading.md) to load only the relevant documentation domain.
-3. **No Code in Phase 0**: Do not generate product code, API routes, or database migrations during Phase 0. Focus exclusively on specifications, ADRs, research, contracts, and planning artifacts.
-4. **Primary Tools**:
-   - Monorepo package manager: Bun
-   - Agent orchestration: LangGraph JS
-   - Workflows: Trigger.dev / Inngest
-   - Primary Database: Neon PostgreSQL
-   - Object Store: Cloudflare R2
-   - Document Processing: Docling (Python Worker)
+## Required context
+1. Read `AGENTS.md`.
+2. Follow `docs/ai/context-loading.md`.
+3. Check relevant ADRs, specs, contracts, and research before changing architecture.
+
+## Phase 0 boundary
+Do not create product code, API routes, migrations, or deployment changes. Work on documentation, research, ADRs, contracts, planning, and evaluations only.
+
+## Current baselines
+- TypeScript primary; Python only for document processing.
+- LangGraph JS for agent orchestration.
+- Trigger.dev 4.x for durable workflows.
+- Supermemory behind `MemoryProvider`.
+- Neon PostgreSQL + Drizzle for canonical business state.
+- Cloudflare R2 for raw source storage.
+- MCP 2026-07-28 + official TypeScript SDK v2.
+- AG-UI 1.0 as the agent↔UI protocol boundary.
+
+Exact package versions are pinned during Phase 1 after fresh verification. When a baseline changes, update research and the relevant ADR first.
