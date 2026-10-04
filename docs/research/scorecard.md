@@ -1,7 +1,9 @@
 # Debo Technology Evaluation Scorecard
 
-This document contains empirical scoring for all candidate technologies considered for Debo's clean-room architecture.
-Ratings range from **1 (Unacceptable / High Risk)** to **5 (Exceptional / Production Ready)**.
+> **Evidence note (2026-10-04):** The tables below are weighted engineering assessments. They must not be cited as empirical Debo benchmarks. Runtime latency, concurrency, citation accuracy, and other performance figures become empirical only after Debo runs the benchmark suite described in `docs/evals/`.
+
+This document contains comparative **engineering assessment scores** for candidate technologies considered for Debo's clean-room architecture. The scores are not Debo-run benchmark measurements unless explicitly labelled as such.
+Ratings range from **1 (poor fit / high risk)** to **5 (strong fit / low operational risk). A score is an assessment backed by the research record, not a guarantee of production readiness.
 
 ---
 
@@ -56,7 +58,7 @@ Ratings range from **1 (Unacceptable / High Risk)** to **5 (Exceptional / Produc
 | **License & Ecosystem Freedom** | 10% | 4.8 (MIT) | 4.0 | 4.8 (Apache) | 4.0 (MIT) |
 | **Weighted Total** | **100%** | **4.94** | **3.09** | **3.97** | **3.00** |
 
-**Recommendation**: Adopt **LangGraph JS** unconditionally. Deprecate and exclude Mastra completely.
+**Recommendation**: Select **LangGraph JS** for the current architecture, pending implementation and evaluation verification. Deprecate and exclude Mastra completely.
 
 ---
 
