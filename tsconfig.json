@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@debo/types": ["packages/types/src/index.ts"],
+      "@debo/config": ["packages/config/src/index.ts"],
+      "@debo/db": ["packages/db/src/index.ts"],
+      "@debo/auth": ["packages/auth/src/index.ts"],
+      "@debo/permissions": ["packages/permissions/src/index.ts"],
+      "@debo/storage": ["packages/storage/src/index.ts"],
+      "@debo/memory": ["packages/memory/src/index.ts"],
+      "@debo/citations": ["packages/citations/src/index.ts"],
+      "@debo/workflows": ["packages/workflows/src/index.ts"],
+      "@debo/connectors": ["packages/connectors/src/index.ts"],
+      "@debo/agent": ["packages/agent/src/index.ts"],
+      "@debo/mcp": ["packages/mcp/src/index.ts"],
+      "@debo/ui": ["packages/ui/src/index.ts"]
+    }
+  },
+  "include": ["packages/*/src", "apps/*/src", "tests"]
+}

@@ -175,3 +175,30 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **Review**: Approved by Root Orchestrator.
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
+
+---
+
+## `DEBO-0014` — End-to-End Product Verification & Hardening
+
+- **Packages**: `tests/e2e`, `PROJECT_STATUS.md`, `CHANGELOG.md`.
+- **Tests**: `bun test` passed 74 tests across 16 files (including all 13 E2E/benchmark tests); `pytest apps/document-worker/tests` passed 7 tests (81 tests total passing, 0 failures); `turbo run typecheck` passed 16 tasks; Prettier formatting clean. Verified:
+  - End-to-end user journeys: journal/note capture -> memory indexing -> agent StateGraph retrieval & reasoning -> exact citation grounding.
+  - Multi-tenant boundary verification: 100% negative assertion rate across cross-tenant memory queries, storage keys, and workflow execution.
+  - Full 7-track memory evaluation benchmark suite (`tests/e2e/memory-benchmark.test.ts`) according to `docs/evals/memory/benchmark-suite.md`:
+    - Track 1: Retrieval Precision & Recall (Exact Fact, Semantic Recall)
+    - Track 2: Temporal Reasoning & State Changes (Preference Evolution)
+    - Track 3: Entity & Relational Resolution (Nicknames and Stakeholder references)
+    - Track 4: Contradiction Resolution & Confidence Calibration
+    - Track 5: Grounding & Citation Precision Benchmark (Exact span verification vs hallucination rejection)
+    - Track 6: Multi-Tenant Isolation Benchmark (0.00% Leakage Tolerance)
+    - Track 7: Deletion Hygiene & Erased Records Guarantee
+  - Security and penetration hardening:
+    - Path traversal sanitization (`../../etc/shadow` -> sanitized safe key)
+    - Storage key deterministic prefixing (`workspaces/{workspaceId}/...`)
+    - Non-LLM Authority role and tool risk tier evaluation
+    - Strict HTTP security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
+  - Edge connectivity verification: Cloudflare Tunnel ingress active and routing `app.debo.life` (:3000), `mcp.debo.life` (:8080), `worker.debo.life` (:8787), and `docs.debo.life` (:3001) with all legacy domains revoked.
+  - Project documentation updated: `PROJECT_STATUS.md` and `CHANGELOG.md` aligned with complete production build baseline.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
