@@ -6,10 +6,10 @@ This document defines the formal JSON Schema contracts for Debo's Model Context 
 
 ## 1. Remote Endpoint
 - **Target URL**: `https://mcp.debo.life/mcp`
-- **Transport**: HTTP POST / Server-Sent Events (SSE)
-- **Headers Required**:
-  - `Authorization: Bearer debo_mcp_<token>`
-  - `Content-Type: application/json`
+- **Transport**: Streamable HTTP
+- **MCP and Debo/application headers must follow the pinned 2026-07-28 SDK/spec.
+  - Debo authentication is carried in the configured Authorization mechanism.
+
 
 ---
 
