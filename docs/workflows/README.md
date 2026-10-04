@@ -1,6 +1,6 @@
 # Debo Durable Workflows Architecture
 
-Debo relies on **Trigger.dev v3** (`@debo/workflows`) to execute long-running, asynchronous, and failure-tolerant business processes.
+Debo relies on **Trigger.dev 4.x** (`@debo/workflows`) to execute long-running, asynchronous, and failure-tolerant business processes.
 
 ---
 
