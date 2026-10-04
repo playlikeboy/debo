@@ -1,0 +1,472 @@
+version: "1.0"
+updated_at: "2026-10-04T12:47:00Z"
+tasks:
+  - id: "DEBO-0001"
+    title: "Monorepo Scaffolding & Shared Tooling Bootstrap"
+    description: "Establish Bun workspaces, Turborepo pipeline cache, shared tsconfig base, Biome/ESLint rules, and unified scripts."
+    phase: 1
+    priority: "P0"
+    status: "ready"
+    owner: "foundation-team"
+    agent: "foundation-agent"
+    depends_on: []
+    blocks: ["DEBO-0002", "DEBO-0003", "DEBO-0004"]
+    files: ["package.json", "turbo.json", "tsconfig.base.json", "biome.json"]
+    packages: ["packages/config", "packages/types"]
+    spec: "docs/specs/deployment-spec.md"
+    contract: "docs/contracts/README.md"
+    acceptance_criteria:
+      - "bun install succeeds cleanly with zero dependency conflicts"
+      - "turbo run build completes across dummy targets"
+      - "turbo run typecheck and turbo run lint execute cleanly"
+    security_requirements:
+      - "Lockfile pinned with integrity verification"
+      - "No global dependencies required"
+    test_requirements:
+      - "bun test runs repository-wide test runner suite"
+    docs_required:
+      - "README.md"
+      - "docs/engineering/dependencies.md"
+    research_required:
+      - "docs/research/scorecard.md"
+    risk: "low"
+    estimated_complexity: "M"
+    branch: "agent/foundation/DEBO-0001"
+    commit: null
+    pr: null
+    verification: "bun install && bun run build && bun test"
+
+  - id: "DEBO-0002"
+    title: "Domain Types, Shared Interfaces & Error Model"
+    description: "Define zero-dependency TypeScript primitives, error hierarchies, result envelopes, and brand types."
+    phase: 1
+    priority: "P0"
+    status: "ready"
+    owner: "domain-team"
+    agent: "domain-agent"
+    depends_on: ["DEBO-0001"]
+    blocks: ["DEBO-0003", "DEBO-0004", "DEBO-0005"]
+    files: ["packages/types/src/index.ts", "packages/types/src/errors.ts", "packages/types/src/envelopes.ts"]
+    packages: ["packages/types"]
+    spec: "docs/specs/data-spec.md"
+    contract: "docs/contracts/http-api.md"
+    acceptance_criteria:
+      - "Exported standard DeboError, Result<T, E>, and pagination primitives"
+      - "Zero external runtime dependencies in @debo/types"
+    security_requirements:
+      - "No sensitive credential shapes in shared type contracts"
+    test_requirements:
+      - "Unit tests for error serialization and envelope typing"
+    docs_required:
+      - "docs/engineering/error-handling.md"
+    research_required: []
+    risk: "low"
+    estimated_complexity: "S"
+    branch: "agent/domain/DEBO-0002"
+    commit: null
+    pr: null
+    verification: "bun test packages/types"
+
+  - id: "DEBO-0003"
+    title: "Database Schema & Drizzle ORM Entity Layer"
+    description: "Implement 24 normalized PostgreSQL tables in Drizzle ORM with strict workspace_id tenancy and migrations."
+    phase: 2
+    priority: "P0"
+    status: "pending"
+    owner: "database-team"
+    agent: "database-agent"
+    depends_on: ["DEBO-0001", "DEBO-0002"]
+    blocks: ["DEBO-0004", "DEBO-0006"]
+    files: ["packages/db/src/schema/*.ts", "packages/db/src/index.ts", "packages/db/drizzle.config.ts"]
+    packages: ["packages/db"]
+    spec: "docs/specs/data-spec.md"
+    contract: "docs/data-model/entities.md"
+    acceptance_criteria:
+      - "Drizzle schema compiles with strict foreign keys and index coverage"
+      - "Migration generator creates clean SQL migrations"
+      - "Every table includes workspace_id except users and system tables"
+    security_requirements:
+      - "Tenant isolation validated on all foreign keys"
+      - "Sensitive columns marked for encryption or hash storage"
+    test_requirements:
+      - "Integration test on local PostgreSQL container with migration apply"
+    docs_required:
+      - "docs/data-model/tenancy.md"
+      - "docs/data-model/audit-log.md"
+    research_required: []
+    risk: "medium"
+    estimated_complexity: "L"
+    branch: "agent/database/DEBO-0003"
+    commit: null
+    pr: null
+    verification: "bun run db:generate && bun test packages/db"
+
+  - id: "DEBO-0004"
+    title: "Deterministic Auth, Tenancy Context & Permission Engine"
+    description: "Implement session verification, workspace context resolver, Non-LLM Authority invariant, and RBAC/ABAC guards."
+    phase: 2
+    priority: "P0"
+    status: "pending"
+    owner: "security-team"
+    agent: "auth-agent"
+    depends_on: ["DEBO-0002", "DEBO-0003"]
+    blocks: ["DEBO-0005", "DEBO-0007", "DEBO-0008"]
+    files: ["packages/auth/src/index.ts", "packages/permissions/src/index.ts"]
+    packages: ["packages/auth", "packages/permissions"]
+    spec: "docs/specs/security-spec.md"
+    contract: "docs/contracts/http-api.md"
+    acceptance_criteria:
+      - "Deterministic TenantContext extraction from JWT or Session"
+      - "authorizeToolCall and authorizeResourceAccess reject model-only decisions"
+      - "Role matrix (Owner, Admin, Member, Guest) enforced"
+    security_requirements:
+      - "OWASP Top 10 API Authorization enforcement"
+      - "Timing-safe string comparisons on API tokens"
+    test_requirements:
+      - "Cross-tenant leakage test suite (Workspace A cannot access Workspace B)"
+    docs_required:
+      - "docs/security/threat-model.md"
+      - "docs/agents/permissions.md"
+    research_required: []
+    risk: "high"
+    estimated_complexity: "L"
+    branch: "agent/security/DEBO-0004"
+    commit: null
+    pr: null
+    verification: "bun test packages/permissions packages/auth"
+
+  - id: "DEBO-0005"
+    title: "R2 Object Storage Client & Presigned URLs"
+    description: "Author @debo/storage wrapper around Cloudflare R2 with streaming uploads, mime validation, and 15-min presigned URLs."
+    phase: 3
+    priority: "P1"
+    status: "pending"
+    owner: "storage-team"
+    agent: "storage-agent"
+    depends_on: ["DEBO-0002", "DEBO-0004"]
+    blocks: ["DEBO-0007", "DEBO-0010"]
+    files: ["packages/storage/src/r2.ts", "packages/storage/src/index.ts"]
+    packages: ["packages/storage"]
+    spec: "docs/specs/storage-spec.md"
+    contract: "docs/contracts/http-api.md"
+    acceptance_criteria:
+      - "PutObject and GetSignedUrl with SigV4"
+      - "Scoped keys: workspaces/{workspaceId}/sources/{sourceId}/{filename}"
+    security_requirements:
+      - "Zero public bucket access"
+      - "Path traversal defense on filenames"
+    test_requirements:
+      - "Unit tests with MinIO local S3 mock"
+    docs_required:
+      - "docs/infrastructure/cloudflare.md"
+    research_required: []
+    risk: "medium"
+    estimated_complexity: "M"
+    branch: "agent/storage/DEBO-0005"
+    commit: null
+    pr: null
+    verification: "bun test packages/storage"
+
+  - id: "DEBO-0006"
+    title: "MemoryProvider Interface & Supermemory Adapter"
+    description: "Implement @debo/memory provider abstraction with Supermemory SDK adapter, semantic recall, and fallback degraded mode."
+    phase: 4
+    priority: "P0"
+    status: "pending"
+    owner: "memory-team"
+    agent: "memory-agent"
+    depends_on: ["DEBO-0002", "DEBO-0003"]
+    blocks: ["DEBO-0007", "DEBO-0012"]
+    files: ["packages/memory/src/provider.ts", "packages/memory/src/supermemory.ts", "packages/memory/src/fallback.ts"]
+    packages: ["packages/memory"]
+    spec: "docs/specs/memory-spec.md"
+    contract: "docs/contracts/memory-provider.md"
+    acceptance_criteria:
+      - "MemoryProvider implements remember, search, recall, profile, forget"
+      - "Supermemory tenant container mapping (workspaceId scoping)"
+      - "Degraded fallback mode activates gracefully on provider outage"
+    security_requirements:
+      - "Zero cross-user memory leakage"
+      - "Memory deletion guarantees (forget clears index)"
+    test_requirements:
+      - "Mock provider test suite and memory lifecycle tests"
+    docs_required:
+      - "docs/memory/lifecycle.md"
+      - "docs/memory/provider-abstraction.md"
+    research_required:
+      - "docs/research/supermemory.md"
+    risk: "high"
+    estimated_complexity: "L"
+    branch: "agent/memory/DEBO-0006"
+    commit: null
+    pr: null
+    verification: "bun test packages/memory"
+
+  - id: "DEBO-0007"
+    title: "Source Grounding & Exact Citation Engine"
+    description: "Author @debo/citations with character-span, PDF bounding box, audio timecode, and strict validation against hallucinated quotes."
+    phase: 4
+    priority: "P0"
+    status: "pending"
+    owner: "memory-team"
+    agent: "provenance-agent"
+    depends_on: ["DEBO-0002", "DEBO-0005", "DEBO-0006"]
+    blocks: ["DEBO-0012", "DEBO-0013"]
+    files: ["packages/citations/src/verifier.ts", "packages/citations/src/index.ts"]
+    packages: ["packages/citations"]
+    spec: "docs/specs/memory-spec.md"
+    contract: "docs/memory/source-grounding.md"
+    acceptance_criteria:
+      - "Exact citation validation against canonical source chunks"
+      - "Unsupported claim rejection with confidence degradation"
+    security_requirements:
+      - "Prompt injection defense inside cited source snippets"
+    test_requirements:
+      - "Citation validation benchmark suite on exact/modified quotes"
+    docs_required:
+      - "docs/memory/source-grounding.md"
+    research_required: []
+    risk: "medium"
+    estimated_complexity: "M"
+    branch: "agent/memory/DEBO-0007"
+    commit: null
+    pr: null
+    verification: "bun test packages/citations"
+
+  - id: "DEBO-0008"
+    title: "Official Model Context Protocol Server (apps/mcp)"
+    description: "Build official MCP server with Streamable HTTP and stdio transports using official @modelcontextprotocol/sdk."
+    phase: 9
+    priority: "P1"
+    status: "pending"
+    owner: "mcp-team"
+    agent: "mcp-agent"
+    depends_on: ["DEBO-0002", "DEBO-0004", "DEBO-0006"]
+    blocks: ["DEBO-0009"]
+    files: ["apps/mcp/src/index.ts", "apps/mcp/src/tools/*.ts", "packages/mcp/src/index.ts"]
+    packages: ["packages/mcp", "apps/mcp"]
+    spec: "docs/specs/mcp-spec.md"
+    contract: "docs/contracts/mcp.md"
+    acceptance_criteria:
+      - "Complies with MCP 2026-07-28 protocol specification"
+      - "Implements core tools: remember, search_memory, recall_context, get_source"
+      - "Enforces deterministic Bearer token workspace authentication"
+    security_requirements:
+      - "Rate limiting (60 req/min per key)"
+      - "Input schema validation on all tool arguments"
+    test_requirements:
+      - "Official MCP client handshake and protocol conformance test"
+    docs_required:
+      - "docs/mcp/tools-taxonomy.md"
+      - "docs/mcp/security.md"
+    research_required:
+      - "docs/research/mcp-sdk.md"
+    risk: "medium"
+    estimated_complexity: "L"
+    branch: "agent/mcp/DEBO-0008"
+    commit: null
+    pr: null
+    verification: "bun test apps/mcp"
+
+  - id: "DEBO-0009"
+    title: "Durable Workflows Engine (apps/worker + Trigger.dev v3)"
+    description: "Implement durable task pipelines for document ingestion, memory consolidation, and scheduled cron jobs."
+    phase: 8
+    priority: "P1"
+    status: "pending"
+    owner: "workflow-team"
+    agent: "workflow-agent"
+    depends_on: ["DEBO-0002", "DEBO-0003", "DEBO-0005", "DEBO-0006"]
+    blocks: ["DEBO-0010", "DEBO-0011"]
+    files: ["apps/worker/src/tasks/*.ts", "packages/workflows/src/index.ts"]
+    packages: ["packages/workflows", "apps/worker"]
+    spec: "docs/specs/workflow-spec.md"
+    contract: "docs/workflows/event-model.md"
+    acceptance_criteria:
+      - "Task retries with exponential backoff on transient failures"
+      - "Strict task idempotency using event idempotencyKey"
+      - "Durable human approval pauses on destructive actions"
+    security_requirements:
+      - "Never expose external provider tokens in workflow task payloads"
+    test_requirements:
+      - "Trigger.dev unit test harness simulating task retries and failures"
+    docs_required:
+      - "docs/workflows/event-model.md"
+    research_required:
+      - "docs/research/trigger-dev.md"
+    risk: "medium"
+    estimated_complexity: "L"
+    branch: "agent/workflow/DEBO-0009"
+    commit: null
+    pr: null
+    verification: "bun test apps/worker"
+
+  - id: "DEBO-0010"
+    title: "Document Worker Service (apps/document-worker + Docling)"
+    description: "Build FastAPI Python worker executing IBM Docling layout parsing, table extraction, and OCR bounding boxes."
+    phase: 12
+    priority: "P1"
+    status: "pending"
+    owner: "document-team"
+    agent: "docling-agent"
+    depends_on: ["DEBO-0002", "DEBO-0005"]
+    blocks: ["DEBO-0011"]
+    files: ["apps/document-worker/app/main.py", "apps/document-worker/app/parser.py"]
+    packages: ["apps/document-worker"]
+    spec: "docs/specs/storage-spec.md"
+    contract: "docs/contracts/document-worker.md"
+    acceptance_criteria:
+      - "POST /process-document parses PDF into Markdown + bounding boxes"
+      - "Validates DEBO_INTERNAL_AUTH_SECRET bearer token"
+      - "Resource limits strictly guarded (CPU/memory timeout)"
+    security_requirements:
+      - "Isolated execution container; no host filesystem escape"
+      - "Decompression bomb defense and file type validation"
+    test_requirements:
+      - "pytest on sample 2-page research PDF fixture with tables"
+    docs_required:
+      - "docs/adr/ADR-0011-document-processing.md"
+    research_required:
+      - "docs/research/docling.md"
+    risk: "medium"
+    estimated_complexity: "M"
+    branch: "agent/document/DEBO-0010"
+    commit: null
+    pr: null
+    verification: "pytest apps/document-worker/tests"
+
+  - id: "DEBO-0011"
+    title: "External Connectors Layer (Composio & Nango)"
+    description: "Implement @debo/connectors wrapping Composio for actions and Nango for durable sync with encrypted OAuth vaults."
+    phase: 7
+    priority: "P2"
+    status: "pending"
+    owner: "connector-team"
+    agent: "composio-agent"
+    depends_on: ["DEBO-0002", "DEBO-0003", "DEBO-0004"]
+    blocks: ["DEBO-0012"]
+    files: ["packages/connectors/src/composio.ts", "packages/connectors/src/nango.ts", "packages/connectors/src/index.ts"]
+    packages: ["packages/connectors"]
+    spec: "docs/specs/connector-spec.md"
+    contract: "docs/contracts/connector-provider.md"
+    acceptance_criteria:
+      - "Connect, disconnect, status, and executeAction interface"
+      - "AES-256-GCM encryption on stored third-party connection metadata"
+    security_requirements:
+      - "OAuth tokens never logged or exposed in model context"
+      - "Human approval required for high-risk write actions (send email, delete)"
+    test_requirements:
+      - "Unit tests with mocked Composio client"
+    docs_required:
+      - "docs/connectors/strategy.md"
+      - "docs/connectors/credential-handling.md"
+    research_required:
+      - "docs/research/composio.md"
+    risk: "high"
+    estimated_complexity: "L"
+    branch: "agent/connector/DEBO-0011"
+    commit: null
+    pr: null
+    verification: "bun test packages/connectors"
+
+  - id: "DEBO-0012"
+    title: "LangGraph JS Agent Runtime (packages/agent)"
+    description: "Compile cyclic state graphs with checkpointing, streaming tokens, tool approvals, and memory recall."
+    phase: 5
+    priority: "P0"
+    status: "pending"
+    owner: "agent-team"
+    agent: "langgraph-agent"
+    depends_on: ["DEBO-0002", "DEBO-0004", "DEBO-0006", "DEBO-0007"]
+    blocks: ["DEBO-0013"]
+    files: ["packages/agent/src/graph.ts", "packages/agent/src/tools/*.ts", "packages/agent/src/state.ts"]
+    packages: ["packages/agent"]
+    spec: "docs/specs/agent-spec.md"
+    contract: "docs/contracts/agent-state.md"
+    acceptance_criteria:
+      - "Compiled StateGraph with nodes: plan -> retrieve -> reason -> validate -> respond"
+      - "PostgreSQL checkpointer for thread resumption and time-travel"
+      - "Interrupt on DESTRUCTIVE / EXTERNAL_WRITE risk class tools"
+    security_requirements:
+      - "Model routing strictly observes workspace tenant limits"
+      - "Prompt injection defense on recalled memory context"
+    test_requirements:
+      - "LangGraph integration test executing mock conversation with memory retrieval"
+    docs_required:
+      - "docs/agents/orchestration.md"
+      - "docs/agents/memory-policy.md"
+    research_required:
+      - "docs/research/langgraph.md"
+    risk: "high"
+    estimated_complexity: "XL"
+    branch: "agent/agent/DEBO-0012"
+    commit: null
+    pr: null
+    verification: "bun test packages/agent"
+
+  - id: "DEBO-0013"
+    title: "Agentic UI Protocol & Web Application (apps/web)"
+    description: "Build Next.js App Router product web app with AG-UI streaming protocol, calm editorial Radix/Tailwind components."
+    phase: 6
+    priority: "P0"
+    status: "pending"
+    owner: "frontend-team"
+    agent: "frontend-agent"
+    depends_on: ["DEBO-0001", "DEBO-0002", "DEBO-0004", "DEBO-0012"]
+    blocks: ["DEBO-0014"]
+    files: ["apps/web/app/**/*.tsx", "packages/ui/src/**/*.tsx"]
+    packages: ["packages/ui", "apps/web"]
+    spec: "docs/specs/ui-spec.md"
+    contract: "docs/product/routes.md"
+    acceptance_criteria:
+      - "Routes implemented: /, /login, /app, /app/ask, /app/journal, /app/library, /app/timeline"
+      - "AG-UI protocol streaming text, citations, tool calls, and approval prompts"
+      - "Bespoke editorial aesthetic adhering to pbakaus/impeccable design system"
+    security_requirements:
+      - "Content Security Policy (CSP), Strict Transport Security, CSRF tokens"
+    test_requirements:
+      - "Playwright E2E tests covering login -> capture journal -> ask Debo flow"
+    docs_required:
+      - "docs/product/routes.md"
+      - "docs/design-system/tokens.md"
+    research_required:
+      - "docs/research/ag-ui.md"
+    risk: "high"
+    estimated_complexity: "XL"
+    branch: "agent/frontend/DEBO-0013"
+    commit: null
+    pr: null
+    verification: "bun test apps/web && bun run build --filter=web"
+
+  - id: "DEBO-0014"
+    title: "End-to-End Product Verification & Hardening"
+    description: "Execute end-to-end integration tests, memory evaluations benchmark, load tests, and security penetration audit."
+    phase: 16
+    priority: "P0"
+    status: "pending"
+    owner: "quality-team"
+    agent: "e2e-agent"
+    depends_on: ["DEBO-0001", "DEBO-0003", "DEBO-0006", "DEBO-0008", "DEBO-0012", "DEBO-0013"]
+    blocks: []
+    files: ["tests/e2e/**/*.ts", "docs/evals/memory/**/*.ts"]
+    packages: ["packages/*", "apps/*"]
+    spec: "docs/specs/product-spec.md"
+    contract: "docs/evals/memory/benchmark-suite.md"
+    acceptance_criteria:
+      - "Zero unsupported claims on synthetic test dataset"
+      - "Tenant boundary leakage tests pass with 100% negative assertion rate"
+      - "Cloudflare Tunnel routing operational for app.debo.life and mcp.debo.life"
+    security_requirements:
+      - "Penetration audit against SSRF, XSS, and SQL injection"
+    test_requirements:
+      - "Automated full-system regression suite passing in CI"
+    docs_required:
+      - "PROJECT_STATUS.md"
+      - "CHANGELOG.md"
+    research_required: []
+    risk: "high"
+    estimated_complexity: "L"
+    branch: "agent/quality/DEBO-0014"
+    commit: null
+    pr: null
+    verification: "bun test && bun run build"
