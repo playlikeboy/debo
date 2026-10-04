@@ -1,29 +1,36 @@
-# Status
-accepted
+# ADR-0003 — Memory Engine
 
-# Context
-Debo is a private AI memory and context operating system. The memory engine is our most mission-critical subsystem. It must store, index, link, deduplicate, and retrieve personal facts, episodic memories, and documents with exact source attribution. We must avoid coupling Debo permanently to any single vendor or proprietary SaaS.
+## Status
+accepted — pending implementation benchmark validation
 
-# Decision
-1. We design a formal, vendor-neutral **`MemoryProvider` interface** in `@debo/memory` (`docs/contracts/memory-provider.md`) covering `remember`, `recall`, `search`, `profile`, `forget`, and `update`.
-2. We select **Supermemory** as our primary provider implementation based on our empirical scorecard (score 4.64/5.0).
-3. We establish **Neon PostgreSQL** as the immutable business owner of memory records, metadata, and citation linkages, using Supermemory as an acceleration and retrieval engine.
+## Context
+Debo needs a provider-neutral memory boundary for personal facts, episodic context, temporal state, retrieval, and source attribution. The selected provider must not become the canonical owner of Debo product state.
 
-# Alternatives
-1. **Mem0**: Evaluated (score 4.10/5.0). Good user fact extraction, but TypeScript SDK is secondary to Python, and citation provenance is less granular.
-2. **Graphiti / Neo4j**: Evaluated (score 4.01/5.0). Excellent multi-hop relational capabilities, but introduces significant operational complexity (Neo4j cluster) too early.
-3. **Bespoke pgvector from scratch**: Evaluated. Requires building custom consolidation, decay algorithms, and contradiction engines from scratch, slowing product velocity.
+## Decision
+1. Define `MemoryProvider` in `docs/contracts/memory-provider.md`.
+2. Use **Supermemory** as the initial memory provider.
+3. Keep **Neon PostgreSQL** as the canonical owner of Debo business state and provenance metadata.
+4. Keep **Cloudflare R2** as the canonical owner of original/raw binary sources.
+5. Treat provider indices, embeddings, and provider-specific retrieval/consolidation state as derived state that can be rebuilt where the contract permits.
+6. Treat provider outage fallback as **degraded retrieval**, not an equivalent replacement.
 
-# Why
-Supermemory provides the optimal balance of native source grounding, TypeScript-first SDK, fast retrieval benchmarks (<120ms), and self-hosting flexibility. Wrapping it behind Debo's `MemoryProvider` ensures Debo remains resilient against future vendor shifts.
+## Alternatives
+- **Mem0:** evaluated alternative.
+- **Hindsight:** bi-temporal model influenced Debo's schema thinking; not selected as the provider.
+- **Graphiti:** future escape hatch if multi-hop graph requirements justify additional infrastructure.
+- **Bespoke pgvector stack:** rejected for the initial build because it would duplicate significant memory-engine responsibilities before measured need is established.
 
-# Consequences
-- **Positive**: Debo launches with state-of-the-art semantic memory, auto-categorization, and source grounding.
-- **Negative**: Requires maintaining adapter code and running comprehensive regression evals (`docs/evals/memory/`) when upgrading provider releases.
+## Why
+Supermemory is currently the best-fit initial provider assessment for Debo. The provider-neutral boundary keeps the rest of the product independent of provider-specific APIs and semantics.
 
-# Migration / Exit Strategy
-Because Neon PostgreSQL retains all canonical memory records and raw source pointers in Cloudflare R2, any memory provider can be fully rebuilt or swapped by re-indexing PostgreSQL records into a replacement adapter.
+## Consequences
+- **Positive:** faster initial delivery and access to mature retrieval capabilities.
+- **Negative:** adapter maintenance, provider-specific capability gaps, vendor availability risk, and required regression evaluation across provider upgrades.
 
-# Evidence
-- Empirical comparison matrix: `docs/research/scorecard.md`.
-- Deep dive: `docs/research/supermemory.md`.
+## Exit strategy
+Because Debo owns canonical records and raw sources, a replacement provider can be introduced by implementing the same `MemoryProvider` contract and rebuilding derived state from Debo-owned data.
+
+## Evidence
+- [Technology scorecard](../research/scorecard.md) — engineering assessment.
+- [Supermemory research](../research/supermemory.md) — provider evidence and notes.
+- [Memory evaluation plan](../memory/evaluation-plan.md) — verification gates.
