@@ -1,0 +1,29 @@
+{
+  "name": "@debo/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "@debo/agent": "workspace:*",
+    "@debo/auth": "workspace:*",
+    "@debo/citations": "workspace:*",
+    "@debo/config": "workspace:*",
+    "@debo/memory": "workspace:*",
+    "@debo/permissions": "workspace:*",
+    "@debo/storage": "workspace:*",
+    "@debo/types": "workspace:*",
+    "@debo/ui": "workspace:*",
+    "@debo/workflows": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.8.0"
+  }
+}

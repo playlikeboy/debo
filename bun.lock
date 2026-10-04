@@ -28,6 +28,26 @@
         "typescript": "^5.8.0",
       },
     },
+    "apps/web": {
+      "name": "@debo/web",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/agent": "workspace:*",
+        "@debo/auth": "workspace:*",
+        "@debo/citations": "workspace:*",
+        "@debo/config": "workspace:*",
+        "@debo/memory": "workspace:*",
+        "@debo/permissions": "workspace:*",
+        "@debo/storage": "workspace:*",
+        "@debo/types": "workspace:*",
+        "@debo/ui": "workspace:*",
+        "@debo/workflows": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
+        "typescript": "^5.8.0",
+      },
+    },
     "apps/worker": {
       "name": "@debo/worker",
       "version": "0.1.0",
@@ -174,6 +194,17 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/ui": {
+      "name": "@debo/ui",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/workflows": {
       "name": "@debo/workflows",
       "version": "0.1.0",
@@ -248,6 +279,10 @@
     "@debo/storage": ["@debo/storage@workspace:packages/storage"],
 
     "@debo/types": ["@debo/types@workspace:packages/types"],
+
+    "@debo/ui": ["@debo/ui@workspace:packages/ui"],
+
+    "@debo/web": ["@debo/web@workspace:apps/web"],
 
     "@debo/worker": ["@debo/worker@workspace:apps/worker"],
 

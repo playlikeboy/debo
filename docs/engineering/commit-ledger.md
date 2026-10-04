@@ -142,7 +142,19 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
 
+---
 
+## `DEBO-0013` — Agentic UI Protocol & Web Application (apps/web & @debo/ui)
 
-
-
+- **Packages**: `@debo/ui`, `@debo/web` (`apps/web`).
+- **Tests**: `bun test` passed 61 tests across 14 files; `turbo run typecheck` passed 16 tasks. Verified:
+  - Bespoke editorial warm-paper design token system (`@debo/ui/tokens`) following impeccable typography and calm minimalism.
+  - Normative AG-UI streaming protocol encoder/decoder (`encodeStreamEvent`, `decodeStreamEvent`) streaming chunks, citations, tool calls, and approval prompts.
+  - UI presentation components: citation badges with exact quote hover states, approval cards for human-in-the-loop authorization, and source cards with provenance indicators.
+  - Complete MVP product routes: `/` (editorial landing page), `/login` (deterministic workspace authentication), `/app` (command dashboard), `/app/ask` (conversational query interface with citation grounding), `/app/journal` (stream-of-consciousness capture), `/app/library` (source provenance management), and `/app/timeline` (chronological memory log).
+  - Streaming SSE endpoint `POST /api/chat` integrating LangGraph agent, memory retrieval, exact citation grounding, and approval interrupts.
+  - Production security headers: Strict Content Security Policy (CSP), Strict-Transport-Security (HSTS), X-Frame-Options DENY, X-Content-Type-Options nosniff.
+  - Direct routing alignment with Cloudflare Tunnel ingress (`app.debo.life` -> `localhost:3000`).
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`

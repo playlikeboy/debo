@@ -409,7 +409,7 @@ tasks:
     description: "Build Next.js App Router product web app with AG-UI streaming protocol, calm editorial Radix/Tailwind components."
     phase: 6
     priority: "P0"
-    status: "pending"
+    status: "verified"
     owner: "frontend-team"
     agent: "frontend-agent"
     depends_on: ["DEBO-0001", "DEBO-0002", "DEBO-0004", "DEBO-0012"]
