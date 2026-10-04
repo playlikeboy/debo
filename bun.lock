@@ -12,6 +12,23 @@
         "typescript": "^5.8.0",
       },
     },
+    "apps/worker": {
+      "name": "@debo/worker",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/citations": "workspace:*",
+        "@debo/config": "workspace:*",
+        "@debo/memory": "workspace:*",
+        "@debo/permissions": "workspace:*",
+        "@debo/storage": "workspace:*",
+        "@debo/types": "workspace:*",
+        "@debo/workflows": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/auth": {
       "name": "@debo/auth",
       "version": "0.1.0",
@@ -98,6 +115,17 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/workflows": {
+      "name": "@debo/workflows",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/types": "workspace:*",
+        "zod": "^3.24.1",
+      },
+      "devDependencies": {
+        "typescript": "^5.8.0",
+      },
+    },
   },
   "packages": {
     "@aws-sdk/checksums": ["@aws-sdk/checksums@3.1001.1", "", { "dependencies": { "@aws-sdk/core": "^3.978.1", "@aws-sdk/types": "^3.974.6", "@smithy/core": "^3.35.0", "@smithy/types": "^4.19.0", "tslib": "^2.6.2" } }, "sha512-x12Q17KYlJAd3nKf8LV5LV0vt8sh8/6YfQLGPtrGnQf/tW4jqxPGq5GPpuVitpQYM3eUR4XB7CbxZf751NMbLw=="],
@@ -153,6 +181,10 @@
     "@debo/storage": ["@debo/storage@workspace:packages/storage"],
 
     "@debo/types": ["@debo/types@workspace:packages/types"],
+
+    "@debo/worker": ["@debo/worker@workspace:apps/worker"],
+
+    "@debo/workflows": ["@debo/workflows@workspace:packages/workflows"],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 
@@ -305,6 +337,8 @@
     "undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "which": ["which@4.0.0", "", { "dependencies": { "isexe": "^3.1.1" }, "bin": { "node-which": "bin/which.js" } }, "sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg=="],
+
+    "zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
     "@esbuild-kit/core-utils/esbuild": ["esbuild@0.18.20", "", { "optionalDependencies": { "@esbuild/android-arm": "0.18.20", "@esbuild/android-arm64": "0.18.20", "@esbuild/android-x64": "0.18.20", "@esbuild/darwin-arm64": "0.18.20", "@esbuild/darwin-x64": "0.18.20", "@esbuild/freebsd-arm64": "0.18.20", "@esbuild/freebsd-x64": "0.18.20", "@esbuild/linux-arm": "0.18.20", "@esbuild/linux-arm64": "0.18.20", "@esbuild/linux-ia32": "0.18.20", "@esbuild/linux-loong64": "0.18.20", "@esbuild/linux-mips64el": "0.18.20", "@esbuild/linux-ppc64": "0.18.20", "@esbuild/linux-riscv64": "0.18.20", "@esbuild/linux-s390x": "0.18.20", "@esbuild/linux-x64": "0.18.20", "@esbuild/netbsd-x64": "0.18.20", "@esbuild/openbsd-x64": "0.18.20", "@esbuild/sunos-x64": "0.18.20", "@esbuild/win32-arm64": "0.18.20", "@esbuild/win32-ia32": "0.18.20", "@esbuild/win32-x64": "0.18.20" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA=="],
 

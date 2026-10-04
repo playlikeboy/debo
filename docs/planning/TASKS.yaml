@@ -273,7 +273,7 @@ tasks:
     description: "Implement durable task pipelines for document ingestion, memory consolidation, and scheduled cron jobs."
     phase: 8
     priority: "P1"
-    status: "pending"
+    status: "verified"
     owner: "workflow-team"
     agent: "workflow-agent"
     depends_on: ["DEBO-0002", "DEBO-0003", "DEBO-0005", "DEBO-0006"]

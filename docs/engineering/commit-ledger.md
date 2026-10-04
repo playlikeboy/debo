@@ -79,3 +79,19 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
 
+---
+
+## `DEBO-0009` — Durable Workflows Engine & Worker Service
+
+- **Packages**: `@debo/workflows`, `@debo/worker` (`apps/worker`).
+- **Tests**: `bun test` passed 40 tests across 10 files; `turbo run typecheck` passed 10 tasks. Verified:
+  - Normative RFC 2119 typed `DeboEvent` envelope schema and event dispatching.
+  - Step memoization, exponential retries, failure compensation execution in reverse order.
+  - Cross-tenant replay violation defenses and deterministic `workspaceId` enforcement.
+  - Background tasks: `ingest.source`, `document.process`, `memory.consolidate`, `connector.sync`.
+  - HTTP worker server with GET `/health`, POST `/events`, GET `/runs/:key` endpoints aligned with Cloudflare Tunnel ingress routing (`worker.debo.life` -> `localhost:8787`).
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
+
+

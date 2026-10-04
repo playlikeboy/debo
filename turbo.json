@@ -8,11 +8,9 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "test": {
-      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"]
     },
     "lint": {
