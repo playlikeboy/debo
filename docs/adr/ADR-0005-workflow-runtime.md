@@ -5,11 +5,11 @@ accepted
 Background processing in Debo involves asynchronous, potentially multi-minute tasks: parsing 100-page PDF documents via Docling, transcribing hours of audio files, syncing thousands of emails or Notion pages via connectors, and periodic memory consolidation. Running these workloads inside Next.js serverless route handlers causes timeouts, lost tasks, and severe memory exhaustion. We need a durable execution engine.
 
 # Decision
-We adopt **Trigger.dev v3** as Debo's primary durable execution and background task engine, organized within `@debo/workflows`.
+We adopt **Trigger.dev 4.x** as Debo's primary durable execution and background task engine, organized within `@debo/workflows`.
 Tasks are defined as code-first TypeScript background jobs with automatic retries, concurrency limits, real-time streaming, and arbitrary execution duration.
 
 # Alternatives
-1. **Inngest**: Evaluated as the top runner-up (Score 4.55/5.0). Excellent HTTP step function engine, but Trigger.dev v3 provides superior local tunneling, real-time client streaming, and more straightforward long-running compute execution.
+1. **Inngest**: Evaluated as the top runner-up (Score 4.55/5.0). Excellent HTTP step function engine, but Trigger.dev 4.x provides superior local tunneling, real-time client streaming, and more straightforward long-running compute execution.
 2. **Temporal**: Enterprise-grade durable execution, but the operational complexity of deploying and managing Temporal Server, Elasticsearch, and Cassandra/PostgreSQL is prohibitive for Debo's current stage.
 3. **BullMQ / Redis**: Requires operating persistent Redis clusters and manually managing lock timeouts, retries, and checkpointing logic.
 
