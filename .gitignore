@@ -13,6 +13,7 @@ build/
 .next/
 out/
 .open-next/
+.turbo/
 *.tsbuildinfo
 
 # Python Virtual Environments & Cache

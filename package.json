@@ -1,0 +1,25 @@
+{
+  "name": "debo",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "bun-types": "^1.4.2",
+    "prettier": "^3.9.9",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.0"
+  }
+}

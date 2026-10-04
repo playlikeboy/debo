@@ -6,7 +6,7 @@ tasks:
     description: "Establish Bun workspaces, Turborepo pipeline cache, shared tsconfig base, Biome/ESLint rules, and unified scripts."
     phase: 1
     priority: "P0"
-    status: "ready"
+    status: "verified"
     owner: "foundation-team"
     agent: "foundation-agent"
     depends_on: []
@@ -41,7 +41,7 @@ tasks:
     description: "Define zero-dependency TypeScript primitives, error hierarchies, result envelopes, and brand types."
     phase: 1
     priority: "P0"
-    status: "ready"
+    status: "verified"
     owner: "domain-team"
     agent: "domain-agent"
     depends_on: ["DEBO-0001"]
