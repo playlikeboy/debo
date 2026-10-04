@@ -64,3 +64,18 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **Review**: Approved by Root Orchestrator.
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
+
+---
+
+## `DEBO-0006` & `DEBO-0007` — Memory Provider Abstraction & Grounded Citation Engine
+
+- **Packages**: `@debo/memory`, `@debo/citations`.
+- **Tests**: `bun test` passed 29 tests across 8 files; `turbo run typecheck` passed 11 tasks. Verified:
+  - Supermemory SDK client adapter with container-scoped memory injection.
+  - Degraded in-memory fallback provider with deterministic zero-tenant-leakage isolation.
+  - `MemoryService` automatic failover and resilience wrappers.
+  - Character-span exact offset extraction, non-existent quote rejection, claim grounding verification.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
+

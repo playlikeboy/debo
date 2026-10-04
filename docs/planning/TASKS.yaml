@@ -172,7 +172,7 @@ tasks:
     description: "Implement @debo/memory provider abstraction with Supermemory SDK adapter, semantic recall, and fallback degraded mode."
     phase: 4
     priority: "P0"
-    status: "pending"
+    status: "verified"
     owner: "memory-team"
     agent: "memory-agent"
     depends_on: ["DEBO-0002", "DEBO-0003"]
@@ -207,7 +207,7 @@ tasks:
     description: "Author @debo/citations with character-span, PDF bounding box, audio timecode, and strict validation against hallucinated quotes."
     phase: 4
     priority: "P0"
-    status: "pending"
+    status: "verified"
     owner: "memory-team"
     agent: "provenance-agent"
     depends_on: ["DEBO-0002", "DEBO-0005", "DEBO-0006"]

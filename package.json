@@ -10,10 +10,10 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
-    "test": "turbo run test",
-    "typecheck": "turbo run typecheck",
-    "lint": "prettier --check \"**/*.{ts,tsx,js,json,md}\"",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+    "test": "turbo run test --cache=local:r,remote:r",
+    "typecheck": "turbo run typecheck --cache=local:r,remote:r",
+    "lint": "bun node_modules/prettier/bin/prettier.cjs --check \"{packages,apps}/**/*.{ts,tsx,js,json}\"",
+    "format": "bun node_modules/prettier/bin/prettier.cjs --write \"{packages,apps}/**/*.{ts,tsx,js,json}\""
   },
   "devDependencies": {
     "@types/node": "^22.13.0",

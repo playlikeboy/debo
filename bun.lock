@@ -23,6 +23,16 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/citations": {
+      "name": "@debo/citations",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/config": {
       "name": "@debo/config",
       "version": "0.1.0",
@@ -44,6 +54,17 @@
       },
       "devDependencies": {
         "drizzle-kit": "^0.30.5",
+        "typescript": "^5.8.0",
+      },
+    },
+    "packages/memory": {
+      "name": "@debo/memory",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/config": "workspace:*",
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
         "typescript": "^5.8.0",
       },
     },
@@ -119,9 +140,13 @@
 
     "@debo/auth": ["@debo/auth@workspace:packages/auth"],
 
+    "@debo/citations": ["@debo/citations@workspace:packages/citations"],
+
     "@debo/config": ["@debo/config@workspace:packages/config"],
 
     "@debo/db": ["@debo/db@workspace:packages/db"],
+
+    "@debo/memory": ["@debo/memory@workspace:packages/memory"],
 
     "@debo/permissions": ["@debo/permissions@workspace:packages/permissions"],
 

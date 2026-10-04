@@ -46,6 +46,7 @@ env/
 
 # IDE & Editor Files
 .idea/
+.ipynb_checkpoints/
 *.swp
 *.swo
 
