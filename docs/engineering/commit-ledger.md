@@ -33,3 +33,24 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **Review**: Approved by Root Orchestrator.
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
+
+---
+
+## `DEBO-0003` — PostgreSQL Drizzle Schema & Neon Client
+
+- **Implementation Commit**: [`51702e84d6934c919d8cbeae33d5ba5d6d376fa3`](https://github.com/SH20RAJ/debo/commit/51702e84d6934c919d8cbeae33d5ba5d6d376fa3)
+- **Packages**: `@debo/db`.
+- **Tests**: `bun test packages/db` passed 3 tests with 23 assertions; `drizzle-kit generate` created clean initial migration `0000_windy_gideon.sql` covering 11 normalized tables.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
+
+---
+
+## `DEBO-0004` — Deterministic Auth, Tenancy Context & Permission Engine
+
+- **Packages**: `@debo/auth`, `@debo/permissions`.
+- **Tests**: `bun test` passed 17 tests across 5 files; `turbo run typecheck` passed 8 tasks; timing-safe SHA-256 and cross-tenant isolation verified.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`

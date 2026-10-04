@@ -12,6 +12,17 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/auth": {
+      "name": "@debo/auth",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/permissions": "workspace:*",
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/config": {
       "name": "@debo/config",
       "version": "0.1.0",
@@ -36,6 +47,16 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/permissions": {
+      "name": "@debo/permissions",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/types": {
       "name": "@debo/types",
       "version": "0.1.0",
@@ -45,9 +66,13 @@
     },
   },
   "packages": {
+    "@debo/auth": ["@debo/auth@workspace:packages/auth"],
+
     "@debo/config": ["@debo/config@workspace:packages/config"],
 
     "@debo/db": ["@debo/db@workspace:packages/db"],
+
+    "@debo/permissions": ["@debo/permissions@workspace:packages/permissions"],
 
     "@debo/types": ["@debo/types@workspace:packages/types"],
 
