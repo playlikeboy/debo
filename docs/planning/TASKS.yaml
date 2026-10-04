@@ -374,7 +374,7 @@ tasks:
     description: "Compile cyclic state graphs with checkpointing, streaming tokens, tool approvals, and memory recall."
     phase: 5
     priority: "P0"
-    status: "pending"
+    status: "verified"
     owner: "agent-team"
     agent: "langgraph-agent"
     depends_on: ["DEBO-0002", "DEBO-0004", "DEBO-0006", "DEBO-0007"]

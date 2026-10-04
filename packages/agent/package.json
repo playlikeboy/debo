@@ -1,0 +1,23 @@
+{
+  "name": "@debo/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@debo/citations": "workspace:*",
+    "@debo/connectors": "workspace:*",
+    "@debo/memory": "workspace:*",
+    "@debo/permissions": "workspace:*",
+    "@debo/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.8.0"
+  }
+}

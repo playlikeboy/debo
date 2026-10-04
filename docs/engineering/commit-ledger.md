@@ -110,5 +110,21 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
 
+---
+
+## `DEBO-0012` — LangGraph JS Agent Runtime (StateGraph Core)
+
+- **Packages**: `@debo/agent`.
+- **Tests**: `bun test` passed 51 tests across 12 files; `turbo run typecheck` passed 12 tasks. Verified:
+  - Compiled StateGraph cyclic pipeline: `plan` -> `retrieve` -> `reason` -> `validate` -> `respond`.
+  - Deterministic citation verification gate (`validateNode`): strips non-retrieved/hallucinated chunk references, verifies quotes against grounded source chunks, appends uncertainty disclaimer if unsupported ratio > 50%.
+  - Human-in-the-loop approval interrupts on Risk Tier 2 (EXTERNAL_WRITE) and Risk Tier 3 (DESTRUCTIVE) operations with graph execution pause.
+  - Graph thread resumption (`resumeWithApproval`) upon valid human signature.
+  - Transactional state checkpointer (`MemoryCheckpointer` / `PostgresCheckpointer`) with time-travel history and strict tenant boundary enforcement (`TenantMismatchError`).
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
+
+
 
 

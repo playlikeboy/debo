@@ -29,6 +29,21 @@
         "typescript": "^5.8.0",
       },
     },
+    "packages/agent": {
+      "name": "@debo/agent",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/citations": "workspace:*",
+        "@debo/connectors": "workspace:*",
+        "@debo/memory": "workspace:*",
+        "@debo/permissions": "workspace:*",
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
+        "typescript": "^5.8.0",
+      },
+    },
     "packages/auth": {
       "name": "@debo/auth",
       "version": "0.1.0",
@@ -177,6 +192,8 @@
     "@aws-sdk/xml-builder": ["@aws-sdk/xml-builder@3.972.41", "", { "dependencies": { "@smithy/types": "^4.19.0", "tslib": "^2.6.2" } }, "sha512-ctjVSyCMegrWfXlx6VqzSBFI6UqmQ5ZlnfMhdLIiWmhoH8UAQxSCP5N3OpG7X3k4LnS7ou74C4mt20+bfTW2aQ=="],
 
     "@aws/lambda-invoke-store": ["@aws/lambda-invoke-store@0.3.0", "", {}, "sha512-sl4Bm6yiMNYrZKkqqDFWN0UfnWhlS8ivKxrYl+6t0gCLrqr8y3B2IqZZbFRkfaVVp7C/baApyh71P+LeE1A2sQ=="],
+
+    "@debo/agent": ["@debo/agent@workspace:packages/agent"],
 
     "@debo/auth": ["@debo/auth@workspace:packages/auth"],
 
