@@ -158,3 +158,20 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **Review**: Approved by Root Orchestrator.
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
+
+---
+
+## `DEBO-0010` — Document Worker Service (apps/document-worker + Docling)
+
+- **Packages**: `apps/document-worker`.
+- **Tests**: `pytest apps/document-worker/tests` passed 7 tests in 0.42s; `bun test` passed 61 tests; `turbo run typecheck` passed 16 tasks. Verified:
+  - Isolated Python 3.12 FastAPI service executing document conversion and structural layout parsing according to `docs/contracts/document-worker.md` and `ADR-0011`.
+  - Exact paragraph-level and table-cell bounding box generation with normalized coordinates (`[x0, y0, x1, y1]`) enabling pixel-level citation rendering.
+  - Table detection and structured cell parsing for complex research papers and tabular reports.
+  - `POST /process-document`, `POST /process-file`, and `POST /jobs/parse` endpoints matching durable workflow trigger contracts.
+  - Non-LLM Authority enforcement: strict validation of `DEBO_INTERNAL_AUTH_SECRET` Bearer token.
+  - Security and DoS defenses: decompression bomb defense, file size limits (50MB / 500 pages), PDF header verification (`%PDF-`), and SSRF protection on download URLs.
+  - Non-root container deployment via Dockerfile (`debo:debo`, UID 1000) with container healthcheck.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
