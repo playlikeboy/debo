@@ -1,64 +1,40 @@
 # Debo Model Context Protocol (MCP) Server Architecture
 
-Debo provides an official **Model Context Protocol (MCP)** server (`apps/mcp/`) that exposes personal memory, source documents, contextual entities, and actions to external AI clients (Claude Desktop, Cursor, Zed, standalone autonomous agents).
+Debo exposes an MCP server from `apps/mcp/` for external AI clients. The MCP layer is an adapter over Debo's authenticated domain services, not a second business-logic stack.
 
----
+## 1. Current Protocol Baseline
 
-## 1. Protocol Architecture & Transports
+- **Protocol:** MCP 2026-07-28.
+- **TypeScript SDK:** v2.
+- **Remote transport:** Streamable HTTP at `https://mcp.debo.life/mcp`.
+- **Local transport:** stdio.
+- **Legacy HTTP+SSE:** not the primary transport; the current specification deprecates the legacy transport.
 
-Debo implements the official `@modelcontextprotocol/sdk` (TypeScript) across dual transports:
+Exact SDK package versions are pinned during Phase 1 after revalidating the official migration and serving guides.
 
-```text
-[ External AI Client ] (Claude Desktop / Cursor)
-           │
-           ├────────────────────────┬────────────────────────┐
-           ▼                        ▼                        ▼
-    Remote Transport         Local Transport          MCP Apps View
-  (HTTP / SSE via Cloudflare)   (Local Stdio)       (Interactive Canvas)
-  https://mcp.debo.life/mcp
-           │
-           ▼
-┌──────────────────────────────────────┐
-│        Debo MCP Server Layer         │
-│  - API Key Auth & Workspace Scoping  │
-│  - Deterministic Tool Gatekeeper     │
-│  - Rate Limiter & Audit Logger       │
-└──────────────────┬───────────────────┘
-                   │
-         ┌─────────┼─────────┐
-         ▼         ▼         ▼
-     [ Tools ] [Resources] [Prompts]
-```
+## 2. Capability Model
 
-### Supported Transports:
-1. **Remote SSE / HTTP Transport**: Hosted at `https://mcp.debo.life/mcp` (configurable). Authenticated via `Authorization: Bearer debo_mcp_...`. Designed for cloud agents and mobile clients.
-2. **Local Stdio Transport**: Packaged as a local CLI runner (`debo mcp run`) for local Claude Desktop or Cursor configurations accessing local or remote Debo accounts.
+Debo can expose:
+- **Tools** for authorized actions and retrieval.
+- **Resources** for source-grounded context where appropriate.
+- **Prompts** for reusable, bounded workflows.
 
----
+Capability exposure is filtered by deterministic Debo permissions. The model never decides whether a capability is permitted.
 
-## 2. Capability Discovery & Handshake
+## 3. Authentication, Tenancy & Audit
 
-During client initialization, Debo advertises its server capabilities:
-- **`tools`**: Dynamic tool catalog scoped to the API key's authorized permissions.
-- **`resources`**: URI-based memory and document streaming (e.g. `debo://workspaces/{id}/sources/{id}`).
-- **`prompts`**: Pre-configured synthesis prompts for personal briefing, daily planning, and decision analysis.
+1. Resolve the presenting credential to an authorized `(userId, workspaceId)` before accessing Debo data.
+2. Apply capability scopes and object-level authorization in Debo code.
+3. Keep secrets out of tool outputs, logs, and model-visible state.
+4. Record tool invocations in the audit model with actor and correlation metadata.
+5. Apply rate limits and output-size bounds appropriate to the endpoint.
 
----
+## 4. Security
 
-## 3. Authentication, Multi-Tenancy & Rate Limiting
+Treat retrieved source material as untrusted input because indirect prompt injection can originate in documents, email, websites, or connector data. Tool handlers must validate inputs, scope data, constrain outputs, and avoid confused-deputy behavior.
 
-1. **Deterministic Tenant Resolution**:
-   - Every MCP API key is prefixed `debo_mcp_` and hashed with SHA-256 before storage in PostgreSQL.
-   - The key resolves to exactly one `(userId, workspaceId)` pair and an associated set of capability scopes.
-2. **Rate Limiting**:
-   - Remote SSE endpoints enforce token-bucket rate limits per API key (default: 60 requests/minute) to prevent denial-of-service and runaway loops by external agents.
-3. **Audit Logging**:
-   - Every MCP tool call is recorded in `AuditLog` with `actorType: 'mcp_client'`.
+## 5. Documentation
 
----
-
-## 4. MCP Documentation Index
-
-- **[Tools Taxonomy Specification](file:///home/kunalkashyap8024/sop/debo/docs/mcp/tools-taxonomy.md)** — Complete catalog of all 21 standard Debo MCP tools.
-- **[MCP Security & Threat Model](file:///home/kunalkashyap8024/sop/debo/docs/mcp/security.md)** — Comprehensive defense against indirect injection, confused deputy, and data leakage.
-- **[MCP Apps & Interactive UI](file:///home/kunalkashyap8024/sop/debo/docs/mcp/mcp-apps.md)** — Delivering interactive UI frames into external agent canvases.
+- [Tools taxonomy](tools-taxonomy.md)
+- [Security and threat model](security.md)
+- [MCP Apps](mcp-apps.md)
