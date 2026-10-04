@@ -17,3 +17,7 @@ This document is a normative specification using RFC 2119 language.
 
 - Workflow triggers MUST conform to the `DeboEvent` envelope schema defined in `docs/workflows/event-model.md`.
 - Workflow events MUST be logged in the database or Trigger.dev run ledger with correlation tracking (`workflowRunId`, `traceId`).
+
+## 3. Provider Boundary
+
+Debo workflow contracts MUST remain provider-neutral at the domain level. Trigger.dev-specific APIs belong in the workflow adapter/implementation layer so a future migration does not require rewriting business entities or event schemas.
