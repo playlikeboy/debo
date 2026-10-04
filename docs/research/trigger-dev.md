@@ -1,88 +1,64 @@
-# Trigger.dev v3
+# Trigger.dev 4.x
 
 ## Problem solved
-Developer-first durable execution and background job framework for TypeScript, supporting long-running tasks, infinite timeouts, real-time log and state streaming, automatic retries, and scheduled crons with zero infrastructure management.
+
+Durable background execution for TypeScript applications: long-running tasks, retries, scheduling, concurrency controls, real-time run visibility, and durable waits without relying on short-lived web-request execution.
 
 ## Why considered
-Debo performs complex, long-running asynchronous tasks: document ingestion, PDF OCR layout extraction, audio transcription chunking, vector embedding, and periodic memory consolidation. Serverless Next.js API routes time out after 15-60 seconds and cannot support these workloads reliably.
 
-## Official repository
-`https://github.com/triggerdotdev/trigger.dev`
+Debo needs durable execution for ingestion, document-processing dispatch, transcription, connector synchronization, memory consolidation, and other jobs that should survive client disconnects, redeploys, and transient failures.
 
-## Official documentation
-`https://trigger.dev/docs`
+## Current evidence
 
-## Current version/date checked
-v3.x / Checked October 2026
+- **Observed current release:** Trigger.dev **v4.6.4**, from the official changelog checked on 2026-10-04.
+- **v4 status:** Trigger.dev v4 reached general availability in August 2025.
+- **v3 status:** Trigger.dev v3 support was removed in v4.5.4+, so Debo does not target v3.
+- **Pricing observed:** Free $0/month with $5 monthly credits; Hobby $10/month with $10 monthly credits; Pro $50/month with $50 monthly credits. Treat pricing as vendor-reported and re-check before purchase decisions.
+- **Self-hosting:** Official self-hosted Docker releases exist; exact infrastructure requirements must be verified during Phase 1 before committing to an operating model.
 
-## License
-Apache 2.0.
+## Deployment model
 
-## Deployment models
-Trigger.dev Cloud (managed execution) or self-hosted Docker / Kubernetes cluster.
+Debo will use Trigger.dev as the durable execution layer. Exact package and runtime versions are pinned during Phase 1 after an implementation spike.
 
-## TypeScript support
-Native, TypeScript-first design. Full end-to-end type safety between task definitions and client callers.
+## TypeScript / runtime fit
 
-## Python support
-Task runner supports polyglot execution; Python scripts can be spawned or called via container tasks.
+Trigger.dev is TypeScript-first. Debo keeps domain workflow contracts separate from provider SDK calls so a future workflow engine migration remains possible.
 
-## MCP support
-Trigger.dev tasks can expose or consume MCP tool calls cleanly.
+## Security / tenancy
 
-## Agent framework support
-Ideal for hosting long-running LangGraph runs that require durable checkpointing across network boundaries.
-
-## Workflow support
-Core domain: durable step execution, concurrency controls, rate limits, and failure compensation.
-
-## Self-hosting
-Complete self-hosting guide using Docker Compose, PostgreSQL, and Redis.
-
-## Docker
-Official Docker images and self-hosted templates maintained by the core team.
-
-## Authentication
-Project API keys with environment separation (development, staging, production).
-
-## Multi-tenancy
-Supports task metadata tagging (`workspaceId`, `userId`) and queue concurrency limits per tenant.
-
-## Security
-Encrypted payloads, isolated task execution sandboxes, and secure secret injection.
-
-## Observability
-World-class developer UI showing real-time console output, execution spans, retries, and duration breakdowns.
+Debo must not rely on workflow metadata as the sole authorization boundary. Every task receives and verifies Debo tenant context, and secrets remain in the platform's secret-management layer.
 
 ## Strengths
-- Code-first TypeScript syntax (write ordinary async functions; Trigger makes them durable).
-- Real-time streaming output to the web UI via SDK subscriptions.
-- Exceptional local development CLI (`trigger.dev dev`) that tunnels tasks seamlessly.
-- Handles long-running multi-minute workloads without Lambda/Vercel timeout limits.
 
-## Weaknesses
-- Self-hosting v3 requires operating several backend services (PostgreSQL, Redis, ClickHouse for logs).
-- Cloud pricing transitions to compute-second billing for heavy long-running workers.
+- Strong fit for long-running TypeScript workflows.
+- v4 includes durable waits and expanded AI-agent support.
+- Managed cloud reduces early operational burden.
+- Dev-branch workflows help parallel development.
+
+## Weaknesses / risks
+
+- Provider-specific workflow primitives can create coupling.
+- Cloud pricing must be modelled against real Debo workloads.
+- Self-hosting increases operational responsibility.
 
 ## Alternatives considered
-Inngest (very strong, step-function model), Temporal (extreme operational overhead for a small team), BullMQ (no native durable step semantics).
 
-## Benchmark evidence
-Sub-50ms trigger dispatch latency; handles thousands of concurrent background jobs with automatic backpressure.
+- **Inngest:** strong event/function model and credible alternative.
+- **Temporal:** highly capable but operationally heavier for Debo's initial deployment.
+- **BullMQ / pg-boss:** useful lower-level queue options, but require Debo to own more orchestration semantics.
 
-## Cost considerations
-Free tier provides 50,000 runs/month; Pro tier starts at $50/mo. Self-hosting cost depends on VPS sizing (~$20-40/mo).
+## Benchmark status
 
-## Exit strategy
-Because task definitions are standard TypeScript functions, tasks can be refactored to standard worker queues (BullMQ/PgBoss) with minimal logic rewrites.
+**No Debo-run performance benchmark is claimed here.** Vendor latency, throughput, and concurrency figures remain vendor-reported until reproduced in the Debo environment.
 
 ## Recommendation
-**Accepted as Primary Durable Workflow Runtime** for Debo. All document ingestion, memory indexing, and background worker jobs must run via Trigger.dev v3.
 
-## Confidence
-Very High (4.8 / 5.0)
+**Accepted as the primary durable workflow platform**, with exact version pinning and provider-neutral internal workflow contracts completed during implementation.
 
 ## Sources
-- Official repository: https://github.com/triggerdotdev/trigger.dev
-- Documentation: https://trigger.dev/docs
-- npm package: `@trigger.dev/sdk`
+
+- https://trigger.dev/docs
+- https://trigger.dev/pricing
+- https://trigger.dev/changelog/trigger-v4-ga
+- https://trigger.dev/changelog/v4-5-4
+- https://trigger.dev/changelog/v4-6-4
