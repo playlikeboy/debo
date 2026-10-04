@@ -1,9 +1,9 @@
 # Debo — Private AI Memory & Context Operating System
 
-[![Phase](https://img.shields.io/badge/Phase_0-Clean--Room_Documentation-blue.svg)](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md)
-[![Architecture Status](https://img.shields.io/badge/Architecture-Design_Baseline-success.svg)](file:///home/kunalkashyap8024/sop/debo/docs/architecture/system-overview.md)
-[![Implementation Status](https://img.shields.io/badge/Implementation-Not_Started-orange.svg)](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](file:///home/kunalkashyap8024/sop/debo/LICENSE)
+[![Phase](https://img.shields.io/badge/Phase_0-Clean--Room_Documentation-blue.svg)](PROJECT_STATUS.md)
+[![Architecture Status](https://img.shields.io/badge/Architecture-Design_Baseline-success.svg)](docs/architecture/system-overview.md)
+[![Implementation Status](https://img.shields.io/badge/Implementation-Not_Started-orange.svg)](PROJECT_STATUS.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **"Capture anything. Ask your past. Trust every answer."**
 
@@ -134,7 +134,7 @@ Debo relies on rigorous technical evaluation rather than popularity:
 | **Agent Runtime** | LangGraph JS | Deterministic graph orchestration, state checkpointing, and human approvals. |
 | **Memory Engine** | Supermemory (with Provider Abstraction) | Hybrid semantic/temporal memory with zero vendor lock-in. |
 | **Action Connectors** | Composio | Managed OAuth and execution for 1000+ external SaaS tools. |
-| **Durable Workflows**| Trigger.dev v3 | Code-first serverless durable tasks with real-time streaming and local dev support. |
+| **Durable Workflows**| Trigger.dev 4.x | Code-first serverless durable tasks with real-time streaming and local dev support. |
 | **Database** | Neon PostgreSQL | Serverless PostgreSQL with instant branching and Drizzle ORM. |
 | **Object Store** | Cloudflare R2 | Zero-egress fee S3-compatible storage for raw source files. |
 | **External Agent API**| Model Context Protocol (MCP) | Universal protocol supported by Claude, Cursor, and emerging agents. |
@@ -143,16 +143,16 @@ Debo relies on rigorous technical evaluation rather than popularity:
 
 ## 6. Documentation Navigator
 
-All architectural decisions, technical specifications, and research evaluations are documented under [`docs/`](file:///home/kunalkashyap8024/sop/debo/docs/README.md):
+All architectural decisions, technical specifications, and research evaluations are documented under [`docs/`](docs/README.md):
 
-- **[System Architecture](file:///home/kunalkashyap8024/sop/debo/docs/architecture/system-overview.md)** — Core components, communication patterns, and boundaries.
-- **[Architecture Decision Records (ADRs)](file:///home/kunalkashyap8024/sop/debo/docs/adr/README.md)** — Historical context and justifications for all 15 foundational decisions.
-- **[Technology Research & Scorecards](file:///home/kunalkashyap8024/sop/debo/docs/research/scorecard.md)** — Evidence-based technology assessments of candidate technologies.
-- **[Memory Engine & Evals](file:///home/kunalkashyap8024/sop/debo/docs/memory/README.md)** — Memory lifecycle, source-grounding rules, and retrieval benchmarks.
-- **[MCP Server Specification](file:///home/kunalkashyap8024/sop/debo/docs/mcp/README.md)** — Tool taxonomy, modern Streamable HTTP/stdio transports, and injection defenses.
-- **[Data Model & Tenancy](file:///home/kunalkashyap8024/sop/debo/docs/data-model/README.md)** — Complete domain entities, lifecycle states, and tenant scoping.
-- **[Security & Threat Model](file:///home/kunalkashyap8024/sop/debo/SECURITY.md)** — Zero-trust access invariants, non-LLM permission authority, and secret hygiene.
-- **[Product Roadmap & Backlog](file:///home/kunalkashyap8024/sop/debo/docs/planning/ROADMAP.md)** — 16-phase implementation plan and detailed DEBO tickets.
+- **[System Architecture](docs/architecture/system-overview.md)** — Core components, communication patterns, and boundaries.
+- **[Architecture Decision Records (ADRs)](docs/adr/README.md)** — Historical context and justifications for all 15 foundational decisions.
+- **[Technology Research & Scorecards](docs/research/scorecard.md)** — Evidence-based technology assessments of candidate technologies.
+- **[Memory Engine & Evals](docs/memory/README.md)** — Memory lifecycle, source-grounding rules, and retrieval benchmarks.
+- **[MCP Server Specification](docs/mcp/README.md)** — Tool taxonomy, modern Streamable HTTP/stdio transports, and injection defenses.
+- **[Data Model & Tenancy](docs/data-model/README.md)** — Complete domain entities, lifecycle states, and tenant scoping.
+- **[Security & Threat Model](SECURITY.md)** — Zero-trust access invariants, non-LLM permission authority, and secret hygiene.
+- **[Product Roadmap & Backlog](docs/planning/ROADMAP.md)** — 16-phase implementation plan and detailed DEBO tickets.
 
 ---
 
@@ -163,22 +163,22 @@ Debo is currently executing **Phase 0 (Clean-Room Documentation & Architecture B
 - **Product implementation**: Not yet started.
 - **Verification**: The documentation baseline is being reconciled before functional code is merged in Phase 1.
 
-Track live progress in [PROJECT_STATUS.md](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md).
+Track live progress in [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ---
 
 ## 8. Contributing & Governance
 
 Contributions to Debo follow our strict architectural review process. All PRs must align with established ADRs and pass documentation validation:
-- Review [AGENTS.md](file:///home/kunalkashyap8024/sop/debo/AGENTS.md) for coding agent guidelines.
-- Review [CONTRIBUTING.md](file:///home/kunalkashyap8024/sop/debo/CONTRIBUTING.md) for branch and PR workflows.
-- Review [CODE_OF_CONDUCT.md](file:///home/kunalkashyap8024/sop/debo/CODE_OF_CONDUCT.md) for community standards.
+- Review [AGENTS.md](AGENTS.md) for coding agent guidelines.
+- Review [CONTRIBUTING.md](CONTRIBUTING.md) for branch and PR workflows.
+- Review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
 
 ---
 
 ## 9. License
 
-Debo is licensed under the [MIT License](file:///home/kunalkashyap8024/sop/debo/LICENSE).
+Debo is licensed under the [MIT License](LICENSE).
 Copyright (c) 2026 Debo Contributors.
 
 
