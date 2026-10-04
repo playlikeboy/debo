@@ -31,16 +31,24 @@
 
 ## Infrastructure & Edge Ingress Mapping (`debo.life`)
 
-All host daemon ingress is configured via Cloudflare Tunnels (`~/.cloudflared/config.yml`) with active TLS terminating at the Cloudflare edge:
+All host daemon ingress is configured via Cloudflare Custom Domains on Cloudflare Edge Worker (`apps/gateway`) and backed by Cloudflare Tunnels (`~/.cloudflared/config.yml`) with active TLS terminating at the Cloudflare edge:
 
-| Subdomain | Target Ingress | Service / Application | Description |
-|---|---|---|---|
-| `app.debo.life` | `http://127.0.0.1:3000` | `apps/web` | Product Web UI & AG-UI streaming endpoints |
-| `mcp.debo.life` | `http://127.0.0.1:8080` | `apps/mcp` | Official Model Context Protocol 2026-07-28 server |
-| `worker.debo.life` | `http://127.0.0.1:8787` | `apps/worker` | Durable workflow background worker |
-| `docs.debo.life` | `http://127.0.0.1:3001` | Documentation | Static documentation mirror |
+| Domain / Subdomain | Protocol | Target / Edge Provider | Port / Status | Description |
+|---|---|---|---|---|
+| `debo.life` | HTTPS / HTTP/2 | Cloudflare Edge / OpenNext | 200 OK | Public product landing page |
+| `app.debo.life` | HTTPS / HTTP/2 | Vercel / Next.js App | 307 &rarr; /handler/sign-in | Web Application, Dashboard & AG-UI Streaming |
+| `docs.debo.life` | HTTPS / HTTP/1.1 | Cloudflare Edge Worker | 200 OK | Platform Architecture, Warm Paper Documentation & Specs |
+| `worker.debo.life` | HTTPS / JSON | Cloudflare Edge + VPS | 200 OK (`:8787`) | Debo Durable Workflow Engine & Event Ingestion |
+| `mcp.debo.life` | MCP 2026-07-28 | Cloudflare Edge + VPS | 200 OK (`:8082`) | Official Model Context Protocol Streamable HTTP Server |
+| `docworker.debo.life` | HTTPS / JSON | Cloudflare Edge + VPS | 200 OK (`:8005`) | Specialized Python Docling Document Worker |
 
-All legacy domains (`campusloop.space`) have been revoked and deleted from the ingress configuration.
+### VPS Daemon Supervisor (`scripts/manage-vps-services.sh`)
+Persistent background daemons managed on VPS host (`rachel.local`):
+- `docworker` (Python 3 Docling FastAPI on `:8005`)
+- `web` (Debo Web SSR on `:3002`)
+- `worker` (Durable Workflow Engine on `:8787`)
+- `mcp` (Model Context Protocol Server on `:8082`)
+- `cloudflared` (Cloudflare Tunnel `a5275ec6-92d6-4c67-b0cc-0cb6f767967e`)
 
 ---
 
