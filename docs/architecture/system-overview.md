@@ -92,7 +92,7 @@ No external vendor or satellite service may become an implicit canonical owner o
             ┌──────────────────┴──────────────────┐
             ▼                                     ▼
 ┌──────────────────────────────┐      ┌──────────────────────────────┐
-│     Cloudflare R2 (Raw)      │      │   Memory Engine / Vector     │
+│     Cloudflare R2 (Raw Source Storage)      │      │   Memory Provider / Derived Retrieval     │
 │   Canonical Storage for:     │      │   Acceleration Engine:       │
 │   - Raw PDFs & Documents     │      │   - Derived semantic indices │
 │   - Original Audio / Voice   │      │   - Fast vector similarity   │
@@ -100,7 +100,7 @@ No external vendor or satellite service may become an implicit canonical owner o
 └──────────────────────────────┘      └──────────────────────────────┘
 ```
 
-1. **Neon PostgreSQL** owns business truth. If the memory engine or vector store is wiped or corrupted, the system can completely reconstruct it by replaying records from PostgreSQL.
+1. **Neon PostgreSQL** owns business truth. If provider-derived retrieval state is wiped or corrupted, Debo can rebuild supported derived state from canonical Debo records and raw sources.
 2. **Cloudflare R2** owns raw binary truth. If processed document chunks are deleted, they can be re-extracted from original files in R2.
 3. **Supermemory / Vector Stores** are derived retrieval structures. They never hold unique business state that does not exist in PostgreSQL or R2.
 4. **Composio / Nango** are execution and integration layers. They do not own Debo product state.
