@@ -13,7 +13,7 @@
 
 Debo is an open-source, private personal memory and context operating system. It ingests voice memos, daily journals, research documents, PDFs, calendar events, communications, and connected tools into a structured, temporal memory graph. 
 
-Whenever you query Debo, it retrieves relevant facts, synthesizes answers through a deterministic agent graph, and **provides strict, source-backed citations linking directly back to the original immutable source data**.
+Whenever you query Debo, it retrieves relevant facts, synthesizes answers through a deterministic agent graph, and **provides source-grounded citations that resolve to provenance metadata for the original source data**.
 
 Debo also serves as an external context layer for external AI agents (Claude Desktop, Cursor, local LLMs) via the standardized **Model Context Protocol (MCP)**.
 
@@ -147,9 +147,9 @@ All architectural decisions, technical specifications, and research evaluations 
 
 - **[System Architecture](file:///home/kunalkashyap8024/sop/debo/docs/architecture/system-overview.md)** — Core components, communication patterns, and boundaries.
 - **[Architecture Decision Records (ADRs)](file:///home/kunalkashyap8024/sop/debo/docs/adr/README.md)** — Historical context and justifications for all 15 foundational decisions.
-- **[Technology Research & Scorecards](file:///home/kunalkashyap8024/sop/debo/docs/research/scorecard.md)** — Empirical 17-vector evaluations of candidate technologies.
+- **[Technology Research & Scorecards](file:///home/kunalkashyap8024/sop/debo/docs/research/scorecard.md)** — Evidence-based technology assessments of candidate technologies.
 - **[Memory Engine & Evals](file:///home/kunalkashyap8024/sop/debo/docs/memory/README.md)** — Memory lifecycle, source-grounding rules, and retrieval benchmarks.
-- **[MCP Server Specification](file:///home/kunalkashyap8024/sop/debo/docs/mcp/README.md)** — Tool taxonomy, SSE transports, and injection defenses.
+- **[MCP Server Specification](file:///home/kunalkashyap8024/sop/debo/docs/mcp/README.md)** — Tool taxonomy, modern Streamable HTTP/stdio transports, and injection defenses.
 - **[Data Model & Tenancy](file:///home/kunalkashyap8024/sop/debo/docs/data-model/README.md)** — Complete domain entities, lifecycle states, and tenant scoping.
 - **[Security & Threat Model](file:///home/kunalkashyap8024/sop/debo/SECURITY.md)** — Zero-trust access invariants, non-LLM permission authority, and secret hygiene.
 - **[Product Roadmap & Backlog](file:///home/kunalkashyap8024/sop/debo/docs/planning/ROADMAP.md)** — 16-phase implementation plan and detailed DEBO tickets.
@@ -161,7 +161,7 @@ All architectural decisions, technical specifications, and research evaluations 
 Debo is currently executing **Phase 0 (Clean-Room Documentation & Architecture Bootstrap)**. 
 - **Legacy code**: Successfully deleted and archived.
 - **Product implementation**: Not yet started.
-- **Verification**: All specifications, schemas, ADRs, and threat models must be fully aligned and approved before functional code is merged in Phase 1.
+- **Verification**: The documentation baseline is being reconciled before functional code is merged in Phase 1.
 
 Track live progress in [PROJECT_STATUS.md](file:///home/kunalkashyap8024/sop/debo/PROJECT_STATUS.md).
 
@@ -180,3 +180,6 @@ Contributions to Debo follow our strict architectural review process. All PRs mu
 
 Debo is licensed under the [MIT License](file:///home/kunalkashyap8024/sop/debo/LICENSE).
 Copyright (c) 2026 Debo Contributors.
+
+
+> **Documentation status:** research and architecture pages distinguish official evidence, vendor claims, repo observations, independent benchmarks, and future Debo-measured results. See `docs/audits/documentation-audit.md`.
