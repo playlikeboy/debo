@@ -238,7 +238,7 @@ tasks:
     description: "Build official MCP server with Streamable HTTP and stdio transports using official @modelcontextprotocol/sdk."
     phase: 9
     priority: "P1"
-    status: "pending"
+    status: "verified"
     owner: "mcp-team"
     agent: "mcp-agent"
     depends_on: ["DEBO-0002", "DEBO-0004", "DEBO-0006"]

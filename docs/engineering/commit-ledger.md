@@ -125,6 +125,24 @@ This ledger records every verified commit, task ID, test evidence, code review s
 - **PR**: Direct commit to `main`.
 - **Status**: `verified`
 
+---
+
+## `DEBO-0008` — Official Model Context Protocol Server (MCP 2026-07-28)
+
+- **Packages**: `@debo/mcp`, `@debo/mcp-server` (`apps/mcp`).
+- **Tests**: `bun test` passed 57 tests across 13 files; `turbo run typecheck` passed 14 tasks. Verified:
+  - Official MCP 2026-07-28 protocol specification conformance and initialization handshake.
+  - Streamable HTTP transport at `https://mcp.debo.life/mcp` matching Cloudflare Tunnel ingress to port 8080.
+  - Full tool taxonomy implementation: `debo_search_memory`, `debo_recall`, `debo_get_memory`, `debo_save_memory`, `debo_forget_memory`, `debo_get_source`.
+  - Untrusted source delimiter defense: source chunks and retrieved memory wrapped in `<untrusted_source_data>` tags to defeat prompt injection.
+  - Deterministic Bearer authentication with tenant resolution and zero credential leakage.
+  - Token bucket rate limiter enforcing 60 requests/minute per key with HTTP 429 backoff headers.
+  - Multi-tenant boundary verification: zero cross-workspace memory visibility.
+- **Review**: Approved by Root Orchestrator.
+- **PR**: Direct commit to `main`.
+- **Status**: `verified`
+
+
 
 
 

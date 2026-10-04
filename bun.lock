@@ -12,6 +12,22 @@
         "typescript": "^5.8.0",
       },
     },
+    "apps/mcp": {
+      "name": "@debo/mcp-server",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/auth": "workspace:*",
+        "@debo/config": "workspace:*",
+        "@debo/mcp": "workspace:*",
+        "@debo/memory": "workspace:*",
+        "@debo/storage": "workspace:*",
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
+        "typescript": "^5.8.0",
+      },
+    },
     "apps/worker": {
       "name": "@debo/worker",
       "version": "0.1.0",
@@ -98,6 +114,22 @@
       },
       "devDependencies": {
         "drizzle-kit": "^0.30.5",
+        "typescript": "^5.8.0",
+      },
+    },
+    "packages/mcp": {
+      "name": "@debo/mcp",
+      "version": "0.1.0",
+      "dependencies": {
+        "@debo/auth": "workspace:*",
+        "@debo/citations": "workspace:*",
+        "@debo/memory": "workspace:*",
+        "@debo/permissions": "workspace:*",
+        "@debo/storage": "workspace:*",
+        "@debo/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "^22.13.0",
         "typescript": "^5.8.0",
       },
     },
@@ -204,6 +236,10 @@
     "@debo/connectors": ["@debo/connectors@workspace:packages/connectors"],
 
     "@debo/db": ["@debo/db@workspace:packages/db"],
+
+    "@debo/mcp": ["@debo/mcp@workspace:packages/mcp"],
+
+    "@debo/mcp-server": ["@debo/mcp-server@workspace:apps/mcp"],
 
     "@debo/memory": ["@debo/memory@workspace:packages/memory"],
 

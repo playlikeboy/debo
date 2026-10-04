@@ -1,0 +1,25 @@
+{
+  "name": "@debo/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "@debo/auth": "workspace:*",
+    "@debo/config": "workspace:*",
+    "@debo/mcp": "workspace:*",
+    "@debo/memory": "workspace:*",
+    "@debo/storage": "workspace:*",
+    "@debo/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.8.0"
+  }
+}
