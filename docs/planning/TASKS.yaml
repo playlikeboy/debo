@@ -1,5 +1,5 @@
 version: "1.0"
-updated_at: "2026-10-04T12:47:00Z"
+updated_at: "2026-10-05T04:35:00Z"
 tasks:
   - id: "DEBO-0001"
     title: "Monorepo Scaffolding & Shared Tooling Bootstrap"
@@ -406,10 +406,10 @@ tasks:
 
   - id: "DEBO-0013"
     title: "Agentic UI Protocol & Web Application (apps/web)"
-    description: "Build Next.js App Router product web app with AG-UI streaming protocol, calm editorial Radix/Tailwind components."
+    description: "Build the specified React/Next.js App Router web app with AG-UI streaming, Tailwind CSS, Radix UI primitives, and a production rich-text journal editor (BlockNote preferred; Tiptap is the fallback when deeper editor customization is required)."
     phase: 6
     priority: "P0"
-    status: "verified"
+    status: "blocked"
     owner: "frontend-team"
     agent: "frontend-agent"
     depends_on: ["DEBO-0001", "DEBO-0002", "DEBO-0004", "DEBO-0012"]
@@ -419,8 +419,11 @@ tasks:
     spec: "docs/specs/ui-spec.md"
     contract: "docs/product/routes.md"
     acceptance_criteria:
-      - "Routes implemented: /, /login, /app, /app/ask, /app/journal, /app/library, /app/timeline"
+      - "Routes implemented: /, /login, /signup, /app, /app/ask, /app/journal, /app/library, /app/timeline, and required settings routes"
+      - "App is a React + Next.js App Router application with file-system routing and client/server component boundaries"
+      - "Tailwind CSS is the styling system and Radix UI primitives provide accessible interactive behavior"
       - "AG-UI protocol streaming text, citations, tool calls, and approval prompts"
+      - "Journal capture uses a real rich-text editor with keyboard formatting, slash/command affordances, serialization, and accessible editing semantics; BlockNote is the preferred default, Tiptap is the approved alternative"
       - "Bespoke editorial aesthetic adhering to pbakaus/impeccable design system"
     security_requirements:
       - "Content Security Policy (CSP), Strict Transport Security, CSRF tokens"
@@ -436,7 +439,7 @@ tasks:
     branch: "agent/frontend/DEBO-0013"
     commit: null
     pr: null
-    verification: "bun test apps/web && bun run build --filter=web"
+    verification: "bun test apps/web && bun run typecheck --filter=web && bun run build --filter=web && Playwright E2E for login -> journal capture -> ask flow"
 
   - id: "DEBO-0014"
     title: "End-to-End Product Verification & Hardening"
