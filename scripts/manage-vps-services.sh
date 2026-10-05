@@ -10,7 +10,7 @@ REPO_DIR="/home/kunalkashyap8024/sop/debo"
 LOG_DIR="/home/kunalkashyap8024/logs/debo"
 PID_DIR="/home/kunalkashyap8024/logs/debo/pids"
 CLOUDFLARED="/home/kunalkashyap8024/.local/bin/cloudflared"
-CF_CONFIG="/home/kunalkashyap8024/.cloudflared/config.yml"
+CF_CONFIG="/home/kunalkashyap8024/.cloudflared/debo-config.yml"
 TUNNEL_ID="a5275ec6-92d6-4c67-b0cc-0cb6f767967e"
 PYTHON="/home/kunalkashyap8024/.venvs/debo-docworker/bin/python"
 
