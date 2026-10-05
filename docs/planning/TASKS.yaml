@@ -172,7 +172,7 @@ tasks:
     description: "Implement @debo/memory provider abstraction with Supermemory SDK adapter, semantic recall, and fallback degraded mode."
     phase: 4
     priority: "P0"
-    status: "verified"
+    status: "blocked"
     owner: "memory-team"
     agent: "memory-agent"
     depends_on: ["DEBO-0002", "DEBO-0003"]
@@ -238,7 +238,7 @@ tasks:
     description: "Build official MCP server with Streamable HTTP and stdio transports using official @modelcontextprotocol/sdk."
     phase: 9
     priority: "P1"
-    status: "verified"
+    status: "blocked"
     owner: "mcp-team"
     agent: "mcp-agent"
     depends_on: ["DEBO-0002", "DEBO-0004", "DEBO-0006"]
@@ -269,11 +269,11 @@ tasks:
     verification: "bun test apps/mcp"
 
   - id: "DEBO-0009"
-    title: "Durable Workflows Engine (apps/worker + Trigger.dev v3)"
-    description: "Implement durable task pipelines for document ingestion, memory consolidation, and scheduled cron jobs."
+    title: "Durable Workflows Engine (apps/worker + Trigger.dev 4.x)"
+    description: "Implement durable task pipelines using Trigger.dev 4.x for document ingestion, memory consolidation, and scheduled cron jobs; current in-memory TaskExecutor is only a local fallback and does not satisfy the production runtime contract."
     phase: 8
     priority: "P1"
-    status: "verified"
+    status: "blocked"
     owner: "workflow-team"
     agent: "workflow-agent"
     depends_on: ["DEBO-0002", "DEBO-0003", "DEBO-0005", "DEBO-0006"]
@@ -303,10 +303,10 @@ tasks:
 
   - id: "DEBO-0010"
     title: "Document Worker Service (apps/document-worker + Docling)"
-    description: "Build FastAPI Python worker executing IBM Docling layout parsing, table extraction, and OCR bounding boxes."
+    description: "Build FastAPI Python worker executing IBM Docling layout parsing, table extraction, and OCR bounding boxes; current parser is a hand-rolled PDF/text fallback and Docling is not present in requirements."
     phase: 12
     priority: "P1"
-    status: "verified"
+    status: "blocked"
     owner: "document-team"
     agent: "docling-agent"
     depends_on: ["DEBO-0002", "DEBO-0005"]
@@ -337,10 +337,10 @@ tasks:
 
   - id: "DEBO-0011"
     title: "External Connectors Layer (Composio & Nango)"
-    description: "Implement @debo/connectors wrapping Composio for actions and Nango for durable sync with encrypted OAuth vaults."
+    description: "Implement @debo/connectors using real Composio actions and Nango durable sync with encrypted OAuth vaults; current adapters are mock/dry-run implementations and do not satisfy the production provider contract."
     phase: 7
     priority: "P2"
-    status: "verified"
+    status: "blocked"
     owner: "connector-team"
     agent: "composio-agent"
     depends_on: ["DEBO-0002", "DEBO-0003", "DEBO-0004"]
@@ -371,10 +371,10 @@ tasks:
 
   - id: "DEBO-0012"
     title: "LangGraph JS Agent Runtime (packages/agent)"
-    description: "Compile cyclic state graphs with checkpointing, streaming tokens, tool approvals, and memory recall."
+    description: "Implement the agent runtime with LangGraph JS StateGraph, checkpointing, streaming tokens, tool approvals, and memory recall; current implementation is a hand-rolled loop and in-memory checkpointer."
     phase: 5
     priority: "P0"
-    status: "verified"
+    status: "blocked"
     owner: "agent-team"
     agent: "langgraph-agent"
     depends_on: ["DEBO-0002", "DEBO-0004", "DEBO-0006", "DEBO-0007"]
@@ -446,7 +446,7 @@ tasks:
     description: "Execute end-to-end integration tests, memory evaluations benchmark, load tests, and security penetration audit."
     phase: 16
     priority: "P0"
-    status: "verified"
+    status: "blocked"
     owner: "quality-team"
     agent: "e2e-agent"
     depends_on: ["DEBO-0001", "DEBO-0003", "DEBO-0006", "DEBO-0008", "DEBO-0012", "DEBO-0013"]
