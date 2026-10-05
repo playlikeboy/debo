@@ -32,6 +32,7 @@
 
 ## P0 Production-Readiness Blockers
 
+0. **Frontend stack is not implemented as specified.** `apps/web` is a Bun-native HTML renderer, not the specified React + Next.js App Router application. `@debo/ui` has no React/Radix/Tailwind dependencies, the journal is a native `<textarea>`, and repository inspection found no BlockNote/Tiptap integration. AG-UI is represented only by local SSE event types/HTML handling rather than the specified protocol/library boundary. Phase 6 is therefore reopened until the frontend stack and rich-text editor are implemented and covered by E2E tests.\n
 Tracked in GitHub issue **#42**: `P0 audit: MCP production path uses forgeable auth and degraded/stub memory`.
 
 1. **MCP authentication is not safe by default.** `packages/mcp/src/server.ts` accepts structurally forgeable `Bearer key_<workspaceId>_<userId>` tokens when `authResolver` is absent. A production endpoint must use a real cryptographically verified identity resolver and fail closed otherwise.
@@ -68,4 +69,4 @@ All host daemon ingress is configured via Cloudflare Custom Domains on Cloudflar
 - **Audit commits**: `37f63c34127ec546b42587c347b00918e5fb8d05`, `32cfea78ad6a8fb131cda2a4050f22b1dd96af0a`
 - **Recorded baseline verification command**: `bun test && bun run test:python && bun run typecheck`
 - **Recorded baseline result**: 98 tests passing, 16 packages typecheck clean.
-- **Current readiness**: **BLOCKED — see GitHub issue #42.**
+- **Current readiness**: **BLOCKED — see GitHub issue #42 and the reopened Phase 6 frontend-stack audit.**
