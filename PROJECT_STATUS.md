@@ -18,7 +18,7 @@
 | **Phase 3** | Source Ingestion & PostgreSQL Schemas | [x] Completed | `51702e8`, `24dde91` | 2026-10-04 |
 | **Phase 4** | Memory Engine & Exact Citations | [!] Audit reopened | `eac8420` | 2026-10-05 |
 | **Phase 5** | LangGraph Agent Runtime Orchestration | [x] Baseline present | `2c94c1c` | 2026-10-04 |
-| **Phase 6** | Agentic UI & Web Application | [x] Baseline present | `35bd209` | 2026-10-04 |
+| **Phase 6** | Agentic UI & Web Application | [!] Audit reopened — stack mismatch | `35bd209` | 2026-10-05 |
 | **Phase 7** | External Connectors Layer | [x] Baseline present | `904ac23` | 2026-10-04 |
 | **Phase 8** | Durable Workflows Engine | [!] Version/docs audit required | `ceade25` | 2026-10-05 |
 | **Phase 9** | Official MCP Server | [!] Audit reopened | `5e27126` | 2026-10-05 |
