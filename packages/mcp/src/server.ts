@@ -4,6 +4,7 @@ import type { TenantContext } from '@debo/types';
 import { JSON_RPC_ERRORS, JsonRpcRequest, JsonRpcResponse, MCP_PROTOCOL_VERSION } from './protocol';
 import { MemoryRateLimiter } from './ratelimit';
 import { DEBO_MCP_TOOLS, ToolDispatcher } from './tools';
+import { DEBO_MCP_RESOURCES, DEBO_MCP_RESOURCE_TEMPLATES, resolveFrameResource } from './frames';
 
 export interface McpServerOptions {
   memoryService: MemoryService;
@@ -74,6 +75,56 @@ export class DeboMcpServer {
           jsonrpc: '2.0',
           id,
           result: callResult,
+        };
+      }
+
+      case 'resources/list': {
+        return {
+          jsonrpc: '2.0',
+          id,
+          result: {
+            resources: DEBO_MCP_RESOURCES,
+          },
+        };
+      }
+
+      case 'resources/templates/list': {
+        return {
+          jsonrpc: '2.0',
+          id,
+          result: {
+            resourceTemplates: DEBO_MCP_RESOURCE_TEMPLATES,
+          },
+        };
+      }
+
+      case 'resources/read': {
+        const uri = String(params?.uri || '');
+        const resolved = resolveFrameResource(uri);
+
+        if (!resolved) {
+          return {
+            jsonrpc: '2.0',
+            id,
+            error: {
+              code: JSON_RPC_ERRORS.INVALID_PARAMS,
+              message: `Resource not found: ${uri}`,
+            },
+          };
+        }
+
+        return {
+          jsonrpc: '2.0',
+          id,
+          result: {
+            contents: [
+              {
+                uri: resolved.uri,
+                mimeType: resolved.mimeType,
+                text: resolved.text,
+              },
+            ],
+          },
         };
       }
 

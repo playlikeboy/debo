@@ -199,4 +199,149 @@ describe('Debo MCP Server (apps/mcp)', () => {
     const body3 = await res3.json();
     expect(body3.error?.code).toBe(-32029);
   });
+
+  it('lists visual frame resources via resources/list and templates via resources/templates/list (Phase 10: MCP Apps)', async () => {
+    // 1. resources/list
+    const listReq = new Request('http://localhost:8080/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer key_ws100_usr200',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'res_list_1',
+        method: 'resources/list',
+      }),
+    });
+
+    const listRes = await handler(listReq);
+    expect(listRes.status).toBe(200);
+    const listBody = await listRes.json();
+    expect(listBody.result.resources).toBeDefined();
+    expect(listBody.result.resources.length).toBeGreaterThanOrEqual(3);
+
+    const uris = listBody.result.resources.map((r: { uri: string }) => r.uri);
+    expect(uris).toContain('ui://debo/frames/citation/sample');
+    expect(uris).toContain('ui://debo/frames/graph/sample');
+    expect(uris).toContain('ui://debo/frames/approval/sample');
+
+    // 2. resources/templates/list
+    const tplReq = new Request('http://localhost:8080/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer key_ws100_usr200',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'res_tpl_1',
+        method: 'resources/templates/list',
+      }),
+    });
+
+    const tplRes = await handler(tplReq);
+    expect(tplRes.status).toBe(200);
+    const tplBody = await tplRes.json();
+    expect(tplBody.result.resourceTemplates).toBeDefined();
+    expect(tplBody.result.resourceTemplates.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('renders sandboxed HTML/SVG frame resources via resources/read (Phase 10: MCP Apps)', async () => {
+    // 1. Citation Frame
+    const citationReq = new Request('http://localhost:8080/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer key_ws100_usr200',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'res_read_citation',
+        method: 'resources/read',
+        params: {
+          uri: 'ui://debo/frames/citation?quote=Grounding%20quote&sourceTitle=Report.pdf&confidence=0.95',
+        },
+      }),
+    });
+
+    const citationRes = await handler(citationReq);
+    expect(citationRes.status).toBe(200);
+    const citationBody = await citationRes.json();
+    const citationHtml = citationBody.result.contents[0]?.text;
+    expect(citationHtml).toContain('Source Grounding Inspector');
+    expect(citationHtml).toContain('95% Verified');
+    expect(citationHtml).toContain('Report.pdf');
+
+    // 2. Memory Graph Frame
+    const graphReq = new Request('http://localhost:8080/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer key_ws100_usr200',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'res_read_graph',
+        method: 'resources/read',
+        params: {
+          uri: 'ui://debo/frames/graph/sample',
+        },
+      }),
+    });
+
+    const graphRes = await handler(graphReq);
+    expect(graphRes.status).toBe(200);
+    const graphBody = await graphRes.json();
+    const graphHtml = graphBody.result.contents[0]?.text;
+    expect(graphHtml).toContain('<svg');
+    expect(graphHtml).toContain('Debo Personal AI');
+
+    // 3. Approval Gate Frame
+    const approvalReq = new Request('http://localhost:8080/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer key_ws100_usr200',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'res_read_approval',
+        method: 'resources/read',
+        params: {
+          uri: 'ui://debo/frames/approval?actionId=act_123&toolName=gmail_delete&riskTier=TIER_3_DESTRUCTIVE',
+        },
+      }),
+    });
+
+    const approvalRes = await handler(approvalReq);
+    expect(approvalRes.status).toBe(200);
+    const approvalBody = await approvalRes.json();
+    const approvalHtml = approvalBody.result.contents[0]?.text;
+    expect(approvalHtml).toContain('Action Approval Required');
+    expect(approvalHtml).toContain('TIER_3_DESTRUCTIVE');
+    expect(approvalHtml).toContain('act_123');
+
+    // 4. Invalid Resource URI returns error
+    const notFoundReq = new Request('http://localhost:8080/mcp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer key_ws100_usr200',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 'res_not_found',
+        method: 'resources/read',
+        params: {
+          uri: 'ui://debo/frames/nonexistent',
+        },
+      }),
+    });
+
+    const notFoundRes = await handler(notFoundReq);
+    expect(notFoundRes.status).toBe(200);
+    const notFoundBody = await notFoundRes.json();
+    expect(notFoundBody.error?.code).toBe(-32602);
+  });
 });
