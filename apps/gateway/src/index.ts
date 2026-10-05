@@ -72,6 +72,19 @@ const DEBO_MCP_TOOLS = [
     },
   },
   {
+    name: "debo_update_memory",
+    description: "Updates an existing memory record with new factual assertions or superseding information.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        memory_id: { type: "string", description: "The unique ID of the memory to update." },
+        content: { type: "string", description: "The updated factual content." },
+        tags: { type: "array", items: { type: "string" }, description: "Updated tags." },
+      },
+      required: ["memory_id", "content"],
+    },
+  },
+  {
     name: "debo_get_source",
     description: "Retrieves source container metadata and a temporary pre-signed preview URL for an original document.",
     inputSchema: {
@@ -529,6 +542,71 @@ async function handleMcpRequest(req: Request, url: URL): Promise<Response> {
             },
           });
 
+        case "resources/list":
+          return jsonResponse({
+            jsonrpc: "2.0",
+            id,
+            result: {
+              resources: [
+                {
+                  uri: "ui://debo/frames/citation/sample",
+                  name: "Debo Citation Inspector Frame",
+                  description: "Sandboxed HTML preview card for inspecting grounded source citations.",
+                  mimeType: "text/html",
+                },
+                {
+                  uri: "ui://debo/frames/graph/sample",
+                  name: "Debo Memory Graph Frame",
+                  description: "Sandboxed SVG force graph preview for associative memory connections.",
+                  mimeType: "text/html",
+                },
+                {
+                  uri: "ui://debo/frames/approval/sample",
+                  name: "Debo Action Approval Frame",
+                  description: "Sandboxed human approval gate card for Tier 2/3 agent mutations.",
+                  mimeType: "text/html",
+                },
+              ],
+            },
+          });
+
+        case "resources/templates/list":
+          return jsonResponse({
+            jsonrpc: "2.0",
+            id,
+            result: {
+              resourceTemplates: [
+                {
+                  uriTemplate: "ui://debo/frames/citation{?quote,sourceTitle,sourceId,confidence}",
+                  name: "Dynamic Citation Inspector Frame",
+                  mimeType: "text/html",
+                },
+                {
+                  uriTemplate: "ui://debo/frames/graph{?centerNode,workspaceId}",
+                  name: "Dynamic Memory Graph Frame",
+                  mimeType: "text/html",
+                },
+                {
+                  uriTemplate: "ui://debo/frames/approval{?actionId,toolName,riskTier}",
+                  name: "Dynamic Action Approval Frame",
+                  mimeType: "text/html",
+                },
+              ],
+            },
+          });
+
+        case "resources/read": {
+          const uri = String(params?.uri || "");
+          const htmlContent = `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:16px;background:#FBF9F5;"><div style="background:#FFF;padding:16px;border:1px solid #E7E5E4;border-radius:8px;"><h3>Debo Sandboxed UI Frame</h3><p>Frame URI: <code>${uri}</code></p></div></body></html>`;
+          return jsonResponse({
+            jsonrpc: "2.0",
+            id,
+            result: {
+              contents: [{ uri, mimeType: "text/html", text: htmlContent }],
+            },
+          });
+        }
+
         case "tools/call": {
           const toolName = String(params?.name || "");
           const args = (params?.arguments as Record<string, unknown>) || {};
@@ -565,6 +643,17 @@ async function handleMcpRequest(req: Request, url: URL): Promise<Response> {
             const memoryId = String(args.memory_id || "");
             const record = memoryStore.get(memoryId);
             toolOutput = record ? { memory: record } : { error: "Memory record not found" };
+          } else if (toolName === "debo_update_memory") {
+            const memoryId = String(args.memory_id || "");
+            const record = memoryStore.get(memoryId);
+            if (!record) {
+              toolOutput = { error: "Memory record not found", memory_id: memoryId };
+            } else {
+              record.content = String(args.content || record.content);
+              if (Array.isArray(args.tags)) record.tags = args.tags as string[];
+              memoryStore.set(memoryId, record);
+              toolOutput = { memory: record, updated: true };
+            }
           } else if (toolName === "debo_forget_memory") {
             const memoryId = String(args.memory_id || "");
             const existed = memoryStore.delete(memoryId);

@@ -37,6 +37,7 @@ start_service() {
 stop_service() {
   local name="$1"
   local pidfile="$PID_DIR/${name}.pid"
+  local port="${2:-}"
 
   if [ -f "$pidfile" ]; then
     local pid
@@ -51,8 +52,15 @@ stop_service() {
     fi
     rm -f "$pidfile"
     echo "[debo] Stopped $name"
-  else
-    echo "[debo] $name was not running"
+  fi
+
+  if [ -n "$port" ]; then
+    local port_pid
+    port_pid="$(fuser "$port/tcp" 2>/dev/null || true)"
+    if [ -n "$port_pid" ]; then
+      echo "[debo] Clearing orphan process on port $port (PID: $port_pid)..."
+      kill -9 $port_pid 2>/dev/null || true
+    fi
   fi
 }
 
@@ -101,10 +109,10 @@ start_all() {
 stop_all() {
   echo "=== Stopping Debo VPS Services ==="
   stop_service "cloudflared"
-  stop_service "mcp"
-  stop_service "worker"
-  stop_service "web"
-  stop_service "docworker"
+  stop_service "mcp" "8082"
+  stop_service "worker" "8787"
+  stop_service "web" "3002"
+  stop_service "docworker" "8005"
   echo "=== All services stopped ==="
 }
 
