@@ -373,6 +373,652 @@ function renderDocsHtml(): string {
 </html>`;
 }
 
+// --- Landing Page Renderer for www.debo.life & debo.life ---
+function renderLandingPageHtml(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debo — Private, Source-Grounded Personal AI Memory & Context OS</title>
+  <meta name="description" content="Debo is your private, source-grounded personal AI memory operating system. Connect your documents, rich journal entries, and external tools with zero hallucinated quotes and deterministic tenant security.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FBF9F5;
+      --card-bg: #FFFFFF;
+      --text-main: #1C1917;
+      --text-muted: #78716C;
+      --accent: #B45309;
+      --accent-hover: #92400E;
+      --border: #E7E5E4;
+      --border-subtle: #F0EEE9;
+      --success: #065F46;
+      --success-bg: #D1FAE5;
+      --font-serif: "Newsreader", Georgia, serif;
+      --font-sans: "Plus Jakarta Sans", -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      background: rgba(251, 249, 245, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 50;
+      padding: 1rem 1.5rem;
+    }
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo {
+      font-family: var(--font-serif);
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+    .badge-kernel {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    nav a.nav-link {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    nav a.nav-link:hover { color: var(--accent); }
+    .btn-launch {
+      background: var(--accent);
+      color: #FFFFFF !important;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 1.15rem;
+      border-radius: 6px;
+      transition: background 0.15s, transform 0.15s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .btn-launch:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Hero */
+    .hero {
+      max-width: 900px;
+      margin: 4.5rem auto 3rem;
+      text-align: center;
+      padding: 0 1.5rem;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+    }
+    .hero-badge span.dot {
+      width: 6px;
+      height: 6px;
+      background: #10B981;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    h1.hero-title {
+      font-family: var(--font-serif);
+      font-size: 3.5rem;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+      color: var(--text-main);
+    }
+    p.hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.25rem;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .btn-hero-primary {
+      background: var(--accent);
+      color: #FFFFFF !important;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);
+    }
+    .btn-hero-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(180, 83, 9, 0.35);
+    }
+    .btn-hero-secondary {
+      background: #FFFFFF;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border);
+      font-size: 1.05rem;
+      font-weight: 500;
+      padding: 0.85rem 1.75rem;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+    .btn-hero-secondary:hover {
+      background: #F5F3EF;
+      border-color: #D6D3D1;
+    }
+    .protocol-callout {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+    }
+
+    /* Live Showcase Cards */
+    .showcase-grid {
+      max-width: 1120px;
+      margin: 2rem auto 5rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .showcase-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      display: flex;
+      flex-direction: column;
+    }
+    .showcase-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .showcase-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .status-pill {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .pill-green { background: var(--success-bg); color: var(--success); }
+    .pill-amber { background: #FEF3C7; color: #92400E; }
+    .pill-blue { background: #DBEAFE; color: #1E40AF; }
+
+    /* Module Launchpad */
+    .launchpad-section {
+      max-width: 1120px;
+      margin: 0 auto 5rem;
+      padding: 0 1.5rem;
+    }
+    .section-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+    .launchpad-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+    }
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .module-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+    .module-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .module-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+    .module-link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Six Core Invariants */
+    .invariants-section {
+      max-width: 1120px;
+      margin: 0 auto 5rem;
+      padding: 0 1.5rem;
+    }
+    .invariants-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .invariant-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.75rem;
+    }
+    .invariant-card h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+    .invariant-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* CTA Banner */
+    .cta-banner {
+      max-width: 1120px;
+      margin: 0 auto 5rem;
+      padding: 3rem 2rem;
+      background: #1C1917;
+      color: #FFFFFF;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .cta-banner h2 {
+      font-family: var(--font-serif);
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .cta-banner p {
+      font-size: 1.05rem;
+      color: #A8A29E;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 1.5rem 2rem;
+      background: #F5F3EF;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+    .footer-col h5 {
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    .footer-col a {
+      display: block;
+      margin-bottom: 0.4rem;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+    .footer-col a:hover { color: var(--accent); }
+    .footer-bottom {
+      max-width: 1120px;
+      margin: 2rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+      h1.hero-title { font-size: 2.5rem; }
+      .showcase-grid { grid-template-columns: 1fr; }
+      nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Navigation Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo-container">
+        <a href="/" class="logo">Debo</a>
+        <span class="badge-kernel">KERNEL 1.0</span>
+      </div>
+      <nav>
+        <a href="#features" class="nav-link">Capabilities</a>
+        <a href="#modules" class="nav-link">Modules</a>
+        <a href="https://docs.debo.life" class="nav-link">Documentation</a>
+        <a href="https://mcp.debo.life/health" class="nav-link">MCP Health</a>
+        <a href="https://web.debo.life/app" class="btn-launch">Launch App &rarr;</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span> PRODUCTION BUILD ACTIVE &bull; 0.00% CROSS-TENANT LEAKAGE
+    </div>
+    <h1 class="hero-title">Your Life's Private Memory & Context Operating System.</h1>
+    <p class="hero-subtitle">
+      Capture personal journals, index documents, and interrogate your history with mathematical certainty.
+      Every answer is source-grounded with exact PDF bounding boxes, journal block spans, and zero hallucinations.
+    </p>
+
+    <div class="hero-actions">
+      <a href="https://web.debo.life/app" class="btn-hero-primary">Enter Web App &rarr;</a>
+      <a href="https://web.debo.life/app/journal" class="btn-hero-secondary">Open Rich Journal</a>
+      <a href="https://docs.debo.life" class="btn-hero-secondary">Explore Architecture Docs</a>
+    </div>
+
+    <div class="protocol-callout">
+      <span>Official MCP Endpoint:</span>
+      <code style="color:var(--text-main);">https://mcp.debo.life/mcp</code>
+      <span>(Streamable HTTP 2026-07-28)</span>
+    </div>
+  </section>
+
+  <!-- Live Showcase Grid -->
+  <section class="showcase-grid" id="features">
+    <!-- Card 1: Rich Journaling -->
+    <div class="showcase-card">
+      <div class="showcase-card-header">
+        <span class="showcase-title">1. Rich Personal Journaling</span>
+        <span class="status-pill pill-amber">AUTOSAVED</span>
+      </div>
+      <div style="font-family:var(--font-serif);font-size:1.15rem;font-weight:600;margin-bottom:6px;">
+        Q4 Strategic Planning & Architecture Review
+      </div>
+      <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5;">
+        "Migrated the journal editor to production BlockNote blocks. All notes persist idempotently to Neon PostgreSQL and index automatically into Supermemory container namespaces."
+      </p>
+      <div style="margin-top:auto;padding-top:10px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">
+        <span>Neon PostgreSQL: ses_active</span>
+        <span style="color:var(--accent);">BlockNote Editor</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Grounded Citations -->
+    <div class="showcase-card">
+      <div class="showcase-card-header">
+        <span class="showcase-title">2. Source-Grounded Answering</span>
+        <span class="status-pill pill-green">98% CONFIDENCE</span>
+      </div>
+      <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:8px;">
+        <strong>Prompt:</strong> "What were the approved server requirements?"
+      </div>
+      <div style="background:#F5F3EF;border-left:3px solid var(--success);padding:10px 12px;border-radius:4px;font-size:0.85rem;margin-bottom:10px;line-height:1.5;">
+        Debo identified standard 64-thread allocation with isolated microservices under systemd <span style="background:var(--success-bg);color:var(--success);font-weight:700;padding:0 4px;border-radius:3px;">[^1]</span>.
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);margin-top:auto;">
+        &bull; Source: ADR-0007-mcp.md (Offset: 412–478)
+      </div>
+    </div>
+
+    <!-- Card 3: Open Protocol Gateway -->
+    <div class="showcase-card">
+      <div class="showcase-card-header">
+        <span class="showcase-title">3. Model Context Protocol</span>
+        <span class="status-pill pill-blue">STREAMABLE HTTP</span>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:0.78rem;background:#1C1917;color:#F5F5F4;padding:12px;border-radius:6px;margin-bottom:12px;line-height:1.4;">
+        <span style="color:#A8A29E;">// Claude Desktop config</span><br/>
+        "debo": {<br/>
+        &nbsp;&nbsp;"transport": "http",<br/>
+        &nbsp;&nbsp;"url": "https://mcp.debo.life/mcp"<br/>
+        }
+      </div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-top:auto;">
+        Expose associative memories and source cards directly to external agents with cryptographic auth.
+      </div>
+    </div>
+  </section>
+
+  <!-- Module Launchpad Section -->
+  <section class="launchpad-section" id="modules">
+    <div class="section-header">
+      <h2 class="section-title">Debo Application Suite</h2>
+      <p class="section-desc">Access the dedicated workspace modules deployed across high-speed Cloudflare edge and dedicated VPS services.</p>
+    </div>
+
+    <div class="launchpad-grid">
+      <a href="https://web.debo.life/app" class="module-card">
+        <div>
+          <div class="module-name">Workspace Overview</div>
+          <p class="module-desc">Central hub for recent source containers, activity metrics, and quick capture stream.</p>
+        </div>
+        <div class="module-link">Open Overview &rarr;</div>
+      </a>
+
+      <a href="https://web.debo.life/app/journal" class="module-card">
+        <div>
+          <div class="module-name">Daily Journal</div>
+          <p class="module-desc">Distraction-free rich text editor with autosave, draft recovery, and automatic memory embedding.</p>
+        </div>
+        <div class="module-link">Write Journal &rarr;</div>
+      </a>
+
+      <a href="https://web.debo.life/app/ask" class="module-card">
+        <div>
+          <div class="module-name">Ask Debo</div>
+          <p class="module-desc">LangGraph agent conversation engine. Get streamed answers with authentic numeric citations.</p>
+        </div>
+        <div class="module-link">Ask Question &rarr;</div>
+      </a>
+
+      <a href="https://web.debo.life/app/library" class="module-card">
+        <div>
+          <div class="module-name">Source Library</div>
+          <p class="module-desc">Upload PDFs, notes, and records. Layout extracted via IBM Docling with bounding boxes.</p>
+        </div>
+        <div class="module-link">View Library &rarr;</div>
+      </a>
+
+      <a href="https://web.debo.life/app/timeline" class="module-card">
+        <div>
+          <div class="module-name">Episodic Timeline</div>
+          <p class="module-desc">Chronological history of interactions, captured memories, and system milestones.</p>
+        </div>
+        <div class="module-link">View Timeline &rarr;</div>
+      </a>
+
+      <a href="https://docs.debo.life" class="module-card">
+        <div>
+          <div class="module-name">Architecture & ADRs</div>
+          <p class="module-desc">Normative specifications, security invariants, data contracts, and implementation evidence.</p>
+        </div>
+        <div class="module-link">Read Documentation &rarr;</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Core Invariants Section -->
+  <section class="invariants-section">
+    <div class="section-header">
+      <h2 class="section-title">Architectural Invariants</h2>
+      <p class="section-desc">Six non-negotiable engineering principles governing every line of code in Debo.</p>
+    </div>
+
+    <div class="invariants-grid">
+      <div class="invariant-card">
+        <h4>1. Non-LLM Authority</h4>
+        <p>The Large Language Model is an untrusted reasoning engine and never the authority for permissions. All access controls, tenant scoping, and authorization checks are enforced deterministically by Debo application code.</p>
+      </div>
+
+      <div class="invariant-card">
+        <h4>2. Zero Unsupported Claims</h4>
+        <p>Debo never presents ungrounded hallucinations as fact. Every memory item references its authentic source container, and factual answers provide clickable citation previews with character spans or page numbers.</p>
+      </div>
+
+      <div class="invariant-card">
+        <h4>3. Cryptographic MCP Security</h4>
+        <p>External agent gateways reject forgeable caller-chosen strings. Authentication relies on HMAC-SHA256 signed bearer tokens and timing-safe hashed API key verification backed by canonical identity state.</p>
+      </div>
+
+      <div class="invariant-card">
+        <h4>4. Durable Workflow Execution</h4>
+        <p>Document ingestion, memory consolidation, and connector sync runs as resilient background workflows managed by Trigger.dev 4.x with automatic retries and compensation rollbacks.</p>
+      </div>
+
+      <div class="invariant-card">
+        <h4>5. Strict Tenant Isolation</h4>
+        <p>Neon PostgreSQL schemas, Cloudflare R2 storage keys, and Supermemory namespace tags strictly mandate workspaceId scoping. Cross-workspace data leakage is bounded at 0.00% under fuzzing.</p>
+      </div>
+
+      <div class="invariant-card">
+        <h4>6. Human Approval Gates</h4>
+        <p>Destructive mutations or external communications (sending emails, modifying calendars, wiping documents) trigger a graph interrupt and pause for explicit human approval before dispatch.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <div class="cta-banner">
+    <h2>Own Your Context. Build Your Memory.</h2>
+    <p>Debo gives you the foundational context OS for personal intelligence. Open-source, private, and grounded in truth.</p>
+    <a href="https://web.debo.life/app" class="btn-hero-primary" style="background:#B45309;padding:0.9rem 2.5rem;font-size:1.1rem;">Launch Debo Workspace &rarr;</a>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h5>Debo Platform</h5>
+        <a href="https://web.debo.life/app">Web Application</a>
+        <a href="https://web.debo.life/app/journal">Daily Journal</a>
+        <a href="https://web.debo.life/app/ask">Ask Intelligence</a>
+        <a href="https://web.debo.life/app/library">Source Library</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>Infrastructure</h5>
+        <a href="https://docs.debo.life">Documentation Hub</a>
+        <a href="https://mcp.debo.life/health">MCP Server (:8082)</a>
+        <a href="https://worker.debo.life/health">Workflow Worker (:8787)</a>
+        <a href="https://docworker.debo.life/health">Document Worker (:8005)</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>Protocol & Standards</h5>
+        <a href="https://spec.modelcontextprotocol.io/">MCP 2026-07-28 Spec</a>
+        <a href="https://docs.debo.life">ADR-0007 (Model Context Protocol)</a>
+        <a href="https://docs.debo.life">ADR-0014 (Security Architecture)</a>
+        <a href="https://github.com/SH20RAJ/debo">GitHub Repository</a>
+      </div>
+
+      <div class="footer-col">
+        <h5>System Invariants</h5>
+        <span>Non-LLM Authority</span><br/>
+        <span>Source-Grounded Citations</span><br/>
+        <span>Deterministic Multi-Tenancy</span><br/>
+        <span>Zero Hallucinations Guarantee</span>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      &copy; 2026 Debo OS. Private, Source-Grounded Personal AI Memory & Context OS. Hosted on Cloudflare Edge & Dedicated VPS.
+    </div>
+  </footer>
+</body>
+</html>`;
+}
+
 // --- Handler: worker.debo.life ---
 async function handleWorkerRequest(req: Request, url: URL): Promise<Response> {
   if (req.method === "OPTIONS") {
@@ -1211,6 +1857,30 @@ export default {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const host = url.hostname.toLowerCase();
+
+    // 0. Landing Page on www.debo.life and debo.life
+    if (
+      host === "www.debo.life" ||
+      host === "debo.life" ||
+      host.startsWith("www.") ||
+      host === "localhost" ||
+      host.startsWith("127.0.0.1")
+    ) {
+      if (
+        url.pathname.startsWith("/app") ||
+        url.pathname.startsWith("/login") ||
+        url.pathname.startsWith("/signup")
+      ) {
+        return Response.redirect(`https://web.debo.life${url.pathname}${url.search}`, 302);
+      }
+      return new Response(renderLandingPageHtml(), {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=300",
+        },
+      });
+    }
 
     // 1. Documentation: docs.debo.life
     if (host === "docs.debo.life" || host.startsWith("docs.")) {

@@ -4,10 +4,12 @@
   "compatibility_date": "2024-10-01",
   "account_id": "091539408595ba99a0ef106d42391d5b",
   "routes": [
+    { "pattern": "www.debo.life", "custom_domain": true },
+    { "pattern": "debo.life", "custom_domain": true },
+    { "pattern": "web.debo.life", "custom_domain": true },
     { "pattern": "worker.debo.life", "custom_domain": true },
     { "pattern": "docs.debo.life", "custom_domain": true },
     { "pattern": "mcp.debo.life", "custom_domain": true },
-    { "pattern": "docworker.debo.life", "custom_domain": true },
-    { "pattern": "web.debo.life", "custom_domain": true }
+    { "pattern": "docworker.debo.life", "custom_domain": true }
   ]
 }
