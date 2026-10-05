@@ -1,12 +1,18 @@
 import { ValidationError } from '@debo/types';
 
 export function sanitizeFilename(filename: string): string {
-  // Strip null bytes and path traversal sequences
-  const sanitized = filename
+  // Strip null bytes and traversal sequences
+  let sanitized = filename
     .replace(/\0/g, '')
     .replace(/(\.\.[\/\\])+/g, '')
     .replace(/[^\w\.\-\s]/gi, '_')
     .trim();
+
+  while (sanitized.includes('..')) {
+    sanitized = sanitized.replace(/\.\./g, '');
+  }
+
+  sanitized = sanitized.replace(/^_+/, '').trim();
 
   if (!sanitized) {
     throw new ValidationError('Invalid or empty filename');

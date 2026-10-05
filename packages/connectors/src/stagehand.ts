@@ -37,6 +37,9 @@ const BLOCKED_IP_PATTERNS = [
   /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
   /^192\.168\./,
   /^169\.254\./, // AWS/Cloud metadata
+  /^instance-data$/i,
+  /^metadata\.google\.internal$/i,
+  /^\[::1\]$/,
   /^::1$/,
   /^fc00:/i,
   /^fe80:/i,
