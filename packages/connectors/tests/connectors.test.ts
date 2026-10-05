@@ -166,4 +166,93 @@ describe('@debo/connectors subsystem', () => {
       expect(syncResult.data[0]?.workspaceId).toBe('ws_alpha');
     });
   });
+
+  describe('Stagehand Browser Automation Fallback (Phase 13)', () => {
+    const { StagehandBrowserManager, validateSafeUrl } = require('../src/stagehand');
+
+    const contextA: TenantContext = {
+      workspaceId: 'ws_browser_a',
+      userId: 'usr_alice',
+      role: 'member',
+    };
+
+    const contextB: TenantContext = {
+      workspaceId: 'ws_browser_b',
+      userId: 'usr_bob',
+      role: 'member',
+    };
+
+    it('blocks SSRF attempts to localhost, private IPs, and cloud metadata', () => {
+      const maliciousUrls = [
+        'http://localhost:8080/admin',
+        'http://127.0.0.1/etc/passwd',
+        'http://169.254.169.254/latest/meta-data/',
+        'http://10.0.0.1/internal-dashboard',
+        'http://192.168.1.1/router-settings',
+        'file:///etc/hosts',
+        'ftp://internal.backup/data',
+      ];
+
+      for (const url of maliciousUrls) {
+        expect(() => validateSafeUrl(url)).toThrow();
+      }
+    });
+
+    it('allows navigation to valid public HTTPS targets and extracts DOM data safely', async () => {
+      const manager = new StagehandBrowserManager();
+      const session = await manager.createSession(contextA);
+
+      const navResult = await session.navigate('https://docs.debo.life/specs');
+      expect(navResult.status).toBe(200);
+      expect(session.getCurrentUrl()).toBe('https://docs.debo.life/specs');
+
+      const extracted = await session.extract('Summarize platform architecture');
+      expect(extracted.url).toBe('https://docs.debo.life/specs');
+      expect(extracted.groundedSourceEnvelope).toContain('<untrusted_source_data');
+      expect(extracted.groundedSourceEnvelope).toContain('</untrusted_source_data>');
+
+      await session.close();
+      expect(session.isClosed).toBe(true);
+    });
+
+    it('enforces Non-LLM Authority: blocks high-risk browser mutations without human approval', async () => {
+      const manager = new StagehandBrowserManager();
+      const session = await manager.createSession(contextA);
+      await session.navigate('https://example.com/checkout');
+
+      // Attempt high-risk action without approval
+      await expect(session.act('Click "Submit Order" button')).rejects.toThrow('approval');
+
+      // Providing explicit approvalId permits execution
+      const approvedResult = await session.act('Click "Submit Order" button', {
+        approvalId: 'appr_browser_001',
+      });
+      expect(approvedResult.success).toBe(true);
+      expect(approvedResult.approvalId).toBe('appr_browser_001');
+
+      await session.close();
+    });
+
+    it('enforces tenant isolation and session concurrency limits', async () => {
+      const manager = new StagehandBrowserManager({ maxConcurrentPerWorkspace: 2 });
+
+      const s1 = await manager.createSession(contextA);
+      const s2 = await manager.createSession(contextA);
+
+      // Exceed quota
+      await expect(manager.createSession(contextA)).rejects.toThrow('limit reached');
+
+      // Tenant B can still create session (tenant isolation)
+      const sB = await manager.createSession(contextB);
+      expect(sB.workspaceId).toBe('ws_browser_b');
+
+      // Context A cannot access Tenant B session
+      expect(manager.getSession(contextA, sB.sessionId)).toBeNull();
+
+      // Clean up
+      await s1.close();
+      await s2.close();
+      await sB.close();
+    });
+  });
 });
