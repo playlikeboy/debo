@@ -19,7 +19,7 @@ Every major architectural decision, interface contract, threat model, and produc
   - [ADR-0002: Language Strategy](docs/adr/ADR-0002-language-strategy.md) (TypeScript Primary + Python Worker)
   - [ADR-0003: Memory Engine](docs/adr/ADR-0003-memory-engine.md) (Supermemory Core + `MemoryProvider` Abstraction)
   - [ADR-0004: Agent Runtime](docs/adr/ADR-0004-agent-runtime.md) (LangGraph JS Cyclic Graphs)
-  - [ADR-0005: Workflow Runtime](docs/adr/ADR-0005-workflow-runtime.md) (Trigger.dev v3 Durable Execution)
+  - [ADR-0005: Workflow Runtime](docs/adr/ADR-0005-workflow-runtime.md) (Trigger.dev 4.x Durable Execution)
   - [ADR-0006: Agent UI Layer](docs/adr/ADR-0006-agent-ui.md) (AG-UI Protocol + Editorial Design)
   - [ADR-0007: Model Context Protocol](docs/adr/ADR-0007-mcp.md) (Official TypeScript SDK at `mcp.debo.life`)
   - [ADR-0008: External Connectors](docs/adr/ADR-0008-connectors.md) (Composio Actions + Nango Sync)
@@ -30,6 +30,8 @@ Every major architectural decision, interface contract, threat model, and produc
   - [ADR-0013: Observability](docs/adr/ADR-0013-observability.md) (OpenTelemetry + LangSmith + Sentry)
   - [ADR-0014: Security Architecture](docs/adr/ADR-0014-security.md) (Deterministic Non-LLM Authority)
   - [ADR-0015: Multi-Tenancy Hierarchy](docs/adr/ADR-0015-multi-tenancy.md) (User -> Workspace -> Membership)
+  - [ADR-0016: Identity & Auth Migration](docs/adr/ADR-0016-better-auth-migration.md) (Better Auth + Drizzle Adapter + API Key Plugin)
+  - [ADR-0017: Billing Plans & Quotas](docs/adr/ADR-0017-billing-plans-and-quotas.md) (Plan Tiers & Feature Gating)
 
 ### Technology Research & Scorecards
 - **[Research Methodology & Protocol](docs/research/README.md)** — Primary evidence hierarchy and 20 evaluation vectors.
@@ -61,7 +63,7 @@ Every major architectural decision, interface contract, threat model, and produc
 ### Connectors & Workflows
 - **[Connectors Strategy](docs/connectors/strategy.md)** — Composio (Actions) vs. Nango (Sync) vs. Airbyte.
 - **[Credential Handling Rule](docs/connectors/credential-handling.md)** — Prohibiting plaintext third-party tokens in Debo tables.
-- **[Durable Workflows Overview](docs/workflows/README.md)** — Trigger.dev v3 background task architecture.
+- **[Durable Workflows Overview](docs/workflows/README.md)** — Trigger.dev 4.x background task architecture.
 - **[Application Event Catalog](docs/workflows/event-model.md)** — Typed event definitions (`source.*`, `memory.*`, `workflow.*`).
 
 ### Data Model & Multi-Tenancy

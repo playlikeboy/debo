@@ -10,8 +10,12 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@better-auth/api-key": "^1.7.7",
+    "@debo/db": "workspace:*",
     "@debo/permissions": "workspace:*",
-    "@debo/types": "workspace:*"
+    "@debo/types": "workspace:*",
+    "better-auth": "^1.7.7",
+    "drizzle-orm": "^0.39.3"
   },
   "devDependencies": {
     "typescript": "^5.8.0"

@@ -23,7 +23,7 @@ Phase 6  ── AG-UI Protocol & Editorial Presentation
    │
 Phase 7  ── External Connectors (Composio / Nango)
    │
-Phase 8  ── Durable Workflows (Trigger.dev v3)
+Phase 8  ── Durable Workflows (Trigger.dev 4.x)
    │
 Phase 9  ── Model Context Protocol (MCP) Server
    │
@@ -52,7 +52,7 @@ Phase 16 ── Public Launch
 - **Phase 1 — Repository Bootstrap**:
   - Deliverable: Bun workspaces, Turborepo setup, TypeScript project configs, Biome linter, initial GitHub CI.
 - **Phase 2 — Identity & Tenancy**:
-  - Deliverable: Stack Auth integration, `User`, `Workspace`, and `WorkspaceMember` Drizzle schemas in Neon PostgreSQL.
+  - Deliverable: Better Auth integration with Drizzle adapter and @better-auth/api-key plugin, `User`, `Workspace`, and `WorkspaceMember` Drizzle schemas in Neon PostgreSQL.
 - **Phase 3 — Source Ingestion**:
   - Deliverable: Cloudflare R2 client in `@debo/storage`, pre-signed URL upload endpoint, and `Source` entity tracking.
 - **Phase 4 — Memory Subsystem**:
@@ -64,7 +64,7 @@ Phase 16 ── Public Launch
 - **Phase 7 — Connectors**:
   - Deliverable: `@debo/connectors`, Composio action integration, Google Calendar and Gmail tools with approval gates.
 - **Phase 8 — Durable Workflows**:
-  - Deliverable: Trigger.dev v3 integration, background file ingestion and embedding pipeline.
+  - Deliverable: Trigger.dev 4.x integration, background file ingestion and embedding pipeline.
 - **Phase 9 — Model Context Protocol**:
   - Deliverable: `apps/mcp` standalone server, stdio & SSE transports, 21 standard Debo MCP tools.
 - **Phase 10 — MCP Apps**:

@@ -10,7 +10,7 @@ All Debo hostnames are registered and routed through Cloudflare DNS with univers
 |---|---|---|---|---|---|---|---|---|
 | **`debo.life`** | Marketing Landing Page | Cloudflare / Vercel | Vercel CDN Edge | CNAME (Proxied) | Strict (1.3) | Public | Edge Cache (24h) | Public |
 | **`www.debo.life`** | Canonical Redirect | Cloudflare | Redirects to `debo.life` | CNAME (Proxied) | Strict (1.3) | Public | Permanent 301 | Public |
-| **`app.debo.life`** | Product Web UI & API | Vercel | Vercel Next.js App | CNAME (Proxied) | Strict (1.3) | Session / Stack Auth | Dynamic (No-Cache on /api) | Public |
+| **`app.debo.life`** | Product Web UI & API | Vercel | Vercel Next.js App | CNAME (Proxied) | Strict (1.3) | Session / Better Auth | Dynamic (No-Cache on /api) | Public |
 | **`mcp.debo.life`** | External MCP Gateway | Dedicated VPS | Cloudflare Tunnel (`cloudflared`) | CNAME (Proxied) | Strict (1.3) | Bearer API Key | Zero-Cache (Streaming SSE) | Public |
 | **`docs.debo.life`** | Developer Documentation | Cloudflare Pages | Git-backed Static Docs | CNAME (Proxied) | Strict (1.3) | Public | Edge Cache (1h) | Public |
 | **`status.debo.life`** | System Uptime & Incident Log | Independent Provider (BetterStack/Instatus)| External Status Origin | CNAME (DNS Only)| Strict (1.3) | Public | Edge Cache (1m) | Public |

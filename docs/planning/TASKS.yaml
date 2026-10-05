@@ -102,8 +102,8 @@ tasks:
     verification: "bun run db:generate && bun test packages/db"
 
   - id: "DEBO-0004"
-    title: "Deterministic Auth, Tenancy Context & Permission Engine"
-    description: "Implement session verification, workspace context resolver, Non-LLM Authority invariant, and RBAC/ABAC guards."
+    title: "Deterministic Auth, Tenancy Context & Permission Engine (Better Auth Migration)"
+    description: "Implement Better Auth with Drizzle adapter, @better-auth/api-key plugin, workspace context resolver, Non-LLM Authority invariant, and RBAC/ABAC guards."
     phase: 2
     priority: "P0"
     status: "verified"
@@ -111,29 +111,34 @@ tasks:
     agent: "auth-agent"
     depends_on: ["DEBO-0002", "DEBO-0003"]
     blocks: ["DEBO-0005", "DEBO-0007", "DEBO-0008"]
-    files: ["packages/auth/src/index.ts", "packages/permissions/src/index.ts"]
-    packages: ["packages/auth", "packages/permissions"]
+    files: ["packages/auth/src/index.ts", "packages/auth/src/better-auth.ts", "packages/auth/src/api-keys.ts", "packages/auth/src/plans.ts", "packages/permissions/src/index.ts"]
+    packages: ["packages/auth", "packages/permissions", "packages/db"]
     spec: "docs/specs/security-spec.md"
     contract: "docs/contracts/http-api.md"
     acceptance_criteria:
-      - "Deterministic TenantContext extraction from JWT or Session"
+      - "Deterministic TenantContext extraction from Better Auth session or unforgeable API key"
+      - "Better Auth API keys with SHA-256 hash storage, rate-limiting, and one-time secret display"
       - "authorizeToolCall and authorizeResourceAccess reject model-only decisions"
-      - "Role matrix (Owner, Admin, Member, Guest) enforced"
+      - "Role matrix (Owner, Admin, Member, Guest) and billing plan quotas enforced"
     security_requirements:
       - "OWASP Top 10 API Authorization enforcement"
-      - "Timing-safe string comparisons on API tokens"
+      - "Timing-safe string comparisons on API tokens and SHA-256 hashes"
+      - "Zero caller-chosen identity parameters allowed"
     test_requirements:
       - "Cross-tenant leakage test suite (Workspace A cannot access Workspace B)"
+      - "API key lifecycle: create -> list -> verify -> rate-limit -> rotate -> revoke"
     docs_required:
       - "docs/security/threat-model.md"
-      - "docs/agents/permissions.md"
+      - "docs/adr/ADR-0016-better-auth-migration.md"
+      - "docs/adr/ADR-0017-billing-plans-and-quotas.md"
+      - "docs/specs/plans-spec.md"
     research_required: []
     risk: "high"
     estimated_complexity: "L"
-    branch: "agent/security/DEBO-0004"
+    branch: "better-auth-migration"
     commit: null
     pr: null
-    verification: "bun test packages/permissions packages/auth"
+    verification: "bun test packages/permissions packages/auth packages/db"
 
   - id: "DEBO-0005"
     title: "R2 Object Storage Client & Presigned URLs"
@@ -269,7 +274,7 @@ tasks:
     verification: "bun test apps/mcp"
 
   - id: "DEBO-0009"
-    title: "Durable Workflows Engine (apps/worker + Trigger.dev v3)"
+    title: "Durable Workflows Engine (apps/worker + Trigger.dev 4.x)"
     description: "Implement durable task pipelines for document ingestion, memory consolidation, and scheduled cron jobs."
     phase: 8
     priority: "P1"

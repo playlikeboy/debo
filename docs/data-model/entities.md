@@ -7,16 +7,24 @@ This document defines the normative relational specifications for all core entit
 ## 1. Identity & Tenancy Entities
 
 ### User
-- **Purpose**: Global user identity authenticated via Stack Auth or email.
+- **Purpose**: Global user identity authenticated via Better Auth (email/password or credentials).
 - **Identifier**: `usr_<ulid>` (Primary Key)
 - **Ownership**: The user owns their global account record.
 - **Tenant Scope**: Global (can belong to multiple workspaces).
 - **Lifecycle**: `ACTIVE` -> `SUSPENDED` -> `DELETED`.
 - **Soft/Hard Delete**: Soft-delete via `deleted_at`; hard-delete purges across all workspaces after 30-day grace period.
 - **Indexes**: Unique index on `email`, index on `created_at`.
-- **Relationships**: `1:N` with `WorkspaceMember`, `1:N` with `AuditLog`.
-- **Security**: Password hashes managed externally by Stack Auth; email verified flag required.
+- **Relationships**: `1:N` with `WorkspaceMember`, `1:N` with `ApiKey`, `1:N` with `AuditLog`.
+- **Security**: Password hashes managed by Better Auth with scrypt/bcrypt; email verified flag required.
 - **Retention**: Retained until account termination request.
+
+### ApiKey
+- **Purpose**: Scoped, unforgeable API keys for MCP clients (Claude Desktop, Cursor), external agents, and background workers.
+- **Identifier**: `key_<ulid>` (Primary Key)
+- **Ownership**: Scoped strictly to `workspace_id` and owned by `reference_id` (`users.id`).
+- **Tenant Scope**: Unconditional `workspace_id`.
+- **Security**: Plaintext secret (`debo_live_...`) is displayed only once upon creation; only SHA-256 hash is persisted. Timing-safe comparison. Rate-limited and scoped (`memory.read`, `tools.execute`, `*`).
+- **Lifecycle**: `ACTIVE` -> `REVOKED` | `EXPIRED`.
 
 ### Workspace
 - **Purpose**: The foundational boundary of tenant isolation for data, memory, and permissions.

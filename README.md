@@ -111,7 +111,7 @@ debo/
 │   ├── citations/         # Grounding validator and citation resolution engine
 │   ├── db/                # Neon PostgreSQL connection and Drizzle schema
 │   ├── storage/           # Cloudflare R2 S3-compatible client
-│   ├── auth/              # Stack Auth / Session verification utilities
+│   ├── auth/              # Better Auth / Session & API Key verification utilities
 │   ├── types/             # Shared TypeScript domain types and Zod schemas
 │   ├── ui/                # Calm editorial component library (Radix + Tailwind)
 │   └── config/            # Shared environment, linting, and build configs

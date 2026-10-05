@@ -14,7 +14,7 @@ Tasks are defined as code-first TypeScript background jobs with automatic retrie
 3. **BullMQ / Redis**: Requires operating persistent Redis clusters and manually managing lock timeouts, retries, and checkpointing logic.
 
 # Why
-Trigger.dev v3 combines code-first TypeScript simplicity with serverless longevity. A task can run for 30 minutes without timeout issues, stream status logs back to the frontend in real-time, and run locally with a single CLI command (`npx trigger.dev@latest dev`).
+Trigger.dev 4.x combines code-first TypeScript simplicity with serverless longevity. A task can run for 30 minutes without timeout issues, stream status logs back to the frontend in real-time, and run locally with a single CLI command (`npx trigger.dev@latest dev`).
 
 # Consequences
 - **Positive**: Zero risk of serverless route timeouts; tasks can be retried automatically from failure points; end-to-end type safety between task invocation and task definitions.
@@ -24,5 +24,5 @@ Trigger.dev v3 combines code-first TypeScript simplicity with serverless longevi
 Trigger tasks are modular functions wrapped in `task({ id, run: async (payload) => ... })`. The business logic inside `run` is standard TypeScript and can be easily re-targeted to Inngest or BullMQ if needed.
 
 # Evidence
-- Trigger.dev v3 Documentation: `https://trigger.dev/docs`
+- Trigger.dev 4.x Documentation: `https://trigger.dev/docs`
 - Detailed evaluation: `docs/research/trigger-dev.md` and `docs/research/scorecard.md`.

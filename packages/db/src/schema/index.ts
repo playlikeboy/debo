@@ -5,3 +5,4 @@ export * from './memories';
 export * from './citations';
 export * from './audit';
 export * from './auth';
+export * from './journal';

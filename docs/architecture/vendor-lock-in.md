@@ -10,12 +10,12 @@ Debo is built on the fundamental principle that user context, personal memories,
 |---|---|---|---|---|---|---|
 | **Memory Engine** | Supermemory | `@debo/memory` (`MemoryProvider` interface) | Underlying vector index, proprietary decay/ranking scoring. | Standard JSON (chunks, embeddings, citations, metadata). | Mem0, Qdrant + pgvector, self-hosted SQLite vector. | **Low**: Canonical records reside in PostgreSQL; re-indexing takes minutes. |
 | **Action Connectors** | Composio | `@debo/connectors` | Composio cloud routing, proprietary trigger listeners. | Connection metadata in DB; tokens managed in Composio. | Nango, native API client SDKs. | **Medium**: Requires swapping tool calling adapters; zero data loss. |
-| **Durable Workflows** | Trigger.dev v3 | `@debo/workflows` | Trigger task declaration wrapper (`task({ ... })`). | Task execution logs and state payloads in PostgreSQL. | Inngest, BullMQ + Redis, Hatchet. | **Low**: Job functions are vanilla async TypeScript functions. |
+| **Durable Workflows** | Trigger.dev 4.x | `@debo/workflows` | Trigger task declaration wrapper (`task({ ... })`). | Task execution logs and state payloads in PostgreSQL. | Inngest, BullMQ + Redis, Hatchet. | **Low**: Job functions are vanilla async TypeScript functions. |
 | **Primary Database** | Neon PostgreSQL | `@debo/db` (Drizzle ORM) | Neon serverless branching API. | Standard SQL dump (`pg_dump`), standard relational tables. | Supabase, AWS RDS, self-hosted PostgreSQL VPS. | **Very Low**: Standard PostgreSQL dialect with zero proprietary extensions. |
 | **Raw Storage** | Cloudflare R2 | `@debo/storage` | Cloudflare account credentials. | Standard S3 objects (byte-for-byte original files). | AWS S3, Google Cloud Storage, MinIO (self-hosted). | **Zero**: Uses standard AWS S3 SDK v3 protocol. |
 | **LLM Inference** | NVIDIA NIM / Anthropic | `@debo/ai` | Proprietary endpoint URLs and API keys. | Prompts and responses logged to LangSmith / DB. | OpenAI, DeepSeek, vLLM / Ollama (self-hosted). | **Very Low**: Standard LangChain `ChatModel` abstraction. |
 | **Observability** | LangSmith / OpenTelemetry | `@debo/config` | LangSmith project tags and dashboard URL. | OpenTelemetry Protocol (OTLP) trace spans. | Grafana Tempo, Honeycomb, Datadog. | **Zero**: OpenTelemetry is an open vendor-neutral standard. |
-| **Authentication** | Stack Auth | `@debo/auth` | Stack Auth client SDK and server verification. | User identity rows synced to `User` table in Neon DB. | Auth.js, Clerk, self-hosted Supabase Auth, Lucia. | **Medium**: User identities are mirrored in Neon DB, easing credential migration. |
+| **Authentication** | Better Auth | `@debo/auth` | Self-hosted Better Auth with Drizzle adapter. | Native `users`, `user_sessions`, `accounts`, `api_keys` in Neon DB. | Auth.js, Lucia, Supabase Auth. | **Zero**: Entire auth data model is self-hosted in Neon PostgreSQL via Drizzle. |
 
 ---
 

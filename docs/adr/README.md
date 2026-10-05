@@ -22,7 +22,7 @@ Every major architectural, structural, or infrastructure commitment must be reco
 | [ADR-0002](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0002-language-strategy.md) | Language Strategy | `accepted` | TypeScript Primary + Python Document Worker |
 | [ADR-0003](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0003-memory-engine.md) | Memory Engine | `accepted` | Supermemory Core + `MemoryProvider` Abstraction |
 | [ADR-0004](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0004-agent-runtime.md) | Agent Runtime | `accepted` | LangGraph JS (Cyclic State Graphs) |
-| [ADR-0005](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0005-workflow-runtime.md) | Workflow Runtime | `accepted` | Trigger.dev v3 (Durable Execution) |
+| [ADR-0005](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0005-workflow-runtime.md) | Workflow Runtime | `accepted` | Trigger.dev 4.x (Durable Execution) |
 | [ADR-0006](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0006-agent-ui.md) | Agentic UI Layer | `accepted` | AG-UI Protocol + Editorial Component System |
 | [ADR-0007](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0007-mcp.md) | Model Context Protocol | `accepted` | Official `@modelcontextprotocol/sdk` (TypeScript) |
 | [ADR-0008](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0008-connectors.md) | External Connectors | `accepted` | Composio Actions + Nango Data Sync |
@@ -33,3 +33,5 @@ Every major architectural, structural, or infrastructure commitment must be reco
 | [ADR-0013](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0013-observability.md) | Observability & Tracing | `accepted` | OpenTelemetry + LangSmith + Sentry |
 | [ADR-0014](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0014-security.md) | Security & Permissions | `accepted` | Deterministic Zero-Trust RBAC/ABAC (Non-LLM Authority)|
 | [ADR-0015](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0015-multi-tenancy.md) | Multi-Tenancy Hierarchy | `accepted` | User -> Workspace -> Membership Hierarchy |
+| [ADR-0016](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0016-better-auth-migration.md) | Identity & Auth Migration | `accepted` | Better Auth + Drizzle Adapter + API Key Plugin |
+| [ADR-0017](file:///home/kunalkashyap8024/sop/debo/docs/adr/ADR-0017-billing-plans-and-quotas.md) | Billing Plans & Quotas | `accepted` | Plan Tiers (Free, Pro, Enterprise) & Feature Gating |

@@ -102,3 +102,16 @@ export class ValidationError extends DeboError {
     super({ code: 'VALIDATION_FAILED', message, statusCode: 400, meta });
   }
 }
+
+export class RateLimitError extends DeboError {
+  constructor(message = 'Rate limit exceeded', meta?: Record<string, unknown>) {
+    super({ code: 'RATE_LIMITED', message, statusCode: 429, meta });
+  }
+}
+
+export class ConflictError extends DeboError {
+  constructor(message = 'Resource conflict', meta?: Record<string, unknown>) {
+    super({ code: 'CONFLICT', message, statusCode: 409, meta });
+  }
+}
+

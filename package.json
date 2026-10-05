@@ -17,6 +17,7 @@
     "format": "bun node_modules/prettier/bin/prettier.cjs --write \"{packages,apps}/**/*.{ts,tsx,js,json}\""
   },
   "devDependencies": {
+    "@better-auth/cli": "^1.4.21",
     "@types/node": "^22.13.0",
     "bun-types": "^1.4.2",
     "prettier": "^3.9.9",

@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'bun:test';
 import {
+  accounts,
   apiKeys,
   auditLogs,
   citations,
+  journalEntries,
   memories,
   sourceChunks,
   sources,
   toolApprovals,
   userSessions,
   users,
+  verifications,
   workspaceMembers,
   workspaces,
 } from '../src/index';
@@ -26,6 +29,9 @@ describe('@debo/db schema definition', () => {
     expect(apiKeys).toBeDefined();
     expect(toolApprovals).toBeDefined();
     expect(userSessions).toBeDefined();
+    expect(accounts).toBeDefined();
+    expect(verifications).toBeDefined();
+    expect(journalEntries).toBeDefined();
   });
 
   it('enforces workspaceId tenant key on multi-tenant tables', () => {
@@ -38,6 +44,8 @@ describe('@debo/db schema definition', () => {
     expect(apiKeys.workspaceId).toBeDefined();
     expect(toolApprovals.workspaceId).toBeDefined();
     expect(workspaceMembers.workspaceId).toBeDefined();
+    expect(journalEntries.workspaceId).toBeDefined();
+    expect(journalEntries.userId).toBeDefined();
   });
 
   it('verifies primary key definitions', () => {

@@ -9,8 +9,8 @@ This document applies the STRIDE threat modeling methodology to Debo's platform 
 ### Spoofing Identity
 - **Threat**: Attacker creates or spoofs an MCP client session or user token to access another user's personal memories.
 - **Mitigation**:
-  - Web UI uses cryptographically signed session JWTs via Stack Auth with short expiration windows.
-  - MCP Server uses SHA-256 hashed API keys bound irreversibly to a single `(userId, workspaceId)` tuple.
+  - Web UI uses cryptographically signed, HTTP-only secure cookie sessions via Better Auth with short expiration and sliding cache windows.
+  - MCP Server uses SHA-256 hashed API keys bound irreversibly to a single `(userId, workspaceId)` tuple and HMAC-SHA256 tokens.
   - Inter-service communication between workers and the document service uses HMAC-SHA256 request signatures.
 
 ### Tampering with Data

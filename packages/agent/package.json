@@ -14,7 +14,9 @@
     "@debo/connectors": "workspace:*",
     "@debo/memory": "workspace:*",
     "@debo/permissions": "workspace:*",
-    "@debo/types": "workspace:*"
+    "@debo/types": "workspace:*",
+    "@langchain/core": "^1.2.14",
+    "@langchain/langgraph": "^1.4.19"
   },
   "devDependencies": {
     "@types/node": "^22.13.0",

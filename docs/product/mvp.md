@@ -45,7 +45,7 @@ The MVP exists to prove one fundamental architectural loop:
    - Answers synthesized with verified inline citations `[^1]`.
    - Clicking a citation opens the Source Viewer highlighting the exact sentence and bounding box.
 3. **Identity & Tenant Isolation**:
-   - Stack Auth login with personal private workspace partitioning.
+   - Better Auth login with personal private workspace partitioning.
 4. **Basic MCP Server**:
    - Standard stdio and SSE transport implementing `debo_search_memory` and `debo_get_source`.
    - Claude Desktop and Cursor can search the user's Debo memory.

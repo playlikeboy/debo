@@ -90,3 +90,25 @@ export interface Memory {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface BlockNoteBlock {
+  id?: string;
+  type?: string;
+  props?: Record<string, unknown>;
+  content?: unknown;
+  children?: BlockNoteBlock[];
+}
+
+export interface JournalEntry {
+  id: string; // jrn_*
+  workspaceId: string;
+  userId: string;
+  title: string;
+  contentJson: BlockNoteBlock[] | unknown[];
+  contentText: string;
+  sourceId?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+

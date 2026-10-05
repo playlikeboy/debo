@@ -34,10 +34,10 @@ This document details the goals, dependencies, deliverables, exit criteria, and 
 - **Goal**: Implement deterministic tenant partitioning and authentication.
 - **Dependencies**: Phase 1.
 - **Deliverables**:
-  - `@debo/db` with Drizzle ORM schemas for `User`, `Workspace`, `WorkspaceMember`, `Permission`, `AuditLog`.
+  - `@debo/db` with Drizzle ORM schemas for `User`, `Workspace`, `WorkspaceMember`, `Permission`, `AuditLog`, `accounts`, `user_sessions`, `verifications`, `api_keys`.
   - Neon PostgreSQL connection pooler integration.
-  - `@debo/auth` with Stack Auth session verification.
-  - Unit tests verifying multi-tenant query filters.
+  - `@debo/auth` with Better Auth integration and `@better-auth/api-key` plugin.
+  - Unit tests verifying multi-tenant query filters and unforgeable API keys.
 - **Exit Criteria**: User can register, log in, create a personal workspace, and queries unconditionally enforce `workspace_id`.
 
 ---
@@ -98,11 +98,11 @@ This document details the goals, dependencies, deliverables, exit criteria, and 
 
 ---
 
-## Phase 8: Durable Workflows (Trigger.dev v3)
+## Phase 8: Durable Workflows (Trigger.dev 4.x)
 - **Goal**: Orchestrate asynchronous background ingestion tasks.
 - **Dependencies**: Phase 3, Phase 4.
 - **Deliverables**:
-  - `@debo/workflows` Trigger.dev v3 task setup.
+  - `@debo/workflows` Trigger.dev 4.x task setup.
   - Ingestion workflow: file upload -> Docling dispatch -> chunking -> vector indexing.
 - **Exit Criteria**: Uploading a PDF triggers background workflow; progress streams in real time to the web UI.
 

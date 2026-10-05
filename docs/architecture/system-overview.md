@@ -45,7 +45,7 @@ packages/
 ├── citations/         # Grounding engine, citation validator, visual coordinate mapper
 ├── db/                # Drizzle ORM schema, migrations, Neon database client
 ├── storage/           # S3 client wrapper for Cloudflare R2, pre-signed URL generator
-├── auth/              # Stack Auth / Session verification middleware
+├── auth/              # Better Auth / Session & API Key verification middleware
 ├── types/             # Canonical TypeScript domain entities, DTOs, Zod schemas
 ├── ui/                # Radix UI + Tailwind CSS editorial design components
 └── config/            # Shared environment parsing, tsconfig bases, eslint configs

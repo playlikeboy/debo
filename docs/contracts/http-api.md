@@ -5,10 +5,10 @@ This document defines the primary REST and streaming route handlers implemented 
 ---
 
 ## 1. Authentication & Session Resolution
-All `/api/*` endpoints (except `/api/auth/*` and public health checks) require an active session cookie or Bearer token verified against Stack Auth. The resolved session injects:
+All `/api/*` endpoints (except `/api/auth/*` and public health checks) require an active Better Auth session cookie or unforgeable API key (`debo_live_...` via `x-api-key` or `Authorization: Bearer`). Identity resolution is strictly deterministic via `DeboAuthMiddleware`:
 - `ctx.userId: string`
 - `ctx.workspaceId: string`
-- `ctx.role: 'owner' | 'admin' | 'member' | 'viewer'`
+- `ctx.role: 'owner' | 'admin' | 'member' | 'guest'`
 
 ---
 
