@@ -24,7 +24,7 @@ SYSTEMD_UNITS=(
 )
 
 has_systemd() {
-  systemctl --user is-system-running >/dev/null 2>&1 || [ $? -eq 1 ]
+  systemctl --user status >/dev/null 2>&1
 }
 
 mkdir -p "$LOG_DIR" "$PID_DIR"

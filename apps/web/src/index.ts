@@ -9,7 +9,7 @@ const dir = path.resolve(import.meta.dirname, '..');
 
 console.log(`[debo-web] Initializing Next.js App Router (dev=${dev}, dir=${dir})...`);
 
-const app = next({ dev, dir });
+const app = next({ dev, dir, webpack: true });
 const handle = app.getRequestHandler();
 
 await app.prepare();

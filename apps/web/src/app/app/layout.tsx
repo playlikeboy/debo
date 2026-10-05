@@ -64,7 +64,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {navigation.map(item => {
             const Icon = item.icon;
             const isActive =
-              item.href === '/app' ? pathname === '/app' : pathname.startsWith(item.href);
+              item.href === '/app' ? pathname === '/app' : (pathname?.startsWith(item.href) ?? false);
 
             return (
               <Link
