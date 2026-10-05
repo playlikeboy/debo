@@ -3,6 +3,7 @@
 # Debo VPS Daemon Supervisor
 # Manages local microservices that cannot run on edge workers (Docling, Local Daemons)
 # and maintains the persistent Cloudflare Tunnel.
+# Prefers systemd --user when available, falls back to direct nohup daemonization.
 # ==============================================================================
 set -euo pipefail
 
@@ -14,9 +15,21 @@ CF_CONFIG="/home/kunalkashyap8024/.cloudflared/debo-config.yml"
 TUNNEL_ID="a5275ec6-92d6-4c67-b0cc-0cb6f767967e"
 PYTHON="/home/kunalkashyap8024/.venvs/debo-docworker/bin/python"
 
+SYSTEMD_UNITS=(
+  "debo-docworker.service"
+  "debo-web.service"
+  "debo-worker.service"
+  "debo-mcp.service"
+  "debo-tunnel.service"
+)
+
+has_systemd() {
+  systemctl --user is-system-running >/dev/null 2>&1 || [ $? -eq 1 ]
+}
+
 mkdir -p "$LOG_DIR" "$PID_DIR"
 
-start_service() {
+start_direct() {
   local name="$1"
   local pidfile="$PID_DIR/${name}.pid"
   local logfile="$LOG_DIR/${name}.log"
@@ -28,13 +41,13 @@ start_service() {
   fi
 
   echo "[debo] Starting $name..."
-  nohup bash -c "$cmd" >> "$logfile" 2>&1 &
+  nohup setsid bash -c "$cmd" >> "$logfile" 2>&1 &
   local new_pid=$!
   echo "$new_pid" > "$pidfile"
   echo "[debo] Started $name (PID: $new_pid) -> logs at $logfile"
 }
 
-stop_service() {
+stop_direct() {
   local name="$1"
   local pidfile="$PID_DIR/${name}.pid"
   local port="${2:-}"
@@ -64,65 +77,54 @@ stop_service() {
   fi
 }
 
-status_service() {
-  local name="$1"
-  local pidfile="$PID_DIR/${name}.pid"
-  local port="$2"
-
-  if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
-    local pid
-    pid="$(cat "$pidfile")"
-    echo -e "[debo] \033[0;32m● RUNNING\033[0m: $name (PID: $pid, Port: $port)"
-  else
-    echo -e "[debo] \033[0;31m○ STOPPED\033[0m: $name (Port: $port)"
-  fi
-}
-
 start_all() {
   echo "=== Starting Debo VPS Services ==="
-
-  # 1. Document Worker (Python Docling + FastAPI, Port 8005)
-  start_service "docworker" \
-    "$PYTHON -m uvicorn app.main:app --host 0.0.0.0 --port 8005 --app-dir $REPO_DIR/apps/document-worker"
-
-  # 2. Debo Web (Bun App, Port 3002)
-  start_service "web" \
-    "PORT=3002 WEB_PORT=3002 bun run $REPO_DIR/apps/web/src/index.ts"
-
-  # 3. Debo Workflow Worker (Bun Worker, Port 8787)
-  start_service "worker" \
-    "PORT=8787 bun run $REPO_DIR/apps/worker/src/index.ts"
-
-  # 4. Debo MCP Server (Bun MCP, Port 8082)
-  start_service "mcp" \
-    "PORT=8082 MCP_PORT=8082 bun run $REPO_DIR/apps/mcp/src/index.ts"
-
-  # 5. Cloudflare Tunnel (Tunnel a5275ec6-92d6-4c67-b0cc-0cb6f767967e)
-  start_service "cloudflared" \
-    "$CLOUDFLARED tunnel --protocol http2 --config $CF_CONFIG run $TUNNEL_ID"
-
-  echo "=== All services launched ==="
-  sleep 2
-  status_all
+  if has_systemd; then
+    systemctl --user start "${SYSTEMD_UNITS[@]}"
+    systemctl --user status "${SYSTEMD_UNITS[@]}" --no-pager
+  else
+    start_direct "docworker" \
+      "$PYTHON -m uvicorn app.main:app --host 0.0.0.0 --port 8005 --app-dir $REPO_DIR/apps/document-worker"
+    start_direct "web" \
+      "PORT=3002 WEB_PORT=3002 bun run $REPO_DIR/apps/web/src/index.ts"
+    start_direct "worker" \
+      "PORT=8787 bun run $REPO_DIR/apps/worker/src/index.ts"
+    start_direct "mcp" \
+      "PORT=8082 MCP_PORT=8082 bun run $REPO_DIR/apps/mcp/src/index.ts"
+    start_direct "cloudflared" \
+      "$CLOUDFLARED tunnel --protocol http2 --config $CF_CONFIG run $TUNNEL_ID"
+    echo "=== All services launched ==="
+  fi
 }
 
 stop_all() {
   echo "=== Stopping Debo VPS Services ==="
-  stop_service "cloudflared"
-  stop_service "mcp" "8082"
-  stop_service "worker" "8787"
-  stop_service "web" "3002"
-  stop_service "docworker" "8005"
+  if has_systemd; then
+    systemctl --user stop "${SYSTEMD_UNITS[@]}"
+  else
+    stop_direct "cloudflared"
+    stop_direct "mcp" "8082"
+    stop_direct "worker" "8787"
+    stop_direct "web" "3002"
+    stop_direct "docworker" "8005"
+  fi
   echo "=== All services stopped ==="
 }
 
 status_all() {
   echo "=== Debo Service Status ==="
-  status_service "docworker" "8005"
-  status_service "web" "3002"
-  status_service "worker" "8787"
-  status_service "mcp" "8082"
-  status_service "cloudflared" "Argo Tunnel $TUNNEL_ID"
+  if has_systemd; then
+    systemctl --user status "${SYSTEMD_UNITS[@]}" --no-pager
+  else
+    for name in docworker web worker mcp cloudflared; do
+      local pidfile="$PID_DIR/${name}.pid"
+      if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+        echo -e "[debo] \033[0;32m● RUNNING\033[0m: $name (PID: $(cat "$pidfile"))"
+      else
+        echo -e "[debo] \033[0;31m○ STOPPED\033[0m: $name"
+      fi
+    done
+  fi
 }
 
 case "${1:-status}" in
