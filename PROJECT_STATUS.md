@@ -32,6 +32,14 @@
 
 ## P0 Production-Readiness Blockers
 
+0. **Frontend stack is not implemented as specified.** `apps/web` is a Bun-native HTML renderer, not the specified React + Next.js App Router application. `@debo/ui` has no React/Radix/Tailwind dependencies, the journal is a native `<textarea>`, and repository inspection found no BlockNote/Tiptap integration. AG-UI is represented only by local SSE event types/HTML handling rather than the specified protocol/library boundary.
+1. **Agent runtime is not LangGraph JS.** `packages/agent` contains a hand-rolled execution loop and in-memory checkpointer; `@langchain/langgraph` is absent from the workspace dependency graph.
+2. **Durable workflows are not Trigger.dev.** `packages/workflows` provides a local in-memory `TaskExecutor`; the Trigger.dev SDK is absent, and the task registry's former v3 reference was stale against the current 4.x architecture target.
+3. **Connectors are mocks, not Composio/Nango integrations.** `ComposioConnector.executeAction()` returns a synthetic success response and `NangoConnector.sync()` returns synthetic records; the external SDKs are absent from the lockfile.
+4. **Document processing is not Docling-backed.** The Python worker advertises Docling compatibility but its parser implements hand-rolled PDF/text extraction, and `requirements.txt` does not include the `docling` package.
+5. **MCP and memory runtime blockers remain tracked in GitHub issue #42.** MCP auth is forgeable by default, MCP hardcodes degraded memory, and the Supermemory adapter is still a stub.
+
+
 0. **Frontend stack is not implemented as specified.** `apps/web` is a Bun-native HTML renderer, not the specified React + Next.js App Router application. `@debo/ui` has no React/Radix/Tailwind dependencies, the journal is a native `<textarea>`, and repository inspection found no BlockNote/Tiptap integration. AG-UI is represented only by local SSE event types/HTML handling rather than the specified protocol/library boundary. Phase 6 is therefore reopened until the frontend stack and rich-text editor are implemented and covered by E2E tests.\n
 Tracked in GitHub issue **#42**: `P0 audit: MCP production path uses forgeable auth and degraded/stub memory`.
 
