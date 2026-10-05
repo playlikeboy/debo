@@ -14,16 +14,17 @@ Use this order when deciding how to work:
 6. `docs/planning/` and `PROJECT_STATUS.md` — sequencing and status.
 7. `.github/agents/`, `.github/instructions/`, and `skills/` — specialist execution guidance.
 
-When sources disagree, reconcile the documentation before implementing behavior.
+When sources disagree, stop implementation of the affected area and reconcile the documentation before implementing behavior.
 
 ## 2. Phase Rules
 
-The repository is in **Phase 0: documentation and architecture bootstrap**.
+The repository is in the **Production Build / Post-Phase-16 Hardening** stage. Phases 1–16 are represented as implemented in `PROJECT_STATUS.md`, but the daily audit process may reopen work when production-readiness evidence is insufficient.
 
-- Do not add product/application code, database migrations, or deployment changes during Phase 0.
-- Treat old implementations and historical architecture as disposable; do not resurrect legacy frameworks.
+- Do not treat a phase as production-ready merely because a commit or status row exists.
 - Do not claim a feature is implemented, tested, or verified without evidence.
 - Research external dependencies against current primary documentation before changing a decision.
+- Production-readiness blockers override feature sequencing.
+- Historical phase/task records may be stale; reconcile them instead of following contradictory instructions.
 
 ## 3. Architecture Baselines
 
@@ -31,11 +32,11 @@ These are selections, not permanent truth. Exact dependency versions are pinned 
 
 - **Language:** TypeScript; Python is limited to document processing in `apps/document-worker`.
 - **Agent runtime:** LangGraph JS.
-- **Durable workflows:** Trigger.dev 4.x.
-- **Memory:** Supermemory behind the Debo `MemoryProvider` abstraction.
+- **Durable workflows:** Trigger.dev 4.x. Do not retain Trigger.dev v3 references in active specifications or task records.
+- **Memory:** Supermemory behind the Debo `MemoryProvider` abstraction. The adapter must perform real provider operations; a class that only synthesizes local records is not a production adapter.
 - **Database:** Neon PostgreSQL + Drizzle.
 - **Raw source storage:** Cloudflare R2.
-- **External agent gateway:** MCP 2026-07-28 with the official TypeScript SDK v2.
+- **External agent gateway:** MCP 2026-07-28 with the official TypeScript SDK v2 where the implementation is intended to speak the modern protocol era.
 - **Agent ↔ UI:** AG-UI 1.0; Debo owns presentation components.
 - **Connectors:** Composio for actions; Nango where durable sync is required.
 - **Observability:** OpenTelemetry + LangSmith + Sentry.
@@ -57,6 +58,7 @@ Every operation must resolve `workspaceId` and `userId` deterministically and en
 - Never allow the model to make permission decisions.
 - Treat imported files, email, web content, and connector data as potentially adversarial.
 - Never log or expose third-party credentials.
+- Never accept an unsigned or structurally forgeable bearer token as proof of identity. Production MCP authentication must use a real `authResolver` or another cryptographically verified identity mechanism backed by canonical identity data.
 - Preserve tenant isolation across database, storage, cache, memory, workflow, and MCP operations.
 - Factual answers should be source-grounded and cite provenance. Do not claim zero hallucinations; measure unsupported-claim and citation error rates.
 - Provenance is source-specific: use page/block/bounding-box data for PDFs, timestamp intervals for audio, character/segment offsets for text, message/attachment identifiers for email, and canonical URL + extracted segment metadata for web content. Do not require byte ranges unless the pipeline guarantees them.
@@ -72,8 +74,12 @@ A change is complete only when applicable:
 5. Documentation and status are updated.
 6. Actual branch, commit SHA, and verification evidence are recorded. Never fabricate them.
 
-For Phase 0 docs work, replace code gates with link checks, contradiction checks, evidence review, and documentation validation.
+For documentation-only work, replace code gates with link checks, contradiction checks, evidence review, and documentation validation.
 
 ## 7. Working Style
 
 Prefer focused changes over speculative breadth. Use separate branches/worktrees for parallel agent work. Keep commits small and meaningful. Never force-push or rewrite shared history without explicit authorization.
+
+## 8. Audit Rule
+
+The daily audit is allowed to reopen completed phases when source inspection contradicts the claimed implementation. In particular, a provider abstraction is not considered implemented when its production adapter is a stub, and an authenticated endpoint is not considered secure when its default path accepts caller-chosen identity fields.
