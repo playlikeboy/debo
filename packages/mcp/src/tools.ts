@@ -61,6 +61,19 @@ export const DEBO_MCP_TOOLS: McpToolDefinition[] = [
     },
   },
   {
+    name: 'debo_update_memory',
+    description: 'Updates an existing memory record with new factual assertions or superseding information.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        memory_id: { type: 'string', description: 'The unique ID of the memory to update.' },
+        content: { type: 'string', description: 'The updated factual content.' },
+        tags: { type: 'array', items: { type: 'string' }, description: 'Updated tags.' },
+      },
+      required: ['memory_id', 'content'],
+    },
+  },
+  {
     name: 'debo_forget_memory',
     description: 'Permanently purges a memory record from the active and historical graph.',
     inputSchema: {
@@ -160,6 +173,26 @@ export class ToolDispatcher {
             {
               type: 'text',
               text: JSON.stringify({ status: 'saved', memoryId: memory.id }),
+            },
+          ],
+        };
+      }
+
+      case 'debo_update_memory': {
+        const memoryId = String(args.memory_id || '');
+        const content = String(args.content || '');
+        const tags = Array.isArray(args.tags) ? (args.tags as string[]) : undefined;
+
+        const updated = await this.memoryService.update(context, memoryId, {
+          content,
+          metadata: tags ? { tags } : undefined,
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ status: 'updated', memoryId: updated.id }),
             },
           ],
         };

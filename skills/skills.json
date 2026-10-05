@@ -1,0 +1,60 @@
+{
+  "$schema": "https://skills.sh/schema/v1.json",
+  "name": "debo-skills",
+  "version": "1.0.0",
+  "description": "Official portable agent skills for Debo personal AI memory and context OS",
+  "author": "Debo Contributors <team@debo.life>",
+  "license": "MIT",
+  "repository": "https://github.com/SH20RAJ/debo",
+  "homepage": "https://debo.life",
+  "skills": [
+    {
+      "name": "debo-agent",
+      "version": "1.0.0",
+      "description": "Foundational operating skill for all Debo autonomous agents, enforcing editorial tone, non-LLM security, and citation rigor.",
+      "path": "skills/debo-agent/SKILL.md",
+      "tools": ["debo_search_memory", "debo_recall"],
+      "tags": ["core", "agent", "governance", "citations"]
+    },
+    {
+      "name": "debo-memory",
+      "version": "1.0.0",
+      "description": "Procedural knowledge for searching, recalling, and updating personal context in Debo with strict source grounding.",
+      "path": "skills/debo-memory/SKILL.md",
+      "tools": ["debo_search_memory", "debo_recall", "debo_save_memory", "debo_update_memory"],
+      "tags": ["memory", "search", "recall", "grounding"]
+    },
+    {
+      "name": "debo-connectors",
+      "version": "1.0.0",
+      "description": "Procedural knowledge for safely executing third-party actions (Gmail, Slack, Calendar, GitHub) with human-in-the-loop approval.",
+      "path": "skills/debo-connectors/SKILL.md",
+      "tools": ["debo_approve_workflow"],
+      "tags": ["connectors", "integrations", "composio", "approval"]
+    },
+    {
+      "name": "debo-workflows",
+      "version": "1.0.0",
+      "description": "Procedural knowledge for authoring, triggering, and inspecting durable Trigger.dev background tasks in Debo.",
+      "path": "skills/debo-workflows/SKILL.md",
+      "tools": ["debo_run_workflow", "debo_get_workflow"],
+      "tags": ["workflows", "triggerdev", "tasks", "durable"]
+    },
+    {
+      "name": "debo-projects",
+      "version": "1.0.0",
+      "description": "Procedural knowledge for structuring initiatives, managing linked tasks, and recording formal architectural or strategic decisions.",
+      "path": "skills/debo-projects/SKILL.md",
+      "tools": ["debo_get_project_context", "debo_create_task", "debo_create_decision"],
+      "tags": ["projects", "tasks", "decisions", "adr"]
+    },
+    {
+      "name": "debo-research",
+      "version": "1.0.0",
+      "description": "Procedural knowledge for conducting multi-source research investigations, synthesizing cross-document evidence, and building source timelines.",
+      "path": "skills/debo-research/SKILL.md",
+      "tools": ["debo_search_sources", "debo_get_document", "debo_get_timeline"],
+      "tags": ["research", "investigation", "timeline", "documents"]
+    }
+  ]
+}
