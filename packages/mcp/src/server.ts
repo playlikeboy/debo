@@ -1,3 +1,4 @@
+import { createMcpAuthResolver } from '@debo/auth';
 import { MemoryService } from '@debo/memory';
 import { R2StorageService } from '@debo/storage';
 import type { TenantContext } from '@debo/types';
@@ -11,6 +12,7 @@ export interface McpServerOptions {
   storageService?: R2StorageService;
   rateLimiter?: MemoryRateLimiter;
   authResolver?: (authHeader: string | null) => Promise<TenantContext | null>;
+  secret?: string;
 }
 
 export class DeboMcpServer {
@@ -21,7 +23,18 @@ export class DeboMcpServer {
   constructor(options: McpServerOptions) {
     this.toolDispatcher = new ToolDispatcher(options.memoryService, options.storageService);
     this.rateLimiter = options.rateLimiter ?? new MemoryRateLimiter();
-    this.authResolver = options.authResolver;
+
+    if (options.authResolver) {
+      this.authResolver = options.authResolver;
+    } else {
+      const secret =
+        options.secret ||
+        process.env.DEBO_MCP_AUTH_SECRET ||
+        process.env.DEBO_INTERNAL_AUTH_SECRET;
+      if (secret) {
+        this.authResolver = createMcpAuthResolver({ secret });
+      }
+    }
   }
 
   async handleMessage(message: JsonRpcRequest, context: TenantContext): Promise<JsonRpcResponse> {
@@ -182,19 +195,11 @@ export class DeboMcpServer {
 
           if (this.authResolver) {
             context = await this.authResolver(authHeader);
-          } else if (authHeader?.startsWith('Bearer ')) {
-            // Default token structure: Bearer key_<workspaceId>_<userId>
-            const token = authHeader.replace('Bearer ', '').trim();
-            const parts = token.split('_');
-            if (parts.length >= 3) {
-              context = {
-                workspaceId: parts[1]!,
-                userId: parts[2]!,
-                role: 'member',
-              };
-            }
           }
 
+          // STRICT SECURITY INVARIANT (AGENTS.md Section 5 & 8):
+          // Never accept an unsigned or structurally forgeable bearer token as proof of identity.
+          // Caller-chosen identity fields (e.g. key_<workspaceId>_<userId>) without cryptographic verification are strictly rejected.
           if (!context) {
             return new Response(
               JSON.stringify({
@@ -202,7 +207,7 @@ export class DeboMcpServer {
                 id: null,
                 error: {
                   code: JSON_RPC_ERRORS.UNAUTHORIZED,
-                  message: 'Missing or invalid Bearer authentication token',
+                  message: 'Missing, invalid, or unverified Bearer authentication token. Forgeable or unsigned tokens are strictly rejected.',
                 },
               }),
               {

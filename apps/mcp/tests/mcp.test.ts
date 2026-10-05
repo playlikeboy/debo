@@ -1,11 +1,32 @@
 import { describe, expect, it } from 'bun:test';
-import { DeboMcpServer, MCP_PROTOCOL_VERSION } from '@debo/mcp';
-import { MemoryRateLimiter } from '@debo/mcp';
+import { createMcpAuthResolver, createSignedToken, sha256Hex } from '@debo/auth';
+import { DeboMcpServer, MCP_PROTOCOL_VERSION, MemoryRateLimiter } from '@debo/mcp';
 import { DegradedMemoryProvider, MemoryService } from '@debo/memory';
 
-describe('Debo MCP Server (apps/mcp)', () => {
+describe('Debo MCP Server (apps/mcp)', async () => {
+  const TEST_SECRET = 'debo-test-cryptographic-secret-2026-mcp-key-32';
   const memoryService = new MemoryService(new DegradedMemoryProvider());
-  const server = new DeboMcpServer({ memoryService });
+
+  // Generate cryptographically signed HMAC-SHA256 tokens for authenticated testing
+  const authHeaderWs100 = `Bearer ${await createSignedToken(
+    { workspaceId: 'ws100', userId: 'usr200', role: 'member' },
+    TEST_SECRET,
+  )}`;
+
+  const authHeaderOther = `Bearer ${await createSignedToken(
+    { workspaceId: 'wsOTHER', userId: 'usr300', role: 'member' },
+    TEST_SECRET,
+  )}`;
+
+  const authHeaderRate = `Bearer ${await createSignedToken(
+    { workspaceId: 'wsRate', userId: 'usrRate', role: 'member' },
+    TEST_SECRET,
+  )}`;
+
+  const server = new DeboMcpServer({
+    memoryService,
+    secret: TEST_SECRET,
+  });
   const handler = server.createHttpHandler();
 
   it('responds to /health with protocol metadata', async () => {
@@ -18,21 +39,152 @@ describe('Debo MCP Server (apps/mcp)', () => {
     expect(body.protocolVersion).toBe(MCP_PROTOCOL_VERSION);
   });
 
-  it('enforces Bearer authentication and rejects unauthenticated requests', async () => {
-    const req = new Request('http://localhost:8080/mcp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'ping',
-      }),
+  describe('Security & Non-Forgeable Authentication (AGENTS.md Section 5)', () => {
+    it('enforces Bearer authentication and rejects unauthenticated requests with 401', async () => {
+      const req = new Request('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'ping',
+        }),
+      });
+
+      const res = await handler(req);
+      expect(res.status).toBe(401);
+      const body = await res.json();
+      expect(body.error?.message).toContain('authentication token');
     });
 
-    const res = await handler(req);
-    expect(res.status).toBe(401);
-    const body = await res.json();
-    expect(body.error?.message).toContain('authentication token');
+    it('strictly rejects forgeable caller-chosen strings (e.g. key_<ws>_<user>) with 401', async () => {
+      const req = new Request('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer key_ws100_usr200', // Unsigned, forgeable format
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'ping',
+        }),
+      });
+
+      const res = await handler(req);
+      expect(res.status).toBe(401);
+      const body = await res.json();
+      expect(body.error?.message).toContain('Forgeable or unsigned tokens are strictly rejected');
+    });
+
+    it('strictly rejects tokens with tampered signatures or altered payloads with 401', async () => {
+      const validToken = await createSignedToken(
+        { workspaceId: 'ws100', userId: 'usr200', role: 'member' },
+        TEST_SECRET,
+      );
+      const [prefixAndPayload, signature] = validToken.split('.');
+      const tamperedPayload = Buffer.from(
+        JSON.stringify({ workspaceId: 'wsAttacker', userId: 'usr200', role: 'owner' }),
+      ).toString('base64url');
+      const forgedToken = `${prefixAndPayload?.split('_')[0]}_tok_${tamperedPayload}.${signature}`;
+
+      const req = new Request('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${forgedToken}`,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'ping',
+        }),
+      });
+
+      const res = await handler(req);
+      expect(res.status).toBe(401);
+    });
+
+    it('strictly rejects tokens signed with wrong secret with 401', async () => {
+      const wrongSecretToken = await createSignedToken(
+        { workspaceId: 'ws100', userId: 'usr200', role: 'member' },
+        'wrong-secret-key-32-chars-long-0000',
+      );
+
+      const req = new Request('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${wrongSecretToken}`,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'ping',
+        }),
+      });
+
+      const res = await handler(req);
+      expect(res.status).toBe(401);
+    });
+
+    it('fails closed when no authResolver or secret is configured', async () => {
+      const unconfiguredServer = new DeboMcpServer({
+        memoryService,
+        // no authResolver, no secret, empty environment
+      });
+      const unconfiguredHandler = unconfiguredServer.createHttpHandler();
+
+      const req = new Request('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: authHeaderWs100,
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }),
+      });
+
+      const res = await unconfiguredHandler(req);
+      expect(res.status).toBe(401);
+    });
+
+    it('accepts timing-safe hashed API key authentication', async () => {
+      const rawApiKey = 'debo_live_production_secure_token_999';
+      const keyHash = await sha256Hex(rawApiKey);
+
+      const apiKeyServer = new DeboMcpServer({
+        memoryService,
+        authResolver: createMcpAuthResolver({
+          apiKeys: [
+            {
+              keyHash,
+              workspaceId: 'ws_api_key',
+              userId: 'usr_api_key',
+              role: 'admin',
+            },
+          ],
+        }),
+      });
+      const apiKeyHandler = apiKeyServer.createHttpHandler();
+
+      const req = new Request('http://localhost:8080/mcp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${rawApiKey}`,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'ping',
+        }),
+      });
+
+      const res = await apiKeyHandler(req);
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.result).toBeDefined();
+    });
   });
 
   it('executes official initialize handshake with 2026-07-28 protocol version', async () => {
@@ -40,7 +192,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -66,7 +218,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -94,7 +246,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -119,7 +271,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -149,7 +301,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_wsOTHER_usr300',
+        Authorization: authHeaderOther,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -174,6 +326,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
     const limitedServer = new DeboMcpServer({
       memoryService,
       rateLimiter: tightLimiter,
+      secret: TEST_SECRET,
     });
     const limitedHandler = limitedServer.createHttpHandler();
 
@@ -182,7 +335,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer key_wsRate_usrRate',
+          Authorization: authHeaderRate,
         },
         body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }),
       });
@@ -206,7 +359,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -231,7 +384,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -253,7 +406,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -278,7 +431,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -302,7 +455,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
@@ -327,7 +480,7 @@ describe('Debo MCP Server (apps/mcp)', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer key_ws100_usr200',
+        Authorization: authHeaderWs100,
       },
       body: JSON.stringify({
         jsonrpc: '2.0',

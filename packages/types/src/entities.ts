@@ -3,10 +3,12 @@
  * Strictly scoped by workspaceId.
  */
 
+export type TenantRole = 'owner' | 'admin' | 'member' | 'guest';
+
 export interface TenantContext {
   workspaceId: string;
   userId: string;
-  role: 'owner' | 'admin' | 'member' | 'guest';
+  role: TenantRole;
 }
 
 export interface User {

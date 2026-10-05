@@ -462,6 +462,71 @@ async function handleWorkerRequest(req: Request, url: URL): Promise<Response> {
 }
 
 // --- Handler: mcp.debo.life ---
+async function verifyGatewayMcpAuth(req: Request): Promise<{ workspaceId: string; userId: string; role: string } | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+  const token = authHeader.slice(7).trim();
+  if (!token) return null;
+
+  // STRICT SECURITY INVARIANT (AGENTS.md Section 5 & 8):
+  // Reject unverified caller-chosen strings like key_<ws>_<user> without cryptographic signature.
+  if (!token.startsWith("debo_tok_")) {
+    return null;
+  }
+
+  const withoutPrefix = token.slice("debo_tok_".length);
+  const dotIndex = withoutPrefix.indexOf(".");
+  if (dotIndex === -1) return null;
+
+  const encodedPayload = withoutPrefix.slice(0, dotIndex);
+  const signature = withoutPrefix.slice(dotIndex + 1);
+  if (!encodedPayload || !signature) return null;
+
+  const secret = "debo-production-mcp-internal-secret-2026";
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sigBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(encodedPayload));
+  const expectedSig = Array.from(new Uint8Array(sigBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  if (signature.length !== expectedSig.length) return null;
+  let mismatch = 0;
+  for (let i = 0; i < signature.length; i++) {
+    mismatch |= signature.charCodeAt(i) ^ expectedSig.charCodeAt(i);
+  }
+  if (mismatch !== 0) return null;
+
+  try {
+    let base64 = encodedPayload.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4) base64 += "=";
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const decoded = JSON.parse(new TextDecoder().decode(bytes));
+
+    if (!decoded.workspaceId || !decoded.userId) return null;
+    if (decoded.exp && decoded.exp < Date.now()) return null;
+
+    return {
+      workspaceId: String(decoded.workspaceId),
+      userId: String(decoded.userId),
+      role: String(decoded.role || "member"),
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function handleMcpRequest(req: Request, url: URL): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders() });
@@ -497,6 +562,20 @@ async function handleMcpRequest(req: Request, url: URL): Promise<Response> {
 
   // MCP JSON-RPC protocol message handler
   if (req.method === "POST" && (url.pathname === "/" || url.pathname === "/mcp" || url.pathname === "/messages")) {
+    const authContext = await verifyGatewayMcpAuth(req);
+    if (!authContext) {
+      return jsonResponse(
+        {
+          jsonrpc: "2.0",
+          id: null,
+          error: {
+            code: -32000,
+            message: "Missing, invalid, or unverified Bearer authentication token. Forgeable or unsigned tokens are strictly rejected.",
+          },
+        },
+        401
+      );
+    }
     try {
       const msg = (await req.json()) as { id?: string | number; method?: string; params?: Record<string, unknown> };
       const { id, method, params } = msg;
@@ -610,8 +689,8 @@ async function handleMcpRequest(req: Request, url: URL): Promise<Response> {
         case "tools/call": {
           const toolName = String(params?.name || "");
           const args = (params?.arguments as Record<string, unknown>) || {};
-          const tenantWorkspace = req.headers.get("X-Workspace-Id") || "default";
-          const tenantUser = req.headers.get("X-User-Id") || "anonymous";
+          const tenantWorkspace = authContext.workspaceId;
+          const tenantUser = authContext.userId;
 
           let toolOutput: unknown;
 
