@@ -1,16 +1,20 @@
 # Debo Project Status Dashboard
 
 ## Current Phase
-**Production Build / Post-Phase-16 Hardening — Better Auth Migration & MCP Security Hardening Completed**
+**Production Hardening — Security/Auth/MCP/Memory/Workflow Audit Required**
 
 ## Overall Progress
 - **Architecture & Specifications**: 100% verified baseline across 17 ADRs (including ADR-0016 Better Auth Migration and ADR-0017 Billing Plans & Quotas), 14 normative specs (including `plans-spec.md`), and 7 contracts.
 - **Implementation baseline**: Core platform, 12 monorepo packages, and 4 applications are present. Next.js App Router frontend with BlockNote rich-text journal editor, Better Auth identity, and deterministic tenant resolution.
-- **Verification evidence**: 116 TypeScript tests passing across 19 test files (585 assertions), 7 Python tests passing, and all 16 packages typecheck-clean.
-- **Security Hardening**:
-  - Eliminates all forgeable `key_<workspace>_<user>` strings from MCP gateway and web routes.
-  - Implements cryptographically unforgeable API keys (`debo_live_...`) with SHA-256 hashing, rate limiting, and timing-safe comparison.
-  - Fail-closed deterministic `DeboAuthMiddleware` and `createMcpAuthResolver`.
+- **Verification evidence (historical, not independently re-established this audit)**: 116 TypeScript tests passing across 19 test files (585 assertions), 7 Python tests passing, and all 16 packages typecheck-clean.
+- **Security Hardening — CURRENT AUDIT**:
+  - Better Auth/API-key code exists, but production security is **not yet verified**.
+  - `apps/web/src/lib/auth.ts` still contains a default-tenant fallback when the DB is unavailable.
+  - `apps/web/src/app/api/journal/route.ts` still accepts caller-supplied `workspaceId`/`userId` defaults.
+  - `apps/mcp/src/index.ts` still directly constructs `DegradedMemoryProvider` and contains a fallback secret.
+  - `packages/memory/src/supermemory.ts` still contains synthetic/no-op provider methods.
+  - `packages/workflows/src/executor.ts` still provides an in-memory executor alongside the Trigger.dev dependency.
+  - These are P0/P1 blockers and must not be described as production-verified until fixed and regression-tested.
 
 ## Phase Ledger & Milestones
 
@@ -18,21 +22,21 @@
 |---|---|---|---|---|
 | **Phase 0** | Clean-Room Documentation Bootstrap | [x] Completed | `f724e9e` | 2026-10-04 |
 | **Phase 1** | Repository Bootstrap & Monorepo Tooling | [x] Completed | `c5c5219` | 2026-10-04 |
-| **Phase 2** | Identity, Tenancy & Better Auth Migration | [x] Verified | `better-auth-migration` | 2026-10-05 |
+| **Phase 2** | Identity, Tenancy & Better Auth Migration | [!] Re-audit required | `better-auth-migration` | 2026-10-07 |
 | **Phase 3** | Source Ingestion & PostgreSQL Schemas | [x] Completed | `51702e8`, `24dde91` | 2026-10-04 |
-| **Phase 4** | Memory Engine & Exact Citations | [x] Verified | `eac8420` | 2026-10-05 |
+| **Phase 4** | Memory Engine & Exact Citations | [!] Re-audit required | `eac8420` | 2026-10-07 |
 | **Phase 5** | LangGraph Agent Runtime Orchestration | [x] Baseline present | `2c94c1c` | 2026-10-04 |
 | **Phase 6** | Agentic UI & BlockNote Web Application | [x] Verified | `better-auth-migration` | 2026-10-05 |
 | **Phase 7** | External Connectors Layer | [x] Baseline present | `904ac23` | 2026-10-04 |
-| **Phase 8** | Durable Workflows Engine | [x] Verified | `ceade25` | 2026-10-05 |
-| **Phase 9** | Official MCP Server (Secure Auth) | [x] Verified | `better-auth-migration` | 2026-10-05 |
+| **Phase 8** | Durable Workflows Engine | [!] Re-audit required | `ceade25` | 2026-10-07 |
+| **Phase 9** | Official MCP Server (Secure Auth) | [!] Re-audit required | `better-auth-migration` | 2026-10-07 |
 | **Phase 10** | MCP Apps Visual Frame Renderers | [x] Baseline present | `2665e90` | 2026-10-05 |
 | **Phase 11** | Portable Agent Skills | [x] Baseline present | `14e8b2b` | 2026-10-05 |
 | **Phase 12** | Document Worker Service | [x] Baseline present | `99bb3e1` | 2026-10-04 |
 | **Phase 13** | Browser Automation Fallback | [x] Baseline present | `290b50c` | 2026-10-05 |
-| **Phase 14** | Security Hardening & Observability | [x] Verified | `better-auth-migration` | 2026-10-05 |
+| **Phase 14** | Security Hardening & Observability | [!] Re-audit required | `better-auth-migration` | 2026-10-07 |
 | **Phase 15** | Closed Beta Ingress & Edge Gateway Deployment | [x] Baseline present | `50527cdf` | 2026-10-05 |
-| **Phase 16** | Public Launch Readiness & End-to-End Verification | [x] Verified | `better-auth-migration` | 2026-10-05 |
+| **Phase 16** | Public Launch Readiness & End-to-End Verification | [!] BLOCKED — security/runtime gaps | `better-auth-migration` | 2026-10-07 |
 
 ## Infrastructure & Edge Ingress Mapping (`debo.life`)
 
@@ -62,4 +66,4 @@ All host daemon ingress is configured via Cloudflare Custom Domains on Cloudflar
 - **Branch**: `better-auth-migration`
 - **Recorded baseline verification command**: `bun test && bun run test:python && bun run typecheck`
 - **Recorded baseline result**: 116 TypeScript tests passing (585 assertions), 7 Python tests passing, 16 packages typecheck clean.
-- **Current readiness**: **VERIFIED — Better Auth migration, BlockNote journal, and unforgeable MCP authentication operational.**
+- **Current readiness**: **BLOCKED — authentication fallback, caller-selected journal tenancy, degraded MCP memory, synthetic Supermemory methods, and in-memory workflow execution require remediation and specialist review.**
